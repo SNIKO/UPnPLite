@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SV", "SV\SV.csproj", "{9E9E7D83-D777-490B-9240-0BC4B7A88750}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SV.UPnP", "SV.UPnP\SV.UPnP.csproj", "{F4C66E2B-97CC-4954-9C06-C54E8F000C96}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{0F87B042-36B6-4D9F-8CFC-F28331EF7574}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{09B16E2B-2838-4ADE-8372-2922BA9F502E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SV", "Core\SV\SV.csproj", "{9E9E7D83-D777-490B-9240-0BC4B7A88750}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SV.UPnP", "Core\SV.UPnP\SV.UPnP.csproj", "{F4C66E2B-97CC-4954-9C06-C54E8F000C96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

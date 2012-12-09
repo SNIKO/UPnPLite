@@ -113,6 +113,7 @@
     <Compile Include="Protocols\SSDP\Messages\SearchResponseMessage.cs" />
     <Compile Include="Protocols\SSDP\Messages\SSDPMessage.cs" />
     <Compile Include="Protocols\SSDP\SSDPServer.cs" />
+    <Compile Include="ServiceBase.cs" />
     <Compile Include="ServiceInfo.cs" />
   </ItemGroup>
   <ItemGroup>

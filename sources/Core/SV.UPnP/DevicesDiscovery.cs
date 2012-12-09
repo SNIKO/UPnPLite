@@ -91,7 +91,7 @@ namespace SV.UPnP
         /// </exception>
         internal DevicesDiscovery(string targetDevices, ISSDPServer ssdpServer)
         {
-            ssdpServer.EnsureNotNull();
+            ssdpServer.EnsureNotNull("ssdpServer");
 
             this.ssdpServer = ssdpServer;
 

@@ -5,11 +5,11 @@ namespace SV
 
     public static class ObjectExtenstions
     {
-        public static void EnsureNotNull(this object obj)
+        public static void EnsureNotNull(this object obj, string name)
         {
             if (obj == null)
             {
-                throw new ArgumentNullException("obj");
+                throw new ArgumentNullException(name);
             }
         }
     }

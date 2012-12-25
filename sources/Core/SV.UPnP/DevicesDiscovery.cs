@@ -263,6 +263,7 @@ namespace SV.UPnP
                                             BaseURL = urlBase,
                                             UDN = device.Element(upnpNamespace + "UDN").Value,
                                             DeviceType = ParseDeviceType(deviceType),
+                                            FriendlyName = device.Element(upnpNamespace + "friendlyName").Value,
                                             DeviceVersion = ParseDeviceVersion(deviceType),
                                             Manufacturer = device.Element(upnpNamespace + "manufacturer").Value,
                                             Icons = (from icon in device.Descendants(upnpNamespace + "icon")

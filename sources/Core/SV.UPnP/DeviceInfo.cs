@@ -18,7 +18,7 @@ namespace SV.UPnP
         public string UDN { get; internal set; }
 
         public IEnumerable<DeviceIcon> Icons { get; internal set; }
-        
+
         public IEnumerable<ServiceInfo> Services { get; internal set; }
     }
 }

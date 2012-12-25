@@ -9,7 +9,7 @@ namespace SV.UPnP
 
         public string DeviceType { get; internal set; }
 
-        public string DeviceVersion { get; internal set; }
+        public UPnPVersion DeviceVersion { get; internal set; }
 
         public string FriendlyName { get; internal set; }
 
@@ -17,6 +17,8 @@ namespace SV.UPnP
 
         public string UDN { get; internal set; }
 
+        public IEnumerable<DeviceIcon> Icons { get; internal set; }
+        
         public IEnumerable<ServiceInfo> Services { get; internal set; }
     }
 }

@@ -7,22 +7,22 @@ namespace SV.UPnP
     {
         #region Constructors
 
-        public DeviceException(DeviceError error, string description)
-            : this(error, description, null)
+        public DeviceException(int errorCode, string description)
+            : this(errorCode, description, null)
         {
         }
 
-        public DeviceException(DeviceError error, string description, Exception innerException)
+        public DeviceException(int errorCode, string description, Exception innerException)
             : base(description, innerException)
         {
-            this.Error = error;
+            this.ErrorCode = errorCode;
         }
 
         #endregion
 
         #region Properties
 
-        public DeviceError Error { get; private set; }
+        public int ErrorCode { get; private set; }
 
         #endregion
     }

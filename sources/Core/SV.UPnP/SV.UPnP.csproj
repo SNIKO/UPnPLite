@@ -99,6 +99,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DeviceIcon.cs" />
     <Compile Include="DeviceInfo.cs" />
     <Compile Include="DeviceActivity.cs" />
     <Compile Include="DeviceActivityEventArgs.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Protocols\SSDP\SSDPServer.cs" />
     <Compile Include="ServiceBase.cs" />
     <Compile Include="ServiceInfo.cs" />
+    <Compile Include="UPnPVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Reactive.Core, Version=2.0.20304.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />

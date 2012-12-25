@@ -12,6 +12,7 @@ namespace SV.UPnP
     using System.Xml.Linq;
     using SV.UPnP.Protocols.SSDP;
     using SV.UPnP.Protocols.SSDP.Messages;
+    using Windows.Foundation;
 
     public class DevicesDiscovery : IDevicesDiscovery
     {
@@ -21,7 +22,7 @@ namespace SV.UPnP
 
         private readonly Subject<DeviceActivityEventArgs> devicesActivity;
 
-        private readonly  Dictionary<string, DeviceLifetimeControlInfo> availableDevices = new Dictionary<string, DeviceLifetimeControlInfo>(); 
+        private readonly Dictionary<string, DeviceLifetimeControlInfo> availableDevices = new Dictionary<string, DeviceLifetimeControlInfo>();
 
         #endregion
 
@@ -63,7 +64,7 @@ namespace SV.UPnP
         /// </summary>
         public DevicesDiscovery()
             : this("upnp:rootdevice")
-        {            
+        {
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace SV.UPnP
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
         /// </param>
-        public DevicesDiscovery(string targetDevices)
+        internal DevicesDiscovery(string targetDevices)
             : this(targetDevices, new SSDPServer())
         {
         }
@@ -120,7 +121,7 @@ namespace SV.UPnP
                 {
                     var request = WebRequest.Create(notifyMessage.Location);
                     var response = await request.GetResponseAsync();
-                    
+
                     lock (this.availableDevices)
                     {
                         if (availableDevices.ContainsKey(notifyMessage.USN) == false)
@@ -185,10 +186,64 @@ namespace SV.UPnP
             }
         }
 
+        private static string ParseDeviceType(string deviceTypeString)
+        {
+            string deviceType;
+
+            var lastColonIndex = deviceTypeString.LastIndexOf(':');
+            if (lastColonIndex != -1)
+            {
+                deviceType = deviceTypeString.Substring(0, lastColonIndex);
+            }
+            else
+            {
+                deviceType = deviceTypeString;
+
+                // TODO: Log warning
+            }
+
+            return deviceType;
+        }
+
+        private static UPnPVersion ParseDeviceVersion(string deviceTypeString)
+        {
+            var version = new UPnPVersion();
+
+            var lastColonIndex = deviceTypeString.LastIndexOf(':');
+            if (lastColonIndex != -1)
+            {
+                var versionString = deviceTypeString.Substring(lastColonIndex + 1, deviceTypeString.Length - lastColonIndex - 1);
+                var majorMinorSplit = versionString.Split('.');
+
+                int value;
+                if (int.TryParse(majorMinorSplit[0], out value))
+                {
+                    version.Major = value;
+                }
+                else
+                {
+                    version.Major = 1;
+
+                    // TODO: Log warning
+                }
+
+                if (majorMinorSplit.Length > 1 && int.TryParse(majorMinorSplit[1], out value))
+                {
+                    version.Minor = value;
+                }
+            }
+            else
+            {
+                // TODO: Log warning
+            }
+
+            return version;
+        }
+
         private static DeviceInfo CreateDevice(string host, Stream deviceDescription)
         {
             var xmlDoc = XDocument.Load(deviceDescription);
-            var upnpNamespace = XNamespace.Get("urn:schemas-upnp-org:device-1-0");            
+            var upnpNamespace = XNamespace.Get("urn:schemas-upnp-org:device-1-0");
             var urlBaseNode = xmlDoc.Element(upnpNamespace + "URLBase");
 
             string urlBase;
@@ -201,24 +256,36 @@ namespace SV.UPnP
                 urlBase = urlBaseNode.Value;
             }
 
-
             var deviceInfo = from device in xmlDoc.Descendants(upnpNamespace + "device")
+                             let deviceType = device.Element(upnpNamespace + "deviceType").Value
                              select new DeviceInfo()
                                         {
                                             BaseURL = urlBase,
                                             UDN = device.Element(upnpNamespace + "UDN").Value,
-                                            DeviceType = device.Element(upnpNamespace + "deviceType").Value,
-                                            FriendlyName = device.Element(upnpNamespace + "friendlyName").Value,
+                                            DeviceType = ParseDeviceType(deviceType),
+                                            DeviceVersion = ParseDeviceVersion(deviceType),
                                             Manufacturer = device.Element(upnpNamespace + "manufacturer").Value,
+                                            Icons = (from icon in device.Descendants(upnpNamespace + "icon")
+                                                     select new DeviceIcon
+                                                                {
+                                                                    Type = icon.Element(upnpNamespace + "mimetype").Value,
+                                                                    Size = new Size
+                                                                               {
+                                                                                   Width = int.Parse(icon.Element(upnpNamespace + "width").Value),
+                                                                                   Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
+                                                                               },
+                                                                    ColorDepth = icon.Element(upnpNamespace + "depth").Value,
+                                                                    Url = new Uri(urlBase + icon.Element(upnpNamespace + "url").Value)
+                                                                }).ToList(),
                                             Services = (from service in device.Descendants(upnpNamespace + "service")
-                                                       select new ServiceInfo
-                                                                  {
-                                                                      BaseURL = urlBase,
-                                                                      ControlURL = service.Element(upnpNamespace + "controlURL").Value,
-                                                                      DescriptionURL = service.Element(upnpNamespace + "SCPDURL").Value,
-                                                                      EventsSunscriptionURL = service.Element(upnpNamespace + "eventSubURL").Value,
-                                                                      ServiceType = service.Element(upnpNamespace + "serviceType").Value
-                                                                  }).ToList()
+                                                        select new ServiceInfo
+                                                                   {
+                                                                       BaseURL = urlBase,
+                                                                       ControlURL = service.Element(upnpNamespace + "controlURL").Value,
+                                                                       DescriptionURL = service.Element(upnpNamespace + "SCPDURL").Value,
+                                                                       EventsSunscriptionURL = service.Element(upnpNamespace + "eventSubURL").Value,
+                                                                       ServiceType = service.Element(upnpNamespace + "serviceType").Value
+                                                                   }).ToList()
                                         };
 
             return deviceInfo.First();

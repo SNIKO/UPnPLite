@@ -107,7 +107,7 @@ namespace SV.UPnP
                 var errorCodeElement = doc.Descendants(c + "errorCode").FirstOrDefault();
                 var errorDesctiptionElement = doc.Descendants(c + "errorDescription").FirstOrDefault();
 
-                throw new DeviceException((DeviceError)Convert.ToInt32(errorCodeElement.Value), errorDesctiptionElement.Value, ex);
+                throw new DeviceException(Convert.ToInt32(errorCodeElement.Value), errorDesctiptionElement.Value, ex);
             }
         }
 

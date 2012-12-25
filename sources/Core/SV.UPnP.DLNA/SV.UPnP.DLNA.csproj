@@ -6,11 +6,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9E9E7D83-D777-490B-9240-0BC4B7A88750}</ProjectGuid>
+    <ProjectGuid>{35555345-2E45-43D3-872A-E05F452844A6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SV</RootNamespace>
-    <AssemblyName>SV</AssemblyName>
+    <RootNamespace>SV.UPnP.DLNA</RootNamespace>
+    <AssemblyName>SV.UPnP.DLNA</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -100,13 +100,35 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\SV.UPnP\SV.UPnP.csproj">
+      <Project>{f4c66e2b-97cc-4954-9c06-c54e8f000c96}</Project>
+      <Name>SV.UPnP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SV\SV.csproj">
+      <Project>{9e9e7d83-d777-490b-9240-0bc4b7a88750}</Project>
+      <Name>SV</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ObjectExtenstions.cs" />
-    <Compile Include="ObservableCollectionExtensions.cs" />
+    <Compile Include="DeviceActivityEventArgs.cs" />
+    <Compile Include="DLNADevicesDiscovery.cs" />
+    <Compile Include="IMediaRenderersDiscovery.cs" />
+    <Compile Include="IMediaServersDiscovery.cs" />
+    <Compile Include="MediaRenderer.cs" />
+    <Compile Include="MediaRenderersDiscovery.cs" />
+    <Compile Include="MediaServer.cs" />
+    <Compile Include="MediaServersDiscovery.cs" />
+    <Compile Include="Services\ContentDirectory\BrowseFlag.cs" />
+    <Compile Include="Services\ContentDirectory\BrowseResult.cs" />
+    <Compile Include="Services\ContentDirectory\ContentDirectoryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StringExtensions.cs" />
-    <Compile Include="XDocumentExtensions.cs" />
+    <Compile Include="Services\ContentDirectory\MediaObject.cs" />
+    <Compile Include="DLNADevice.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Reactive.Core, Version=2.0.20304.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Interfaces, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Linq, Version=2.0.20304.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>

@@ -46,16 +46,14 @@ namespace SV.UPnP.DLNA
             deviceType.EnsureNotNull("deviceType");
 
             this.upnpDevicesDiscovery = upnpDevicesDiscovery;
-            this.discoveredDevices = new List<TDevice>(from deviceInfo in this.upnpDevicesDiscovery.DiscoveredDevices select this.CreateDevice(deviceInfo));
+            this.discoveredDevices =
+                new List<TDevice>(from deviceInfo in this.upnpDevicesDiscovery.DiscoveredDevices
+                                  select this.CreateDevice(deviceInfo));
             this.devicesActivity = new Subject<DeviceActivityEventArgs<TDevice>>();
 
             var activityOfDevicesOfTheSpecificType = from activity in this.upnpDevicesDiscovery.DevicesActivity
                                                      where string.Compare(activity.Device.DeviceType, deviceType, StringComparison.OrdinalIgnoreCase) == 0
-                                                     select new DeviceActivityEventArgs<TDevice>
-                                                                {
-                                                                    Device = this.CreateDevice(activity.Device),
-                                                                    Activity = activity.Activity
-                                                                };
+                                                     select activity;
 
             var deviceFound = from activity in activityOfDevicesOfTheSpecificType
                               where activity.Activity == DeviceActivity.Available
@@ -65,10 +63,34 @@ namespace SV.UPnP.DLNA
                              where activity.Activity == DeviceActivity.Gone
                              select activity;
 
-            deviceFound.Synchronize(this.discoveredDevices).Subscribe(device => this.discoveredDevices.Add(device.Device));
-            deviceGone.Synchronize(this.discoveredDevices).Subscribe(device => this.discoveredDevices.Remove(device.Device));
+            deviceFound.Synchronize(this.discoveredDevices).Subscribe(device =>
+            {
+                var e = new DeviceActivityEventArgs<TDevice>
+                {
+                    Device = CreateDevice(device.Device),
+                    Activity = DeviceActivity.Available
+                };
+                    
+                this.discoveredDevices.Add(e.Device);
+                this.devicesActivity.OnNext(e);
+            });
 
-            activityOfDevicesOfTheSpecificType.Subscribe(this.devicesActivity);            
+            deviceGone.Synchronize(this.discoveredDevices).Subscribe(device =>
+            {
+                var deviceToRemove = this.discoveredDevices.FirstOrDefault(d => d.UDN == device.Device.UDN);
+
+                if (deviceToRemove != null)
+                {
+                    var e = new DeviceActivityEventArgs<TDevice>
+                    {
+                        Device = deviceToRemove,
+                        Activity = DeviceActivity.Gone
+                    };
+
+                    this.discoveredDevices.Remove(deviceToRemove);
+                    this.devicesActivity.OnNext(e);
+                }
+            });
         }
 
         #endregion

@@ -60,7 +60,7 @@ namespace SV.UPnP.Protocols.SSDP
             this.server = new DatagramSocket();
             this.server.MessageReceived += this.NotifyMessageReceived;
             this.server.BindEndpointAsync(null, MulticastPort.ToString()).GetAwaiter().GetResult();
-            this.server.JoinMulticastGroup(new HostName(MulticastAddress));
+            this.server.JoinMulticastGroup(this.multicastHost);
         }
 
         #endregion
@@ -115,13 +115,14 @@ namespace SV.UPnP.Protocols.SSDP
                             }
                         };
 
-                    searchSocket.BindEndpointAsync(null, "0");
+                    searchSocket.BindEndpointAsync(null, "0").GetAwaiter().GetResult();
                     searchSocket.JoinMulticastGroup(this.multicastHost);
 
                     // Sending the search request to a multicast group
                     var outputStream = searchSocket.GetOutputStreamAsync(this.multicastHost, MulticastPort.ToString()).GetAwaiter().GetResult();
                     var request = MSearchRequestFormattedString.F(searchTarget, timeForResponse);
                     var buffer = Encoding.UTF8.GetBytes(request).AsBuffer();
+                    outputStream.WriteAsync(buffer);
                     outputStream.WriteAsync(buffer);
 
                     // Stop listening for a devices when timeout for responses is expired

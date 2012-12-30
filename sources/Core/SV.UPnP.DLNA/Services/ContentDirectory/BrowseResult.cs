@@ -4,7 +4,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
     using System.Collections.Generic;
 
     /// <summary>
-    ///     Defines result for a <see cref="ContentDirectoryService.Browse"/> action.
+    ///     Defines result for a <see cref="ContentDirectoryService.BrowseAsync"/> action.
     /// </summary>
     public class BrowseResult
     {

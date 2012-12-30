@@ -4,9 +4,16 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
 
     public class ContentDirectoryService : ServiceBase
     {
+        #region Fields
+
+        private static Dictionary<string, Type> knownMediaObjectTypes;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -21,7 +28,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         public ContentDirectoryService(ServiceInfo serviceInfo)
             : base(serviceInfo)
         {
-
+            InitializeMediaObjectTypes();
         }
 
         #endregion
@@ -62,17 +69,21 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         ///     The specified <paramref name="objectId"/> is invalid -OR-
         ///     The sort criteria specified is not supported or is invalid.
         /// </exception>
-        public async Task<BrowseResult> Browse(string objectId, BrowseFlag browseFlag, string filter, int startingIndex, int requestedCount, string sortCriteria)
+        public async Task<BrowseResult> BrowseAsync(string objectId, BrowseFlag browseFlag, string filter, int startingIndex, int requestedCount, string sortCriteria)
         {
             var arguments = new Dictionary<string, object>
-                                    {
-                                        { "Instance", 0 },
-                                        { "Speed", 1 },
-                                    };
+                                {
+                                    {"ObjectID", objectId},
+                                    {"BrowseFlag", browseFlag},
+                                    {"Filter", filter},
+                                    {"StartingIndex", startingIndex},
+                                    {"RequestedCount", requestedCount},
+                                    {"SortCriteria", sortCriteria},
+                                };
 
-            var response = await this.InvokeActionAsync("Play", arguments);
-
-            var mediaObjects = ParseMediaObjects(response["Result"]);
+            var response = await this.InvokeActionAsync("Browse", arguments);
+            var resultXml = response["Result"];
+            var mediaObjects = ParseMediaObjects(resultXml);
             var result = new BrowseResult
                              {
                                  Result = mediaObjects,
@@ -84,9 +95,81 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             return result;
         }
 
-        private static IEnumerable<MediaObject> ParseMediaObjects(string mediaObjectsXML)
+        private static IEnumerable<MediaObject> ParseMediaObjects(string mediaObjectsXml)
         {
-            throw new NotImplementedException();
+            var result = new List<MediaObject>();
+            var document = XDocument.Parse(mediaObjectsXml);
+            var didl = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
+            var upnp = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/upnp/");
+
+            var containers = document.Descendants(didl + "container");
+            foreach (var container in containers)
+            {
+                var objectClass = container.Element(upnp + "class").Value;
+                var mediaObject = CreateMediaObject(objectClass);
+                if (mediaObject != null)
+                {
+                    mediaObject.Deserialize(container.ToString());
+                }
+
+                result.Add(mediaObject);
+            }
+
+            var items = document.Descendants(didl + "item");
+            foreach (var item in items)
+            {
+                var objectClass = item.Element(upnp + "class").Value;
+                var mediaObject = CreateMediaObject(objectClass);
+                if (mediaObject != null)
+                {
+                    mediaObject.Deserialize(item.ToString());
+                }
+
+                result.Add(mediaObject);
+            }
+
+            return result;
+        }
+
+        private static void InitializeMediaObjectTypes()
+        {
+            if (knownMediaObjectTypes == null)
+            {
+                knownMediaObjectTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+
+                knownMediaObjectTypes["object.item"] = typeof(MediaItem);
+                knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
+                knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
+                knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
+                knownMediaObjectTypes["object.container"] = typeof(MediaContainer);
+            }
+        }
+
+        private static MediaObject CreateMediaObject(string contentClass)
+        {
+            MediaObject result = null;
+            Type mediaObjectType;
+
+            if (knownMediaObjectTypes.TryGetValue(contentClass, out mediaObjectType) == false)
+            {
+                // Type for object with such class not found. Lets fine the closest type. 
+                var maxCoincidence = 0;
+                foreach (var knownMediaObjectType in knownMediaObjectTypes)
+                {
+                    if (contentClass.StartsWith(knownMediaObjectType.Key, StringComparison.OrdinalIgnoreCase) && knownMediaObjectType.Key.Length > maxCoincidence)
+                    {
+                        maxCoincidence = knownMediaObjectType.Key.Length;
+                        mediaObjectType = knownMediaObjectType.Value;
+                    }
+                }
+            }
+
+            if (mediaObjectType != null)
+            {
+                result = Activator.CreateInstance(mediaObjectType) as MediaObject;
+            }
+
+            return result;
         }
 
         #endregion

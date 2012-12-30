@@ -118,12 +118,18 @@
     <Compile Include="MediaRenderersDiscovery.cs" />
     <Compile Include="MediaServer.cs" />
     <Compile Include="MediaServersDiscovery.cs" />
+    <Compile Include="Services\ContentDirectory\AudioItem.cs" />
     <Compile Include="Services\ContentDirectory\BrowseFlag.cs" />
     <Compile Include="Services\ContentDirectory\BrowseResult.cs" />
     <Compile Include="Services\ContentDirectory\ContentDirectoryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ContentDirectory\ImageItem.cs" />
+    <Compile Include="Services\ContentDirectory\MediaContainer.cs" />
+    <Compile Include="Services\ContentDirectory\MediaItem.cs" />
     <Compile Include="Services\ContentDirectory\MediaObject.cs" />
     <Compile Include="DLNADevice.cs" />
+    <Compile Include="Services\ContentDirectory\MediaResource.cs" />
+    <Compile Include="Services\ContentDirectory\VideoItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Reactive.Core, Version=2.0.20304.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />

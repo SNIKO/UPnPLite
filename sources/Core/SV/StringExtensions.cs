@@ -19,5 +19,10 @@ namespace SV
         {
             return text.Split(new char[] { '\r', '\n' }, maxNumberOfLines, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public static bool ToBool(this string source)
+        {
+            return source != null && (string.Compare(source, "true", StringComparison.OrdinalIgnoreCase) == 0 || source == "1");
+        }
     }
 }

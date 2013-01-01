@@ -80,6 +80,11 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         /// </summary>
         public Uri Uri { get; internal set; }
 
+        /// <summary>
+        ///     Gets a metadata associated with the resource.
+        /// </summary>
+        public string Metadata { get; internal set; }
+
         #endregion
 
         #region Methods
@@ -106,6 +111,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             }
 
             this.Uri = new Uri(resourceElement.Value);
+            this.Metadata = resourceXml;
 
             return this;
         }
@@ -124,7 +130,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             propertyNameToSetterMap["sampleFrequency"]  = value => this.SampleFrequency = uint.Parse(value);
             propertyNameToSetterMap["bitsPerSample"]    = value => this.BitsPerSample = uint.Parse(value);
             propertyNameToSetterMap["nrAudioChannels"]  = value => this.NumberOfAudioChannels = uint.Parse(value);
-            propertyNameToSetterMap["resolution"]       = value => ParseResolution(value);
+            propertyNameToSetterMap["resolution"]       = value => this.Resolution = ParseResolution(value);
             propertyNameToSetterMap["colorDepth"]       = value => this.ColorDepth = uint.Parse(value);
             propertyNameToSetterMap["protocolInfo"]     = value => this.ProtocolInfo = value;
             propertyNameToSetterMap["protection"]       = value => this.Protection = value;

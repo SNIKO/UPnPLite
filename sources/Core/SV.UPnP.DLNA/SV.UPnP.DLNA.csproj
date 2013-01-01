@@ -118,6 +118,7 @@
     <Compile Include="MediaRenderersDiscovery.cs" />
     <Compile Include="MediaServer.cs" />
     <Compile Include="MediaServersDiscovery.cs" />
+    <Compile Include="Services\AvTransport\AvTransportService.cs" />
     <Compile Include="Services\ContentDirectory\AudioItem.cs" />
     <Compile Include="Services\ContentDirectory\BrowseFlag.cs" />
     <Compile Include="Services\ContentDirectory\BrowseResult.cs" />

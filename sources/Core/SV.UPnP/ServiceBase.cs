@@ -18,8 +18,6 @@ namespace SV.UPnP
 
         private readonly ServiceInfo serviceInfo;
 
-        private readonly Uri controlUri;
-
         #endregion
 
         #region Constructors
@@ -38,7 +36,6 @@ namespace SV.UPnP
             serviceInfo.EnsureNotNull("serviceInfo");
 
             this.serviceInfo = serviceInfo;
-            this.controlUri = new Uri(new Uri(this.serviceInfo.BaseURL), this.serviceInfo.ControlURL);
         }
 
         #endregion
@@ -65,7 +62,7 @@ namespace SV.UPnP
             var requestXml = this.CreateActionRequest(action, parameters);
             var data = Encoding.UTF8.GetBytes(requestXml);
 
-            var request = WebRequest.Create(this.controlUri);
+            var request = WebRequest.Create(this.serviceInfo.ControlUri);
             request.Method = "POST";
             request.ContentType = "text/xml; charset=\"utf-8\"";
             request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.serviceInfo.ServiceType, action);

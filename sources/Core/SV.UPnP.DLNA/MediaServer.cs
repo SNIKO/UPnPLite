@@ -24,7 +24,7 @@ namespace SV.UPnP.DLNA
         ///     Initializes a new instance of the <see cref="DLNADevice" /> class.
         /// </summary>
         /// <param name="deviceInfo">
-        ///     Defines parameters of the device.
+        ///     The description of the the device.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="deviceInfo"/> is <c>null</c>.
@@ -43,7 +43,13 @@ namespace SV.UPnP.DLNA
         internal MediaServer(DeviceInfo deviceInfo)
             : base(deviceInfo)
         {
-            this.contentDirectoryService = new ContentDirectoryService(deviceInfo.Services.FirstOrDefault(s => s.ServiceType.ToUpper().Contains("CONTENTDIRECTORY")));
+            var contentDirectoryInfo = deviceInfo.Services.FirstOrDefault(s => s.ServiceType.StartsWith("urn:schemas-upnp-org:service:ContentDirectory", StringComparison.OrdinalIgnoreCase));
+            if (contentDirectoryInfo == null)
+            {
+                throw new ArgumentException("Description for ContentDirectory service not found", "deviceInfo");
+            }
+
+            this.contentDirectoryService = new ContentDirectoryService(contentDirectoryInfo);
         }
 
         #endregion

@@ -24,15 +24,32 @@ namespace SV.UPnP.DLNA
         ///     Initializes a new instance of the <see cref="DLNADevice" /> class.
         /// </summary>
         /// <param name="deviceInfo">
-        ///     Defines parameters of the device.
+        ///     The description of the the device.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="deviceInfo"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     One of the following services is required but not exist on device described by <paramref name="deviceInfo"/>:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             ConnectionManager
+        ///         </item>
+        ///         <item>
+        ///             AVTransport
+        ///         </item>
+        ///     </list>
+        /// </exception>
         internal MediaRenderer(DeviceInfo deviceInfo)
             : base(deviceInfo)
         {
-            this.avTransportService = new AvTransportService(deviceInfo.Services.FirstOrDefault(s => s.ServiceType.ToUpper().Contains("AVTRANSPORT")));
+            var avTransportInfo = deviceInfo.Services.FirstOrDefault(s => s.ServiceType.StartsWith("urn:schemas-upnp-org:service:AVTransport", StringComparison.OrdinalIgnoreCase));
+            if (avTransportInfo == null)
+            {
+                throw new ArgumentException("Description for AVTransport service not found", "deviceInfo");
+            }
+            
+            this.avTransportService = new AvTransportService(avTransportInfo);
         }
 
         #endregion

@@ -246,21 +246,20 @@ namespace SV.UPnP
             var upnpNamespace = XNamespace.Get("urn:schemas-upnp-org:device-1-0");
             var urlBaseNode = xmlDoc.Element(upnpNamespace + "URLBase");
 
-            string urlBase;
+            Uri baseUri;
             if (urlBaseNode == null || string.IsNullOrWhiteSpace(urlBaseNode.Value))
             {
-                urlBase = "http://{0}".F(host);
+                baseUri = new Uri("http://{0}".F(host));
             }
             else
             {
-                urlBase = urlBaseNode.Value;
+                baseUri = new Uri(urlBaseNode.Value);
             }
 
             var deviceInfo = from device in xmlDoc.Descendants(upnpNamespace + "device")
                              let deviceType = device.Element(upnpNamespace + "deviceType").Value
                              select new DeviceInfo()
                                         {
-                                            BaseURL = urlBase,
                                             UDN = device.Element(upnpNamespace + "UDN").Value,
                                             DeviceType = ParseDeviceType(deviceType),
                                             FriendlyName = device.Element(upnpNamespace + "friendlyName").Value,
@@ -276,16 +275,15 @@ namespace SV.UPnP
                                                                                    Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
                                                                                },
                                                                     ColorDepth = icon.Element(upnpNamespace + "depth").Value,
-                                                                    Url = new Uri(urlBase + icon.Element(upnpNamespace + "url").Value)
+                                                                    Url = new Uri(baseUri + icon.Element(upnpNamespace + "url").Value)
                                                                 }).ToList(),
                                             Services = (from service in device.Descendants(upnpNamespace + "service")
                                                         select new ServiceInfo
                                                                    {
-                                                                       BaseURL = urlBase,
-                                                                       ControlURL = service.Element(upnpNamespace + "controlURL").Value,
+                                                                       ControlUri = new Uri(baseUri, service.Element(upnpNamespace + "controlURL").Value),
                                                                        DescriptionURL = service.Element(upnpNamespace + "SCPDURL").Value,
-                                                                       EventsSunscriptionURL = service.Element(upnpNamespace + "eventSubURL").Value,
-                                                                       ServiceType = service.Element(upnpNamespace + "serviceType").Value
+                                                                       EventsSunscriptionUri = new Uri(baseUri, service.Element(upnpNamespace + "eventSubURL").Value),
+                                                                       ServiceType = service.Element(upnpNamespace + "serviceType").Value                                                                       
                                                                    }).ToList()
                                         };
 

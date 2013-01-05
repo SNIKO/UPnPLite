@@ -46,9 +46,7 @@ namespace SV.UPnP.DLNA
             deviceType.EnsureNotNull("deviceType");
 
             this.upnpDevicesDiscovery = upnpDevicesDiscovery;
-            this.discoveredDevices =
-                new List<TDevice>(from deviceInfo in this.upnpDevicesDiscovery.DiscoveredDevices
-                                  select this.CreateDevice(deviceInfo));
+            this.discoveredDevices = new List<TDevice>(from deviceInfo in this.upnpDevicesDiscovery.DiscoveredDevices select this.CreateDevice(deviceInfo));
             this.devicesActivity = new Subject<DeviceActivityEventArgs<TDevice>>();
 
             var activityOfDevicesOfTheSpecificType = from activity in this.upnpDevicesDiscovery.DevicesActivity

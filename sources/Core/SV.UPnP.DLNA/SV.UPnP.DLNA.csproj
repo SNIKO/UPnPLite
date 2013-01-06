@@ -119,6 +119,10 @@
     <Compile Include="MediaServer.cs" />
     <Compile Include="MediaServersDiscovery.cs" />
     <Compile Include="Services\AvTransport\AvTransportService.cs" />
+    <Compile Include="Services\AvTransport\MediaInfo.cs" />
+    <Compile Include="Services\AvTransport\TransportInfo.cs" />
+    <Compile Include="Services\AvTransport\TransportState.cs" />
+    <Compile Include="Services\AvTransport\TransportStatus.cs" />
     <Compile Include="Services\ContentDirectory\AudioItem.cs" />
     <Compile Include="Services\ContentDirectory\BrowseFlag.cs" />
     <Compile Include="Services\ContentDirectory\BrowseResult.cs" />
@@ -131,6 +135,7 @@
     <Compile Include="DLNADevice.cs" />
     <Compile Include="Services\ContentDirectory\MediaResource.cs" />
     <Compile Include="Services\ContentDirectory\VideoItem.cs" />
+    <Compile Include="Services\ParsingHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Reactive.Core, Version=2.0.20304.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />

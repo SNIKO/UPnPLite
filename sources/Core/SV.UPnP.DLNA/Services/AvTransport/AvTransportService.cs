@@ -3,6 +3,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -47,16 +48,14 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <returns>
         ///     A <see cref="Task"/> instance which could be use for waiting an operation to complete.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="currentUri"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
         /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="instanceId"/> is invalid -OR-
-        ///     The DNS Server is not available -OR-
-        ///     Unable to resolve the Fully Qualified Domain Name -OR-
-        ///     The server that hosts the resource is unreachable or unresponsive -OR-
-        ///     The specified resource cannot be found in the network -OR-
-        ///     The resource is already being played by other means -OR-
-        ///     The specified resource has a MIME-type which is not supported by the AVTransport service.
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task SetAvTransportURIAsync(uint instanceId, Uri currentUri, string currentUriMetadata)
         {
@@ -71,6 +70,110 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         }
 
         /// <summary>
+        ///      Specifies the URI of the resource to be controlled when the playback of the current resource (set earlier via <see cref="SetAvTransportURIAsync"/>) finishes.
+        /// </summary>
+        /// <param name="instanceId">
+        ///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
+        /// </param>
+        /// <param name="nextUri">
+        ///     The URI to the next resource to control.
+        /// </param>
+        /// <param name="nextUriMetadata">
+        ///     The metadata, in the form of a DIDL-Lite XML fragment, associated with the resource pointed by <paramref name="nextUri"/>.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Task"/> instance which could be use for waiting an operation to complete.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="nextUri"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task SetNextAvTransportURIAsync(uint instanceId, Uri nextUri, string nextUriMetadata)
+        {
+            var arguments = new Dictionary<string, object>
+                                    {
+                                        { "InstanceID", instanceId },
+                                        { "NextURI", nextUri.ToString() },
+                                        { "NextURIMetaData", nextUriMetadata },
+                                    };
+
+            await this.InvokeActionAsync("SetNextAVTransportURI", arguments);
+        }
+
+        /// <summary>
+        ///       Returns information associated with the current media of the specified instance.
+        /// </summary>
+        /// <param name="instanceId">
+        ///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="MediaInfo"/> which defines information about currently current media.
+        /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task<MediaInfo> GetMediaInfoAsync(uint instanceId)
+        {
+            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
+
+            var response = await this.InvokeActionAsync("GetMediaInfo", arguments);
+
+            var mediaInfo = new MediaInfo
+                                {
+                                    NumberOfTracks = response.GetValueOrDefault<int>("NrTracks"),
+                                    MediaDuration = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("MediaDuration")),
+                                    CurrentUri = response.GetValueOrDefault<Uri>("CurrentURI"),
+                                    CurrentUriMetadata = response.GetValueOrDefault<string>("CurrentURIMetaData"),
+                                    NextUri = response.GetValueOrDefault<Uri>("NextURI"),
+                                    NextUriMetadata = response.GetValueOrDefault<string>("NextURIMetaData"),
+                                    PlaybackMedium = response.GetValueOrDefault<string>("PlayMedium"),
+                                    RecordMedium = response.GetValueOrDefault<string>("RecordMedium"),
+                                    WriteStatus = response.GetValueOrDefault<bool>("WriteStatus")
+                                };
+
+            return mediaInfo;
+        }
+
+        /// <summary>
+        ///       Returns information associated with the current transport state of the specified instance.
+        /// </summary>
+        /// <param name="instanceId">
+        ///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="TransportInfo"/> which defines information about specified AvTransport instance.
+        /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task<TransportInfo> GetTransportInfoAsync(uint instanceId)
+        {
+            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
+
+            var response = await this.InvokeActionAsync("GetTransportInfo", arguments);
+
+            var transportInfo = new TransportInfo
+            {
+                State = response.GetValueOrDefault<string>("CurrentTransportState"),
+                Status = response.GetValueOrDefault<string>("CurrentTransportStatus"),
+                Speed = response.GetValueOrDefault<string>("CurrentSpeed")
+            };
+
+            return transportInfo;
+        }
+
+        /// <summary>
         ///     Starts playing the resource of the specified instanceId, at the specified speed, starting at the current position, according to the current play mode.
         /// </summary>
         /// <param name="instanceId">
@@ -82,19 +185,11 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <returns>
         ///     A <see cref="Task"/> instance which could be use for waiting an operation to complete.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
         /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="instanceId"/> is invalid -OR-
-        ///     The specified <paramref name="speed"/> is not supported -OR-
-        ///     The resource to be played cannot be found in the network -OR-
-        ///     The resource is already being played by other means.  The actual implementation might detect through HTTP Busy, and returns this error code. -OR-
-        ///     The resource to be played has a MIME-type which is not supported by the AVTransport service -OR-
-        ///     The transport is “hold locked” -OR-
-        ///     The storage format of the currently loaded media is not supported for playback by this device -OR-
-        ///     The media cannot be read (e.g., because of dust or a scratch) -OR-
-        ///     The media does not contain any contents that can be played -OR-
-        ///     The immediate transition from current transport state to desired transport state is not supported by this device.
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task PlayAsync(uint instanceId, string speed)
         {
@@ -116,12 +211,11 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <returns>
         ///     A <see cref="Task"/> instance which could be use for waiting an operation to complete.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
         /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="instanceId"/> is invalid -OR-
-        ///     The transport is “hold locked” -OR-        
-        ///     The immediate transition from current transport state to desired transport state is not supported by this device.
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task PauseAsync(uint instanceId)
         {
@@ -137,12 +231,11 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <returns>
         ///     A <see cref="Task"/> instance which could be use for waiting an operation to complete.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
         /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="instanceId"/> is invalid -OR-
-        ///     The transport is “hold locked” -OR-        
-        ///     The immediate transition from current transport state to desired transport state is not supported by this device.
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task StopAsync(uint instanceId)
         {

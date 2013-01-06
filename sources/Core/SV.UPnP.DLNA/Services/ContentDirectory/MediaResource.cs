@@ -125,66 +125,16 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         protected virtual void InitializePropertySetters(Dictionary<XName, Action<string>> propertyNameToSetterMap)
         {
             propertyNameToSetterMap["size"]             = value => this.Size = uint.Parse(value);
-            propertyNameToSetterMap["duration"]         = value => this.Duration = ParseTimeSpan(value);
+            propertyNameToSetterMap["duration"]         = value => this.Duration = ParsingHelper.ParseTimeSpan(value);
             propertyNameToSetterMap["bitrate"]          = value => this.Bitrate = uint.Parse(value);
             propertyNameToSetterMap["sampleFrequency"]  = value => this.SampleFrequency = uint.Parse(value);
             propertyNameToSetterMap["bitsPerSample"]    = value => this.BitsPerSample = uint.Parse(value);
             propertyNameToSetterMap["nrAudioChannels"]  = value => this.NumberOfAudioChannels = uint.Parse(value);
-            propertyNameToSetterMap["resolution"]       = value => this.Resolution = ParseResolution(value);
+            propertyNameToSetterMap["resolution"]       = value => this.Resolution = ParsingHelper.ParseResolution(value);
             propertyNameToSetterMap["colorDepth"]       = value => this.ColorDepth = uint.Parse(value);
             propertyNameToSetterMap["protocolInfo"]     = value => this.ProtocolInfo = value;
             propertyNameToSetterMap["protection"]       = value => this.Protection = value;
             propertyNameToSetterMap["importUri"]        = value => this.ImportUri = new Uri(value);
-        }
-
-        /// <summary>
-        ///     Parses the time span string in format of DIDL-Lite into <see cref="TimeSpan"/>.
-        /// </summary>
-        /// <param name="timeSpanString">
-        ///     The string to parse.
-        /// </param>
-        /// <returns>
-        ///     A <see cref="TimeSpan"/> instance.
-        /// </returns>
-        /// <remarks>
-        ///     The form of the duration string is: H+:MM:SS[.F+], or H+:MM:SS[.F0/F1] where : H+ :  number of digits (including no digits) to indicate elapsed hours, MM : exactly 2 
-        ///     digits to indicate minutes (00 to 59), SS : exactly 2 digits to indicate seconds (00 to 59), F+ : any number of digits (including no digits) to indicate fractions of 
-        ///     seconds, F0/F1 : a fraction, with F0 and F1 at least one digit long, and F0 less than F1. The string may be preceded by an optional + or – sign, and the decimal point 
-        ///     itself may be omitted if there are no fractional second digits.  
-        /// </remarks>
-        private static TimeSpan ParseTimeSpan(string timeSpanString)
-        {
-            var splitted = timeSpanString.Split(':');
-            var splittedSeconds = splitted[2].Split('.');
-
-            var hours = int.Parse(splitted[0]);
-            var minutes = int.Parse(splitted[1]);
-            var seconds = int.Parse(splittedSeconds[0]);
-            var milliseconds = splittedSeconds.Length == 2 ? int.Parse(splittedSeconds[1]) : 0;
-
-            return new TimeSpan(0, hours, minutes, seconds, milliseconds);
-        }
-
-        /// <summary>
-        ///     Parses the resolution string into <see cref="Size"/>.
-        /// </summary>
-        /// <param name="resolutionString">
-        ///     The string to parse.
-        /// </param>
-        /// <returns>
-        ///     An instance of <see cref="Size"/>
-        /// </returns>
-        /// <remarks>
-        ///     String pattern is of the form: [0-9]+x[0-9]+ (one or more digits,'x', followed by one or more digits).
-        /// </remarks>
-        private static Size ParseResolution(string resolutionString)
-        {
-            var splitted = resolutionString.Split('x');
-
-            var width = int.Parse(splitted[0]);
-            var height = int.Parse(splitted[1]);
-
-            return new Size(width, height);
         }
 
         private void EnsurePropertySettersInititalized()
@@ -196,7 +146,6 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
                 this.InitializePropertySetters(this.propertySetters);
             }
         }
-
 
         #endregion
     }

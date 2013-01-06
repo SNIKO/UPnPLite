@@ -57,6 +57,12 @@ namespace SV.UPnP
         /// <exception cref="ArgumentNullException">
         ///     An <see cref="action"/> is <c>null</c> or empty.
         /// </exception>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
         protected async Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
         {
             var requestXml = this.CreateActionRequest(action, parameters);
@@ -80,12 +86,21 @@ namespace SV.UPnP
             }
             catch (WebException ex)
             {
-                var c = XNamespace.Get("urn:schemas-upnp-org:control-1-0");
-                var doc = XDocument.Load(ex.Response.GetResponseStream());
-                var errorCodeElement = doc.Descendants(c + "errorCode").FirstOrDefault();
-                var errorDesctiptionElement = doc.Descendants(c + "errorDescription").FirstOrDefault();
+                var serviceInternalError = (int)ex.Status == 7;
 
-                throw new DeviceException(Convert.ToInt32(errorCodeElement.Value), errorDesctiptionElement.Value, ex);
+                if (serviceInternalError)
+                {
+                    var c = XNamespace.Get("urn:schemas-upnp-org:control-1-0");
+                    var doc = XDocument.Load(ex.Response.GetResponseStream());
+                    var errorCodeElement = doc.Descendants(c + "errorCode").FirstOrDefault();
+                    var errorDesctiptionElement = doc.Descendants(c + "errorDescription").FirstOrDefault();
+
+                    throw new DeviceException(Convert.ToInt32(errorCodeElement.Value), errorDesctiptionElement.Value, ex);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -97,9 +112,12 @@ namespace SV.UPnP
 
             var actionElement = new XElement(u + action, new XAttribute(XNamespace.Xmlns + "u", u.NamespaceName));
 
-            foreach (var parameter in parameters)
+            if (parameters.Any())
             {
-                actionElement.Add(new XElement(parameter.Key, parameter.Value));
+                foreach (var parameter in parameters)
+                {
+                    actionElement.Add(new XElement(parameter.Key, parameter.Value));
+                }
             }
 
             var envelope = new XDocument(

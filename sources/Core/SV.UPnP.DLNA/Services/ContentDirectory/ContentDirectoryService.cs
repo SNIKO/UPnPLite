@@ -5,15 +5,10 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Xml.Linq;
+    using System.Linq;
 
     public class ContentDirectoryService : ServiceBase
     {
-        #region Fields
-
-        private static Dictionary<string, Type> knownMediaObjectTypes;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -28,7 +23,6 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         public ContentDirectoryService(ServiceInfo serviceInfo)
             : base(serviceInfo)
         {
-            InitializeMediaObjectTypes();
         }
 
         #endregion
@@ -100,73 +94,22 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             var result = new List<MediaObject>();
             var document = XDocument.Parse(mediaObjectsXml);
             var didl = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
-            var upnp = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/upnp/");
 
-            var containers = document.Descendants(didl + "container");
-            foreach (var container in containers)
+            var mediaContainers = document.Descendants(didl + "container").Select(s => s.ToString()).ToList();
+            var mediaItems = document.Descendants(didl + "item").Select(s => s.ToString()).ToList();
+
+            var mediaObjects = new List<string>();
+            mediaObjects.AddRange(mediaContainers);
+            mediaObjects.AddRange(mediaItems);
+
+            foreach (var container in mediaObjects)
             {
-                var objectClass = container.Element(upnp + "class").Value;
-                var mediaObject = CreateMediaObject(objectClass);
+                var mediaObject = MediaObject.Create(container.ToString());
+
                 if (mediaObject != null)
                 {
-                    mediaObject.Deserialize(container.ToString());
+                    result.Add(mediaObject);
                 }
-
-                result.Add(mediaObject);
-            }
-
-            var items = document.Descendants(didl + "item");
-            foreach (var item in items)
-            {
-                var objectClass = item.Element(upnp + "class").Value;
-                var mediaObject = CreateMediaObject(objectClass);
-                if (mediaObject != null)
-                {
-                    mediaObject.Deserialize(item.ToString());
-                }
-
-                result.Add(mediaObject);
-            }
-
-            return result;
-        }
-
-        private static void InitializeMediaObjectTypes()
-        {
-            if (knownMediaObjectTypes == null)
-            {
-                knownMediaObjectTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-
-                knownMediaObjectTypes["object.item"] = typeof(MediaItem);
-                knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
-                knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
-                knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
-                knownMediaObjectTypes["object.container"] = typeof(MediaContainer);
-            }
-        }
-
-        private static MediaObject CreateMediaObject(string contentClass)
-        {
-            MediaObject result = null;
-            Type mediaObjectType;
-
-            if (knownMediaObjectTypes.TryGetValue(contentClass, out mediaObjectType) == false)
-            {
-                // Type for object with such class not found. Lets fine the closest type. 
-                var maxCoincidence = 0;
-                foreach (var knownMediaObjectType in knownMediaObjectTypes)
-                {
-                    if (contentClass.StartsWith(knownMediaObjectType.Key, StringComparison.OrdinalIgnoreCase) && knownMediaObjectType.Key.Length > maxCoincidence)
-                    {
-                        maxCoincidence = knownMediaObjectType.Key.Length;
-                        mediaObjectType = knownMediaObjectType.Value;
-                    }
-                }
-            }
-
-            if (mediaObjectType != null)
-            {
-                result = Activator.CreateInstance(mediaObjectType) as MediaObject;
             }
 
             return result;

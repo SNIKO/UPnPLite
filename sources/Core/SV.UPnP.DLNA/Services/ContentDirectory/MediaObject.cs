@@ -3,6 +3,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Xml.Linq;
 
     /// <summary>
@@ -12,9 +13,23 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
     {
         #region Fields
 
+        private static Dictionary<string, Type> knownMediaObjectTypes;
+
         private Dictionary<XName, Action<string>> propertySetters;
 
         private List<MediaResource> resources;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes the <see cref="MediaObject" /> class.
+        /// </summary>
+        static MediaObject()
+        {
+            InitializeMediaObjectTypes();
+        }
 
         #endregion
 
@@ -23,7 +38,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Gets an identifier for the object. The value of each object id property must be unique with respect to the Content Directory.
         /// </summary>
-        public string Id { get; internal set; }
+        public string Id { get; set; }
 
         /// <summary>
         ///     Gets an id property of object’s parent. The parentID of the Content Directory ‘root’ container must be set to the reserved value of  “-1”.  No other 
@@ -34,7 +49,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Gets a name of the object.
         /// </summary>
-        public string Title { get; internal set; }
+        public string Title { get; set; }
 
         /// <summary>
         ///     Gets a primary content creator or owner of the object.
@@ -52,9 +67,41 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         /// </summary>
         public IEnumerable<MediaResource> Resources { get { return this.resources; } }
 
+        /// <summary>
+        ///     Gets a thumbnail of the media item.
+        /// </summary>
+        public virtual Uri Thumbnail { get; private set; }
+
         #endregion
 
         #region Methods
+
+        /// <summary>
+        ///     Creates a <see cref="MediaObject"/> instance from object defined in DIDL-Lite XML.
+        /// </summary>
+        /// <param name="didlLiteXml">
+        ///     A XML element id DIDL-Lite format which represents a MediaObject.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="MediaObject"/> instance created from the string that contains XML in DIDL-Lite format.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="didlLiteXml"/> is <c>null</c> or <see cref="string.Empty"/>.
+        /// </exception>
+        public static MediaObject Create(string didlLiteXml)
+        {
+            didlLiteXml.EnsureNotNull("didlLiteXml");
+
+            var item = XElement.Parse(didlLiteXml);
+            var objectClass = item.Element(Namespaces.UPnP + "class").Value;
+            var mediaObject = CreateMediaObject(objectClass);
+            if (mediaObject != null)
+            {
+                mediaObject.Deserialize(item.ToString());
+            }
+
+            return mediaObject;
+        }
 
         /// <summary>
         ///     Deserilizes the object from a DIDL-Lite XML.
@@ -95,6 +142,11 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
                     }
                 }
             }
+
+            if (this.resources.Any() && typeof(ImageItem) == this.GetType())
+            {
+                this.Thumbnail = this.resources[0].Uri;
+            }
         }
 
         /// <summary>
@@ -112,6 +164,44 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             propertyNameToSetterMap[Namespaces.DC + "creator"] =    value => this.Creator = value;
         }
 
+        private static void InitializeMediaObjectTypes()
+        {
+            knownMediaObjectTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+
+            knownMediaObjectTypes["object.item"] = typeof(MediaItem);
+            knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
+            knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
+            knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
+            knownMediaObjectTypes["object.container"] = typeof(MediaContainer);
+        }
+
+        private static MediaObject CreateMediaObject(string contentClass)
+        {
+            MediaObject result = null;
+            Type mediaObjectType;
+
+            if (knownMediaObjectTypes.TryGetValue(contentClass, out mediaObjectType) == false)
+            {
+                // Type for object with such class not found. Lets fine the closest type. 
+                var maxCoincidence = 0;
+                foreach (var knownMediaObjectType in knownMediaObjectTypes)
+                {
+                    if (contentClass.StartsWith(knownMediaObjectType.Key, StringComparison.OrdinalIgnoreCase) && knownMediaObjectType.Key.Length > maxCoincidence)
+                    {
+                        maxCoincidence = knownMediaObjectType.Key.Length;
+                        mediaObjectType = knownMediaObjectType.Value;
+                    }
+                }
+            }
+
+            if (mediaObjectType != null)
+            {
+                result = Activator.CreateInstance(mediaObjectType) as MediaObject;
+            }
+
+            return result;
+        }
+
         private void EnsurePropertySettersInititalized()
         {
             if (this.propertySetters == null)
@@ -126,6 +216,9 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
 
         #region Types
 
+        /// <summary>
+        ///     Defines some standard XML namespaces.
+        /// </summary>
         protected static class Namespaces
         {
             public static XNamespace DIDL = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
@@ -134,7 +227,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
 
             public static XNamespace UPnP = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/upnp/");
         }
-        
+
         #endregion
     }
 }

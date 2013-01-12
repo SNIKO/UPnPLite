@@ -20,6 +20,9 @@ namespace SV
         ///             <see cref="int"/>
         ///         </item>
         ///         <item>
+        ///             <see cref="uint"/>
+        ///         </item>
+        ///         <item>
         ///             <see cref="bool"/>
         ///         </item>
         ///         <item>
@@ -55,6 +58,18 @@ namespace SV
                 {
                     int intResult;
                     if (int.TryParse(value, out intResult))
+                    {
+                        result = (TValue)(object)intResult;
+                    }
+                    else
+                    {
+                        result = (TValue)(object)default(int);
+                    }
+                }
+                else if (typeof(TValue) == typeof(uint))
+                {
+                    uint intResult;
+                    if (uint.TryParse(value, out intResult))
                     {
                         result = (TValue)(object)intResult;
                     }

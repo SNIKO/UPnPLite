@@ -174,6 +174,42 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         }
 
         /// <summary>
+        ///       Returns information associated with the current position of the transport of the specified instance.
+        /// </summary>
+        /// <param name="instanceId">
+        ///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="PositionInfo"/> which defines information about playback position of the specified AvTransport instance.
+        /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task<PositionInfo> GetPositionInfoAsync(uint instanceId)
+        {
+            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
+
+            var response = await this.InvokeActionAsync("GetPositionInfo", arguments);
+
+            var positionInfo = new PositionInfo
+            {
+                Track = response.GetValueOrDefault<uint>("Track"),
+                TrackDuration = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("TrackDuration")),
+                TrackMetaData = response.GetValueOrDefault<string>("TrackMetaData"),
+                TrackUri = response.GetValueOrDefault<Uri>("TrackURI"),
+                RelativeTimePosition = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("RelTime")),
+                AbsoluteTimePosition = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("AbsTime")),
+                RelativeCounterPosition = response.GetValueOrDefault<int>("RelCount"),
+                AbsoluteCounterPosition = response.GetValueOrDefault<int>("AbsCount")
+            };
+
+            return positionInfo;
+        }
+
+        /// <summary>
         ///     Starts playing the resource of the specified instanceId, at the specified speed, starting at the current position, according to the current play mode.
         /// </summary>
         /// <param name="instanceId">

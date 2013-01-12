@@ -26,15 +26,28 @@ namespace SV.UPnP.DLNA.Services
         /// </remarks>
         public static TimeSpan ParseTimeSpan(string timeSpanString)
         {
+            TimeSpan result;
+            
             var splitted = timeSpanString.Split(':');
-            var splittedSeconds = splitted[2].Split('.');
+            if (splitted.Length == 3)
+            {
+                var splittedSeconds = splitted[2].Split('.');
 
-            var hours = int.Parse(splitted[0]);
-            var minutes = int.Parse(splitted[1]);
-            var seconds = int.Parse(splittedSeconds[0]);
-            var milliseconds = splittedSeconds.Length == 2 ? int.Parse(splittedSeconds[1]) : 0;
+                var hours = int.Parse(splitted[0]);
+                var minutes = int.Parse(splitted[1]);
+                var seconds = int.Parse(splittedSeconds[0]);
+                var milliseconds = splittedSeconds.Length == 2 ? int.Parse(splittedSeconds[1]) : 0;
 
-            return new TimeSpan(0, hours, minutes, seconds, milliseconds);
+                result = new TimeSpan(0, hours, minutes, seconds, milliseconds);
+            }
+            else
+            {
+                result = new TimeSpan();
+
+                // TODO: Log
+            }
+
+            return result;
         }
 
         /// <summary>

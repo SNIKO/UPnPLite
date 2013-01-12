@@ -2,7 +2,10 @@
 namespace SV.UPnP.DLNA
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Reactive.Linq;
+    using System.Reactive.Subjects;
     using System.Threading.Tasks;
     using SV.UPnP.DLNA.Services.AvTransport;
     using SV.UPnP.DLNA.Services.ContentDirectory;
@@ -15,6 +18,23 @@ namespace SV.UPnP.DLNA
         #region Fields
 
         private readonly AvTransportService avTransportService;
+
+        private readonly Subject<MediaRendererState> stateChanges;
+
+        private readonly Subject<TimeSpan> positionChanges;
+
+        private MediaRendererState currentState;
+
+        private TimeSpan currentPosition;
+
+        private readonly static Dictionary<string, MediaRendererState> statesMapper = new Dictionary<string, MediaRendererState>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { TransportState.NoMediaPresent, MediaRendererState.NoMediaPresent },
+                    { TransportState.PausedPlayback, MediaRendererState.Paused },
+                    { TransportState.Playing, MediaRendererState.Playing },
+                    { TransportState.Stopped, MediaRendererState.Stopped },
+                    { TransportState.Transitioning, MediaRendererState.Buffering } 
+                };
 
         #endregion
 
@@ -48,8 +68,77 @@ namespace SV.UPnP.DLNA
             {
                 throw new ArgumentException("Description for AVTransport service not found", "deviceInfo");
             }
-            
+
+            this.stateChanges = new Subject<MediaRendererState>();
+            this.positionChanges = new Subject<TimeSpan>();
             this.avTransportService = new AvTransportService(avTransportInfo);
+
+            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
+                async _ =>
+                {
+                    var info = await this.avTransportService.GetTransportInfoAsync(0);
+                    var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
+                    
+                    this.State = ParseTransportState(info.State);
+                    this.CurrentPosition = positionInfo.RelativeTimePosition;
+                });
+        }
+
+        #endregion
+
+        #region Events
+
+        public IObservable<MediaRendererState> StateChanges
+        {
+            get
+            {
+                return this.stateChanges;
+            }
+        }
+
+        public IObservable<TimeSpan> PositionChanges
+        {
+            get
+            {
+                return this.positionChanges;
+            }
+        }
+        
+        #endregion
+
+        #region Properties
+
+        public MediaRendererState State
+        {
+            get
+            {
+                return this.currentState;
+            }
+            private set
+            {
+                if (this.currentState != value)
+                {
+                    this.currentState = value;
+                    this.stateChanges.OnNext(value);
+                }
+            }
+        }
+
+        public TimeSpan CurrentPosition
+        {
+            get
+            {
+                return this.currentPosition;
+            }
+
+            private set
+            {
+                if (this.currentPosition != value)
+                {
+                    this.currentPosition = value;
+                    this.positionChanges.OnNext(value);
+                }
+            }
         }
 
         #endregion
@@ -103,6 +192,20 @@ namespace SV.UPnP.DLNA
         public async Task PauseAsync()
         {
             await this.avTransportService.PauseAsync(0);
+        }
+
+        private MediaRendererState ParseTransportState(string transportState)
+        {
+            MediaRendererState result;
+
+            if (statesMapper.TryGetValue(transportState, out result) == false)
+            {
+                result = MediaRendererState.Stopped;
+
+                // TODO: Log about unexpected state
+            }
+
+            return result;
         }
 
         private MediaResource SelectResourceForPlayback(MediaItem mediaItem)

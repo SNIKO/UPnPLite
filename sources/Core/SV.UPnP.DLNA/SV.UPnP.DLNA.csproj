@@ -116,10 +116,12 @@
     <Compile Include="IMediaServersDiscovery.cs" />
     <Compile Include="MediaRenderer.cs" />
     <Compile Include="MediaRenderersDiscovery.cs" />
+    <Compile Include="MediaRendererState.cs" />
     <Compile Include="MediaServer.cs" />
     <Compile Include="MediaServersDiscovery.cs" />
     <Compile Include="Services\AvTransport\AvTransportService.cs" />
     <Compile Include="Services\AvTransport\MediaInfo.cs" />
+    <Compile Include="Services\AvTransport\PositionInfo.cs" />
     <Compile Include="Services\AvTransport\TransportInfo.cs" />
     <Compile Include="Services\AvTransport\TransportState.cs" />
     <Compile Include="Services\AvTransport\TransportStatus.cs" />

@@ -12,7 +12,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         public const string Stopped = "STOPPED";
 
         /// <summary>
-        ///     The media is currently plating.
+        ///     The media is currently playing.
         /// </summary>
         public const string Playing = "PLAYING";
 

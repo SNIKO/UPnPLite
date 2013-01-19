@@ -100,6 +100,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CommonUPnPDevicesDiscovery.cs" />
     <Compile Include="DeviceIcon.cs" />
     <Compile Include="DeviceActivity.cs" />
     <Compile Include="DeviceActivityEventArgs.cs" />

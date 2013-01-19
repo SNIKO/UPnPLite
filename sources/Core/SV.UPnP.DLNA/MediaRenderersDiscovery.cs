@@ -83,6 +83,6 @@ namespace SV.UPnP.DLNA
             return service;
         }
 
-        #endregion        
+        #endregion
     }
 }

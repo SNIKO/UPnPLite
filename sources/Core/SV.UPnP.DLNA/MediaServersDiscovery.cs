@@ -37,13 +37,6 @@ namespace SV.UPnP.DLNA
         /// <returns>
         ///     A concrete instance of the <see cref="UPnPDevice"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
-        ///     <paramref name="services"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     One of the required services is not found in <paramref name="services"/>.
-        /// </exception>
         protected override MediaServer CreateDeviceInstance(string udn, IEnumerable<UPnPService> services)
         {
             var avTransportService = services.FirstOrDefault(s => s is IContentDirectoryService) as IContentDirectoryService;
@@ -66,11 +59,6 @@ namespace SV.UPnP.DLNA
         /// <returns>
         ///     A concrete instance of the <see cref="UPnPService"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
-        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
-        ///     <paramref name="eventsUri"/> is <c>null</c>.
-        /// </exception>
         protected override UPnPService CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri)        
         {
             UPnPService service = null;

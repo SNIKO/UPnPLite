@@ -9,7 +9,7 @@ namespace SV.UPnP.DLNA
     /// <summary>
     ///     Discovers the Media Renderer devices.
     /// </summary>
-    public class MediaRenderersDiscovery : DevicesDiscovery<MediaRenderer>, IMediaRenderersDiscovery
+    public class MediaRenderersDiscovery : UPnPDevicesDiscovery<MediaRenderer>, IMediaRenderersDiscovery
     {
         #region Constructors
 

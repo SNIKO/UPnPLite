@@ -14,7 +14,7 @@ namespace SV.UPnP
     using SV.UPnP.Protocols.SSDP.Messages;
     using Windows.Foundation;
 
-    public abstract class DevicesDiscovery<TDevice> where TDevice : UPnPDevice
+    public abstract class UPnPDevicesDiscovery<TDevice> where TDevice : UPnPDevice
     {
         #region Fields
 
@@ -60,7 +60,7 @@ namespace SV.UPnP
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DevicesDiscovery{TDevice}"/> class.
+        ///     Initializes a new instance of the <see cref="UPnPUPnPDevicesDiscovery{TDevice}"/> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
@@ -68,13 +68,13 @@ namespace SV.UPnP
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="targetDevices"/> is <c>null</c> or <see cref="string.Empty"/>.
         /// </exception>
-        protected DevicesDiscovery(string targetDevices)
+        protected UPnPDevicesDiscovery(string targetDevices)
             : this(targetDevices, SSDPServer.Instance)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DevicesDiscovery{TDevice}" /> class.
+        ///     Initializes a new instance of the <see cref="UPnPUPnPDevicesDiscovery{TDevice}" /> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
@@ -86,7 +86,7 @@ namespace SV.UPnP
         ///     <paramref name="targetDevices"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
         ///     <paramref name="ssdpServer"/> is <c>null</c>.
         /// </exception>
-        internal DevicesDiscovery(string targetDevices, ISSDPServer ssdpServer)
+        internal UPnPDevicesDiscovery(string targetDevices, ISSDPServer ssdpServer)
         {
             targetDevices.EnsureNotNull("targetDevices");
             ssdpServer.EnsureNotNull("ssdpServer");

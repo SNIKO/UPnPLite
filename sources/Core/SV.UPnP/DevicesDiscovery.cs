@@ -14,13 +14,13 @@ namespace SV.UPnP
     using SV.UPnP.Protocols.SSDP.Messages;
     using Windows.Foundation;
 
-    public class DevicesDiscovery : IDevicesDiscovery
+    public abstract class DevicesDiscovery<TDevice> where TDevice : UPnPDevice
     {
         #region Fields
 
         private readonly ISSDPServer ssdpServer;
 
-        private readonly Subject<DeviceActivityEventArgs> devicesActivity;
+        private readonly Subject<DeviceActivityEventArgs<TDevice>> devicesActivity;
 
         private readonly Dictionary<string, DeviceLifetimeControlInfo> availableDevices = new Dictionary<string, DeviceLifetimeControlInfo>();
 
@@ -30,7 +30,7 @@ namespace SV.UPnP
         /// <summary>
         ///     Gets the list of currently discovered devices.
         /// </summary>
-        public IEnumerable<DeviceInfo> DiscoveredDevices
+        public IEnumerable<TDevice> DiscoveredDevices
         {
             get
             {
@@ -47,7 +47,7 @@ namespace SV.UPnP
         /// <summary>
         ///     Gets an observable collection which notifies the devices activities.
         /// </summary>
-        public IObservable<DeviceActivityEventArgs> DevicesActivity
+        public IObservable<DeviceActivityEventArgs<TDevice>> DevicesActivity
         {
             get
             {
@@ -60,26 +60,21 @@ namespace SV.UPnP
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DevicesDiscovery" /> class.
-        /// </summary>
-        public DevicesDiscovery()
-            : this("upnp:rootdevice")
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="DevicesDiscovery" /> class.
+        ///     Initializes a new instance of the <see cref="DevicesDiscovery{TDevice}"/> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
         /// </param>
-        internal DevicesDiscovery(string targetDevices)
-            : this(targetDevices, new SSDPServer())
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="targetDevices"/> is <c>null</c> or <see cref="string.Empty"/>.
+        /// </exception>
+        protected DevicesDiscovery(string targetDevices)
+            : this(targetDevices, SSDPServer.Instance)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DevicesDiscovery" /> class.
+        ///     Initializes a new instance of the <see cref="DevicesDiscovery{TDevice}" /> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
@@ -88,15 +83,16 @@ namespace SV.UPnP
         ///     The implementation of the SSDP protocol to use for discovering the UPnP devices.
         /// </param>
         /// <exception cref="ArgumentNullException">
+        ///     <paramref name="targetDevices"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
         ///     <paramref name="ssdpServer"/> is <c>null</c>.
         /// </exception>
         internal DevicesDiscovery(string targetDevices, ISSDPServer ssdpServer)
         {
+            targetDevices.EnsureNotNull("targetDevices");
             ssdpServer.EnsureNotNull("ssdpServer");
 
             this.ssdpServer = ssdpServer;
-
-            this.devicesActivity = new Subject<DeviceActivityEventArgs>();
+            this.devicesActivity = new Subject<DeviceActivityEventArgs<TDevice>>();
 
             var targetDevicesNotifications = from notification in this.ssdpServer.NotifyMessages
                                              where string.Compare(notification.NotificationType, targetDevices, StringComparison.OrdinalIgnoreCase) == 0
@@ -112,6 +108,49 @@ namespace SV.UPnP
         #endregion
 
         #region Methods
+
+        /// <summary>
+        ///     Creates an instance of concrete <see cref="UPnPDevice"/> which manages a device.
+        /// </summary>
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="services">
+        ///     A set of UPnP service found on the device.
+        /// </param>
+        /// <returns>
+        ///     A concrete instance of the <see cref="UPnPDevice"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="services"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     One of the required services is not found in <paramref name="services"/>.
+        /// </exception>
+        protected abstract TDevice CreateDeviceInstance(string udn, IEnumerable<ServiceBase> services);
+
+        /// <summary>
+        ///     Creates an instance of concrere <see cref="ServiceBase"/> which manages concrete service on a device.
+        /// </summary>
+        /// <param name="serviceType">
+        ///     A type of the service.
+        /// </param>
+        /// <param name="controlUri">
+        ///     An URL for sending commands to the service.
+        /// </param>
+        /// <param name="eventsUri">
+        ///     An URL for subscrinbing to service's events.
+        /// </param>
+        /// <returns>
+        ///     A concrete instance of the <see cref="ServiceBase"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
+        ///     <paramref name="eventsUri"/> is <c>null</c>.
+        /// </exception>
+        protected abstract ServiceBase CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri);
 
         private async void AddDevice(SSDPMessage notifyMessage)
         {
@@ -139,7 +178,7 @@ namespace SV.UPnP
                             Debug.WriteLine("{0} Device '{1}' will live for a '{2}' seconds", DateTime.Now, device.FriendlyName, notifyMessage.MaxAge);
                             availableDevices[notifyMessage.USN] = deviceEx;
 
-                            this.devicesActivity.OnNext(new DeviceActivityEventArgs { Activity = DeviceActivity.Available, Device = device });
+                            this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice> { Activity = DeviceActivity.Available, Device = device });
                         }
                     }
                 }
@@ -181,7 +220,7 @@ namespace SV.UPnP
                     deviceLifetimeControl.LifeTimeControl.Dispose();
 
                     this.availableDevices.Remove(deviceUSN);
-                    this.devicesActivity.OnNext(new DeviceActivityEventArgs { Activity = DeviceActivity.Gone, Device = deviceLifetimeControl.Device });
+                    this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice> { Activity = DeviceActivity.Gone, Device = deviceLifetimeControl.Device });
                 }
             }
         }
@@ -240,7 +279,7 @@ namespace SV.UPnP
             return version;
         }
 
-        private static DeviceInfo CreateDevice(string host, Stream deviceDescription)
+        private TDevice CreateDevice(string host, Stream deviceDescription)
         {
             var xmlDoc = XDocument.Load(deviceDescription);
             var upnpNamespace = XNamespace.Get("urn:schemas-upnp-org:device-1-0");
@@ -256,38 +295,36 @@ namespace SV.UPnP
                 baseUri = new Uri(urlBaseNode.Value);
             }
 
-            var deviceInfo = from device in xmlDoc.Descendants(upnpNamespace + "device")
-                             let deviceType = device.Element(upnpNamespace + "deviceType").Value
-                             select new DeviceInfo()
-                                        {
-                                            UDN = device.Element(upnpNamespace + "UDN").Value,
-                                            DeviceType = ParseDeviceType(deviceType),
-                                            FriendlyName = device.Element(upnpNamespace + "friendlyName").Value,
-                                            DeviceVersion = ParseDeviceVersion(deviceType),
-                                            Manufacturer = device.Element(upnpNamespace + "manufacturer").Value,
-                                            Icons = (from icon in device.Descendants(upnpNamespace + "icon")
-                                                     select new DeviceIcon
-                                                                {
-                                                                    Type = icon.Element(upnpNamespace + "mimetype").Value,
-                                                                    Size = new Size
-                                                                               {
-                                                                                   Width = int.Parse(icon.Element(upnpNamespace + "width").Value),
-                                                                                   Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
-                                                                               },
-                                                                    ColorDepth = icon.Element(upnpNamespace + "depth").Value,
-                                                                    Url = new Uri(baseUri + icon.Element(upnpNamespace + "url").Value)
-                                                                }).ToList(),
-                                            Services = (from service in device.Descendants(upnpNamespace + "service")
-                                                        select new ServiceInfo
-                                                                   {
-                                                                       ControlUri = new Uri(baseUri, service.Element(upnpNamespace + "controlURL").Value),
-                                                                       DescriptionURL = service.Element(upnpNamespace + "SCPDURL").Value,
-                                                                       EventsSunscriptionUri = new Uri(baseUri, service.Element(upnpNamespace + "eventSubURL").Value),
-                                                                       ServiceType = service.Element(upnpNamespace + "serviceType").Value                                                                       
-                                                                   }).ToList()
-                                        };
+            var deviceElement = xmlDoc.Descendants(upnpNamespace + "device").First();
+            var deviceType = deviceElement.Element(upnpNamespace + "deviceType").Value;
+            var serciceElements = deviceElement.Descendants(upnpNamespace + "service");
 
-            return deviceInfo.First();
+            var services = (from serciceElement in serciceElements
+                            let serviceType = serciceElement.Element(upnpNamespace + "serviceType").Value
+                            let controlUri = new Uri(baseUri, serciceElement.Element(upnpNamespace + "controlURL").Value)
+                            let eventsSunscriptionUri = new Uri(baseUri, serciceElement.Element(upnpNamespace + "eventSubURL").Value)
+                            select this.CreateServiceInstance(serviceType, controlUri, eventsSunscriptionUri)).ToList();
+
+            var device = this.CreateDeviceInstance(deviceType, services);
+
+            device.FriendlyName = deviceElement.Element(upnpNamespace + "friendlyName").Value;
+            device.DeviceVersion = ParseDeviceVersion(deviceType);
+            device.Manufacturer = deviceElement.Element(upnpNamespace + "manufacturer").Value;
+
+            device.Icons = (from icon in deviceElement.Descendants(upnpNamespace + "icon")
+                            select new DeviceIcon
+                                {
+                                    Type = icon.Element(upnpNamespace + "mimetype").Value,
+                                    Size = new Size
+                                        {
+                                            Width = int.Parse(icon.Element(upnpNamespace + "width").Value),
+                                            Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
+                                        },
+                                    ColorDepth = icon.Element(upnpNamespace + "depth").Value,
+                                    Url = new Uri(baseUri + icon.Element(upnpNamespace + "url").Value)
+                                }).ToList();
+
+            return device;
         }
 
         #endregion
@@ -296,7 +333,7 @@ namespace SV.UPnP
 
         private class DeviceLifetimeControlInfo
         {
-            public DeviceInfo Device { get; set; }
+            public TDevice Device { get; set; }
 
             public IDisposable LifeTimeControl { get; set; }
         }

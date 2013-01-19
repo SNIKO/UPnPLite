@@ -13,11 +13,11 @@ namespace SV.UPnP.DLNA
     /// <summary>
     ///     A device which renders content from Media Server.
     /// </summary>
-    public class MediaRenderer : DLNADevice
+    public class MediaRenderer : UPnPDevice
     {
         #region Fields
 
-        private readonly AvTransportService avTransportService;
+        private readonly IAvTransportService avTransportService;
 
         private readonly Subject<MediaRendererState> stateChanges;
 
@@ -41,37 +41,26 @@ namespace SV.UPnP.DLNA
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DLNADevice" /> class.
+        ///     Initializes a new instance of the <see cref="MediaRenderer"/> class.
         /// </summary>
-        /// <param name="deviceInfo">
-        ///     The description of the the device.
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="avTransportService">
+        ///     A <see cref="IAvTransportService"/> to use for controlling the transport of media streams.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="deviceInfo"/> is <c>null</c>.
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="avTransportService"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     One of the following services is required but not exist on device described by <paramref name="deviceInfo"/>:
-        ///     <list type="bullet">
-        ///         <item>
-        ///             ConnectionManager
-        ///         </item>
-        ///         <item>
-        ///             AVTransport
-        ///         </item>
-        ///     </list>
-        /// </exception>
-        internal MediaRenderer(DeviceInfo deviceInfo)
-            : base(deviceInfo)
+        public MediaRenderer(string udn, IAvTransportService avTransportService)
+            : base(udn)
         {
-            var avTransportInfo = deviceInfo.Services.FirstOrDefault(s => s.ServiceType.StartsWith("urn:schemas-upnp-org:service:AVTransport", StringComparison.OrdinalIgnoreCase));
-            if (avTransportInfo == null)
-            {
-                throw new ArgumentException("Description for AVTransport service not found", "deviceInfo");
-            }
-
+            avTransportService.EnsureNotNull("avTransportService");
+            
             this.stateChanges = new Subject<MediaRendererState>();
             this.positionChanges = new Subject<TimeSpan>();
-            this.avTransportService = new AvTransportService(avTransportInfo);
+            this.avTransportService = avTransportService;
 
             Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
                 async _ =>

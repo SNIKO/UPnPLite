@@ -1,55 +1,43 @@
 ﻿
 namespace SV.UPnP.DLNA
 {
+    using SV.UPnP.DLNA.Services.ContentDirectory;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using SV.UPnP.DLNA.Services.ContentDirectory;
 
     /// <summary>
     ///     A device which stores a media content.
     /// </summary>
-    public class MediaServer : DLNADevice
+    public class MediaServer : UPnPDevice
     {
         #region Fields
 
-        private readonly ContentDirectoryService contentDirectoryService;
+        private readonly IContentDirectoryService contentDirectoryService;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DLNADevice" /> class.
+        ///     Initializes a new instance of the <see cref="MediaServer" /> class.
         /// </summary>
-        /// <param name="deviceInfo">
-        ///     The description of the the device.
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="contentDirectoryService">
+        ///     A <see cref="IContentDirectoryService"/> to use for managing the media content.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="deviceInfo"/> is <c>null</c>.
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="contentDirectoryService"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     One of the following services is required but not exist on device described by <paramref name="deviceInfo"/>:
-        ///     <list type="bullet">
-        ///         <item>
-        ///             ConnectionManager
-        ///         </item>
-        ///         <item>
-        ///             ContentDirectory
-        ///         </item>
-        ///     </list>
-        /// </exception>
-        internal MediaServer(DeviceInfo deviceInfo)
-            : base(deviceInfo)
+        public MediaServer(string udn, IContentDirectoryService contentDirectoryService)
+            : base(udn)
         {
-            var contentDirectoryInfo = deviceInfo.Services.FirstOrDefault(s => s.ServiceType.StartsWith("urn:schemas-upnp-org:service:ContentDirectory", StringComparison.OrdinalIgnoreCase));
-            if (contentDirectoryInfo == null)
-            {
-                throw new ArgumentException("Description for ContentDirectory service not found", "deviceInfo");
-            }
+            contentDirectoryService.EnsureNotNull("contentDirectoryService");
 
-            this.contentDirectoryService = new ContentDirectoryService(contentDirectoryInfo);
+            this.contentDirectoryService = contentDirectoryService;
         }
 
         #endregion

@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -110,8 +111,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeviceActivityEventArgs.cs" />
-    <Compile Include="DLNADevicesDiscovery.cs" />
     <Compile Include="IMediaRenderersDiscovery.cs" />
     <Compile Include="IMediaServersDiscovery.cs" />
     <Compile Include="MediaRenderer.cs" />
@@ -120,6 +119,7 @@
     <Compile Include="MediaServer.cs" />
     <Compile Include="MediaServersDiscovery.cs" />
     <Compile Include="Services\AvTransport\AvTransportService.cs" />
+    <Compile Include="Services\AvTransport\IAvTransportService.cs" />
     <Compile Include="Services\AvTransport\MediaInfo.cs" />
     <Compile Include="Services\AvTransport\PositionInfo.cs" />
     <Compile Include="Services\AvTransport\TransportInfo.cs" />
@@ -130,11 +130,11 @@
     <Compile Include="Services\ContentDirectory\BrowseResult.cs" />
     <Compile Include="Services\ContentDirectory\ContentDirectoryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ContentDirectory\IContentDirectoryService.cs" />
     <Compile Include="Services\ContentDirectory\ImageItem.cs" />
     <Compile Include="Services\ContentDirectory\MediaContainer.cs" />
     <Compile Include="Services\ContentDirectory\MediaItem.cs" />
     <Compile Include="Services\ContentDirectory\MediaObject.cs" />
-    <Compile Include="DLNADevice.cs" />
     <Compile Include="Services\ContentDirectory\MediaResource.cs" />
     <Compile Include="Services\ContentDirectory\VideoItem.cs" />
     <Compile Include="Services\ParsingHelper.cs" />

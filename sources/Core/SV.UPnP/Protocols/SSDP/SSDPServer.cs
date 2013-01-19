@@ -40,6 +40,10 @@ namespace SV.UPnP.Protocols.SSDP
 
         #region Fields
 
+        private static ISSDPServer instance;
+
+        private static object instanceSyncObject = new object();
+
         private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
 
         private readonly DatagramSocket server;
@@ -53,7 +57,7 @@ namespace SV.UPnP.Protocols.SSDP
         /// <summary>
         ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
         /// </summary>
-        public SSDPServer()
+        private SSDPServer()
         {
             this.multicastHost = new HostName(MulticastAddress);
 
@@ -71,6 +75,23 @@ namespace SV.UPnP.Protocols.SSDP
         ///     An observable collection which contains notifications from devices.
         /// </summary>
         public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
+
+        public static ISSDPServer Instance
+        {
+            get
+            {
+                lock (instanceSyncObject)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SSDPServer();
+                    }
+                }
+
+                return instance;
+            }
+
+        }
 
         #endregion
 

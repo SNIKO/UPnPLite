@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -100,13 +101,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DeviceIcon.cs" />
-    <Compile Include="DeviceInfo.cs" />
     <Compile Include="DeviceActivity.cs" />
     <Compile Include="DeviceActivityEventArgs.cs" />
     <Compile Include="DeviceError.cs" />
     <Compile Include="DeviceException.cs" />
     <Compile Include="DevicesDiscovery.cs" />
-    <Compile Include="IDevicesDiscovery.cs" />
+    <Compile Include="CommonUPnPDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocols\SSDP\ISSDPServer.cs" />
     <Compile Include="Protocols\SSDP\Messages\NotifyMessage.cs" />
@@ -115,7 +115,7 @@
     <Compile Include="Protocols\SSDP\Messages\SSDPMessage.cs" />
     <Compile Include="Protocols\SSDP\SSDPServer.cs" />
     <Compile Include="ServiceBase.cs" />
-    <Compile Include="ServiceInfo.cs" />
+    <Compile Include="UPnPDevice.cs" />
     <Compile Include="UPnPVersion.cs" />
   </ItemGroup>
   <ItemGroup>

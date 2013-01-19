@@ -1,14 +1,36 @@
 ﻿
 namespace SV.UPnP
 {
+    using System;
     using System.Collections.Generic;
 
-    /// <summary>
-    ///     A description for a UPnP device. Contains several pieces of vendor-specific information, definitions of all embedded devices, URL for presentation 
-    ///     of the device, and listings for all services, including URLs for control and eventing.
+    /// <summary>    
+    ///     Defines members for controlling a UPnP device.
     /// </summary>
-    public class DeviceInfo
+    public abstract class UPnPDevice
     {
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UPnPDevice"/> class.
+        /// </summary>
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>nukk</c> or <see cref="string.Empty"/>.
+        /// </exception>
+        protected UPnPDevice(string udn)
+        {
+            udn.EnsureNotNull("udn");
+
+            this.UDN = udn;
+        }
+
+        #endregion
+
+        #region Properties
+
         /// <summary>
         ///     Gets a type of the device.
         /// </summary>
@@ -32,16 +54,13 @@ namespace SV.UPnP
         /// <summary>
         ///     Gets a universally-unique identifier for the device, whether root or embedded. Must be the same over time for a specific device instance (i.e., must survive reboots).
         /// </summary>
-        public string UDN { get; internal set; }
+        public string UDN { get; private set; }
 
         /// <summary>
         ///     Gets the list of icons to depict device in a UI.
         /// </summary>
-        public IEnumerable<DeviceIcon> Icons { get; internal set; }
+        public IEnumerable<DeviceIcon> Icons { get; internal set; }        
 
-        /// <summary>
-        ///     Gets a list of UPnP services provided by the device.
-        /// </summary>
-        public IEnumerable<ServiceInfo> Services { get; internal set; }
+        #endregion
     }
 }

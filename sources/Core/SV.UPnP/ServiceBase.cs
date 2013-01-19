@@ -16,7 +16,9 @@ namespace SV.UPnP
     {
         #region Fields
 
-        private readonly ServiceInfo serviceInfo;
+        private readonly Uri controlUri;
+
+        private readonly Uri eventsUri;
 
         #endregion
 
@@ -25,18 +27,35 @@ namespace SV.UPnP
         /// <summary>
         ///     Initializes a new instance of the <see cref="ServiceBase" /> class.
         /// </summary>
-        /// <param name="serviceInfo">
-        ///     The service info which defines parameters of the service to manage.
+        /// <param name="serviceType">
+        ///     A type of the service.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///      <paramref name="serviceInfo"/> is <c>null</c>.
+        /// <param name="controlUri">
+        ///     An URL for sending commands to the service.
+        /// </param>
+        /// <param name="eventsUri">
+        ///     An URL for subscrinbing to service's events.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
+        ///     <paramref name="eventsUri"/> is <c>null</c>.
         /// </exception>
-        public ServiceBase(ServiceInfo serviceInfo)
+        public ServiceBase(string serviceType, Uri controlUri, Uri eventsUri)
         {
-            serviceInfo.EnsureNotNull("serviceInfo");
-
-            this.serviceInfo = serviceInfo;
+            this.ServiceType = serviceType;
+            this.controlUri = controlUri;
+            this.eventsUri = eventsUri;
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     Gets a type of the service.
+        /// </summary>
+        public string ServiceType { get; internal set; }
 
         #endregion
 
@@ -63,15 +82,15 @@ namespace SV.UPnP
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        protected async Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
+        public async Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
         {
             var requestXml = this.CreateActionRequest(action, parameters);
             var data = Encoding.UTF8.GetBytes(requestXml);
 
-            var request = WebRequest.Create(this.serviceInfo.ControlUri);
+            var request = WebRequest.Create(this.controlUri);
             request.Method = "POST";
             request.ContentType = "text/xml; charset=\"utf-8\"";
-            request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.serviceInfo.ServiceType, action);
+            request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.ServiceType, action);
             using (var stream = await request.GetRequestStreamAsync())
             {
                 stream.Write(data, 0, data.Length);
@@ -107,7 +126,7 @@ namespace SV.UPnP
         private string CreateActionRequest(string action, Dictionary<string, object> parameters)
         {
             var s = XNamespace.Get("http://schemas.xmlsoap.org/soap/envelope/");
-            var u = XNamespace.Get(this.serviceInfo.ServiceType);
+            var u = XNamespace.Get(this.ServiceType);
             var encodingStyle = XNamespace.Get("http://schemas.xmlsoap.org/soap/encoding/");
 
             var actionElement = new XElement(u + action, new XAttribute(XNamespace.Xmlns + "u", u.NamespaceName));
@@ -133,7 +152,7 @@ namespace SV.UPnP
 
         private Dictionary<string, string> ParseActionResponse(string action, XDocument response)
         {
-            var u = XNamespace.Get(this.serviceInfo.ServiceType);
+            var u = XNamespace.Get(this.ServiceType);
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             var responseNode = response.Descendants(u + "{0}Response".F(action)).First();

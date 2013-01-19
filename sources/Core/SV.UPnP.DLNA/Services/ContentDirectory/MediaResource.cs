@@ -73,12 +73,12 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Gets a URI via which the resource can be imported to the CDS via ImportResource() or HTTP POST.
         /// </summary>
-        public Uri ImportUri { get; internal set; }
+        public string ImportUri { get; internal set; }
 
         /// <summary>
         ///     Gets a URI via which the resource can be accessed.
         /// </summary>
-        public Uri Uri { get; internal set; }
+        public string Uri { get; internal set; }
 
         /// <summary>
         ///     Gets a metadata associated with the resource.
@@ -110,7 +110,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
                 }
             }
 
-            this.Uri = new Uri(resourceElement.Value);
+            this.Uri = resourceElement.Value;
             this.Metadata = resourceXml;
 
             return this;
@@ -134,7 +134,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
             propertyNameToSetterMap["colorDepth"]       = value => this.ColorDepth = uint.Parse(value);
             propertyNameToSetterMap["protocolInfo"]     = value => this.ProtocolInfo = value;
             propertyNameToSetterMap["protection"]       = value => this.Protection = value;
-            propertyNameToSetterMap["importUri"]        = value => this.ImportUri = new Uri(value);
+            propertyNameToSetterMap["importUri"]        = value => this.ImportUri = value;
         }
 
         private void EnsurePropertySettersInititalized()

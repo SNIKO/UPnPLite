@@ -145,7 +145,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
 
             if (this.resources.Any() && typeof(ImageItem) == this.GetType())
             {
-                this.Thumbnail = this.resources[0].Uri;
+                this.Thumbnail = new Uri(this.resources[0].Uri);
             }
         }
 

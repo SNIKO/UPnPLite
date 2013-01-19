@@ -1,26 +1,23 @@
 ﻿
 namespace SV.UPnP.DLNA
 {
+    using SV.UPnP.DLNA.Services.ContentDirectory;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     ///     Discovers the Media Server devices.
     /// </summary>
-    public class MediaServersDiscovery : DLNADevicesDiscovery<MediaServer>, IMediaServersDiscovery
+    public class MediaServersDiscovery : DevicesDiscovery<MediaServer>, IMediaServersDiscovery
     {
         #region Constructors
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="MediaServersDiscovery" /> class.
         /// </summary>
-        /// <param name="upnpDevicesDiscovery">
-        ///     The devices discovery service to use for discovering DLNA devices.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="upnpDevicesDiscovery"/> is <c>null</c>.        
-        /// </exception>
-        public MediaServersDiscovery(IDevicesDiscovery upnpDevicesDiscovery)
-            : base(upnpDevicesDiscovery, "urn:schemas-upnp-org:device:MediaServer")
+        public MediaServersDiscovery()
+            : base("urn:schemas-upnp-org:device:MediaServer:1")
         {
         }
 
@@ -29,17 +26,61 @@ namespace SV.UPnP.DLNA
         #region Methods
 
         /// <summary>
-        ///     Creates a new instance of the class for managing the DLNA device described in <paramref name="deviceInfo"/>.
+        ///     Creates an instance of concrete <see cref="UPnPDevice"/> which manages a device.
         /// </summary>
-        /// <param name="deviceInfo">
-        ///     Defines an information about device.
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="services">
+        ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     An instance of the class which manages device.
+        ///     A concrete instance of the <see cref="UPnPDevice"/>.
         /// </returns>
-        protected override MediaServer CreateDevice(DeviceInfo deviceInfo)
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="services"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     One of the required services is not found in <paramref name="services"/>.
+        /// </exception>
+        protected override MediaServer CreateDeviceInstance(string udn, IEnumerable<ServiceBase> services)
         {
-            return new MediaServer(deviceInfo);
+            var avTransportService = services.FirstOrDefault(s => s is IContentDirectoryService) as IContentDirectoryService;
+
+            return new MediaServer(udn, avTransportService);
+        }
+
+        /// <summary>
+        ///     Creates an instance of concrere <see cref="ServiceBase"/> which manages concrete service on a device.
+        /// </summary>
+        /// <param name="serviceType">
+        ///     A type of the service.
+        /// </param>
+        /// <param name="controlUri">
+        ///     An URL for sending commands to the service.
+        /// </param>
+        /// <param name="eventsUri">
+        ///     An URL for subscrinbing to service's events.
+        /// </param>
+        /// <returns>
+        ///     A concrete instance of the <see cref="ServiceBase"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
+        ///     <paramref name="eventsUri"/> is <c>null</c>.
+        /// </exception>
+        protected override ServiceBase CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri)        
+        {
+            ServiceBase service = null;
+
+            if (serviceType.StartsWith("urn:schemas-upnp-org:service:ContentDirectory", StringComparison.OrdinalIgnoreCase))
+            {
+                service = new ContentDirectoryService(serviceType, controlUri, eventsUri);
+            }
+
+            return service;
         }
 
         #endregion

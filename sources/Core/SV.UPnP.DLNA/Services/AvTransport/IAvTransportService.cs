@@ -2,44 +2,15 @@
 namespace SV.UPnP.DLNA.Services.AvTransport
 {
     using System;
-    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
 
     /// <summary>
-    ///     Enables control over the transport of audio and video streams. The service type defines a  ‘common’ model for A/V transport control suitable for a 
+    ///     Defines members for controling the transport of audio and video streams. The service type defines a ‘common’ model for A/V transport control suitable for a 
     ///     generic user interface. It can be used to control a wide variety of disc, tape and solid-state based media devices such as CD players, VCRs and MP3 players. 
     /// </summary>
-    public class AvTransportService : ServiceBase, IAvTransportService
+    public interface IAvTransportService
     {
-        #region Constructors
-
-        /// <summary>
-        ///     Initializes a new instanceId of the <see cref="AvTransportService" /> class.
-        /// </summary>
-        /// <param name="serviceType">
-        ///     A type of the service.
-        /// </param>
-        /// <param name="controlUri">
-        ///     An URL for sending commands to the service.
-        /// </param>
-        /// <param name="eventsUri">
-        ///     An URL for subscrinbing to service's events.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
-        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
-        ///     <paramref name="eventsUri"/> is <c>null</c>.
-        /// </exception>
-        public AvTransportService(string serviceType, Uri controlUri, Uri eventsUri)
-            : base(serviceType, controlUri, eventsUri)
-        {
-        }
-
-        #endregion
-
-        #region Methods
-
         /// <summary>
         ///      Specifies the URI of the resource to be controlled by the specified AVTransport instance.
         /// </summary>
@@ -64,20 +35,10 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task SetAvTransportURIAsync(uint instanceId, string currentUri, string currentUriMetadata)
-        {
-            var arguments = new Dictionary<string, object>
-                                    {
-                                        { "InstanceID", instanceId },
-                                        { "CurrentURI", currentUri },
-                                        { "CurrentURIMetaData", currentUriMetadata },
-                                    };
-
-            await this.InvokeActionAsync("SetAVTransportURI", arguments);
-        }
+        Task SetAvTransportURIAsync(uint instanceId, string currentUri, string currentUriMetadata);
 
         /// <summary>
-        ///      Specifies the URI of the resource to be controlled when the playback of the current resource (set earlier via <see cref="SetAvTransportURIAsync"/>) finishes.
+        ///      Specifies the URI of the resource to be controlled when the playback of the current resource (set earlier via <see cref="AvTransportService.SetAvTransportURIAsync"/>) finishes.
         /// </summary>
         /// <param name="instanceId">
         ///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
@@ -100,17 +61,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task SetNextAvTransportURIAsync(uint instanceId, string nextUri, string nextUriMetadata)
-        {
-            var arguments = new Dictionary<string, object>
-                                    {
-                                        { "InstanceID", instanceId },
-                                        { "NextURI", nextUri },
-                                        { "NextURIMetaData", nextUriMetadata },
-                                    };
-
-            await this.InvokeActionAsync("SetNextAVTransportURI", arguments);
-        }
+        Task SetNextAvTransportURIAsync(uint instanceId, string nextUri, string nextUriMetadata);
 
         /// <summary>
         ///       Returns information associated with the current media of the specified instance.
@@ -127,27 +78,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task<MediaInfo> GetMediaInfoAsync(uint instanceId)
-        {
-            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
-
-            var response = await this.InvokeActionAsync("GetMediaInfo", arguments);
-
-            var mediaInfo = new MediaInfo
-                                {
-                                    NumberOfTracks = response.GetValueOrDefault<int>("NrTracks"),
-                                    MediaDuration = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("MediaDuration")),
-                                    CurrentUri = response.GetValueOrDefault<Uri>("CurrentURI"),
-                                    CurrentUriMetadata = response.GetValueOrDefault<string>("CurrentURIMetaData"),
-                                    NextUri = response.GetValueOrDefault<Uri>("NextURI"),
-                                    NextUriMetadata = response.GetValueOrDefault<string>("NextURIMetaData"),
-                                    PlaybackMedium = response.GetValueOrDefault<string>("PlayMedium"),
-                                    RecordMedium = response.GetValueOrDefault<string>("RecordMedium"),
-                                    WriteStatus = response.GetValueOrDefault<bool>("WriteStatus")
-                                };
-
-            return mediaInfo;
-        }
+        Task<MediaInfo> GetMediaInfoAsync(uint instanceId);
 
         /// <summary>
         ///       Returns information associated with the current transport state of the specified instance.
@@ -164,21 +95,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task<TransportInfo> GetTransportInfoAsync(uint instanceId)
-        {
-            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
-
-            var response = await this.InvokeActionAsync("GetTransportInfo", arguments);
-
-            var transportInfo = new TransportInfo
-            {
-                State = response.GetValueOrDefault<string>("CurrentTransportState"),
-                Status = response.GetValueOrDefault<string>("CurrentTransportStatus"),
-                Speed = response.GetValueOrDefault<string>("CurrentSpeed")
-            };
-
-            return transportInfo;
-        }
+        Task<TransportInfo> GetTransportInfoAsync(uint instanceId);
 
         /// <summary>
         ///       Returns information associated with the current position of the transport of the specified instance.
@@ -195,26 +112,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task<PositionInfo> GetPositionInfoAsync(uint instanceId)
-        {
-            var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
-
-            var response = await this.InvokeActionAsync("GetPositionInfo", arguments);
-
-            var positionInfo = new PositionInfo
-            {
-                Track = response.GetValueOrDefault<uint>("Track"),
-                TrackDuration = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("TrackDuration")),
-                TrackMetaData = response.GetValueOrDefault<string>("TrackMetaData"),
-                TrackUri = response.GetValueOrDefault<Uri>("TrackURI"),
-                RelativeTimePosition = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("RelTime")),
-                AbsoluteTimePosition = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("AbsTime")),
-                RelativeCounterPosition = response.GetValueOrDefault<int>("RelCount"),
-                AbsoluteCounterPosition = response.GetValueOrDefault<int>("AbsCount")
-            };
-
-            return positionInfo;
-        }
+        Task<PositionInfo> GetPositionInfoAsync(uint instanceId);
 
         /// <summary>
         ///     Starts playing the resource of the specified instanceId, at the specified speed, starting at the current position, according to the current play mode.
@@ -234,16 +132,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task PlayAsync(uint instanceId, string speed)
-        {
-            var arguments = new Dictionary<string, object>
-                                    {
-                                        { "InstanceID", instanceId },
-                                        { "Speed", speed },
-                                    };
-
-            await this.InvokeActionAsync("Play", arguments);
-        }
+        Task PlayAsync(uint instanceId, string speed);
 
         /// <summary>
         ///      Halts the progression of the resource that is associated with the specified instance.
@@ -260,10 +149,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task PauseAsync(uint instanceId)
-        {
-            await this.InvokeActionAsync("Pause", new Dictionary<string, object> { { "InstanceID", instanceId } });
-        }
+        Task PauseAsync(uint instanceId);
 
         /// <summary>
         ///      Stops the progression of the current resource that is associated with the specified instance.
@@ -280,11 +166,6 @@ namespace SV.UPnP.DLNA.Services.AvTransport
         /// <exception cref="DeviceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task StopAsync(uint instanceId)
-        {
-            await this.InvokeActionAsync("Stop", new Dictionary<string, object> { { "InstanceID", instanceId } });
-        }
-
-        #endregion
+        Task StopAsync(uint instanceId);
     }
 }

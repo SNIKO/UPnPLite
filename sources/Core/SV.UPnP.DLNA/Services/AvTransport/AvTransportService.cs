@@ -10,7 +10,7 @@ namespace SV.UPnP.DLNA.Services.AvTransport
     ///     Enables control over the transport of audio and video streams. The service type defines a  ‘common’ model for A/V transport control suitable for a 
     ///     generic user interface. It can be used to control a wide variety of disc, tape and solid-state based media devices such as CD players, VCRs and MP3 players. 
     /// </summary>
-    public class AvTransportService : ServiceBase, IAvTransportService
+    public class AvTransportService : UPnPService, IAvTransportService
     {
         #region Constructors
 

@@ -12,7 +12,7 @@ namespace SV.UPnP
     /// <summary>
     ///     The base class for all UPnP device's services.
     /// </summary>
-    public class ServiceBase
+    public class UPnPService
     {
         #region Fields
 
@@ -25,7 +25,7 @@ namespace SV.UPnP
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ServiceBase" /> class.
+        ///     Initializes a new instance of the <see cref="UPnPService" /> class.
         /// </summary>
         /// <param name="serviceType">
         ///     A type of the service.
@@ -41,7 +41,7 @@ namespace SV.UPnP
         ///     <paramref name="controlUri"/> is <c>null</c> -OR-
         ///     <paramref name="eventsUri"/> is <c>null</c>.
         /// </exception>
-        public ServiceBase(string serviceType, Uri controlUri, Uri eventsUri)
+        public UPnPService(string serviceType, Uri controlUri, Uri eventsUri)
         {
             this.ServiceType = serviceType;
             this.controlUri = controlUri;

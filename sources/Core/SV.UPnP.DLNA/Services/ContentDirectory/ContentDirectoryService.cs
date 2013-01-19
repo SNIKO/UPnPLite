@@ -10,7 +10,7 @@ namespace SV.UPnP.DLNA.Services.ContentDirectory
     /// <summary>
     ///     Enables control of the media on a MediaServer.
     /// </summary>
-    public class ContentDirectoryService : ServiceBase, IContentDirectoryService
+    public class ContentDirectoryService : UPnPService, IContentDirectoryService
     {
         #region Constructors
 

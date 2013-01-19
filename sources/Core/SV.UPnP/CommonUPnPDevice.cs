@@ -32,7 +32,7 @@ namespace SV.UPnP
         /// <summary>
         ///     Gets a list of UPnP services provided by the device.
         /// </summary>
-        public IEnumerable<ServiceBase> Services { get; internal set; }
+        public IEnumerable<UPnPService> Services { get; internal set; }
 
         #endregion
     }

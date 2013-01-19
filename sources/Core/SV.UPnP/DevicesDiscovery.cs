@@ -128,10 +128,10 @@ namespace SV.UPnP
         /// <exception cref="ArgumentException">
         ///     One of the required services is not found in <paramref name="services"/>.
         /// </exception>
-        protected abstract TDevice CreateDeviceInstance(string udn, IEnumerable<ServiceBase> services);
+        protected abstract TDevice CreateDeviceInstance(string udn, IEnumerable<UPnPService> services);
 
         /// <summary>
-        ///     Creates an instance of concrere <see cref="ServiceBase"/> which manages concrete service on a device.
+        ///     Creates an instance of concrere <see cref="UPnPService"/> which manages concrete service on a device.
         /// </summary>
         /// <param name="serviceType">
         ///     A type of the service.
@@ -143,14 +143,14 @@ namespace SV.UPnP
         ///     An URL for subscrinbing to service's events.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="ServiceBase"/>.
+        ///     A concrete instance of the <see cref="UPnPService"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
         ///     <paramref name="controlUri"/> is <c>null</c> -OR-
         ///     <paramref name="eventsUri"/> is <c>null</c>.
         /// </exception>
-        protected abstract ServiceBase CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri);
+        protected abstract UPnPService CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri);
 
         private async void AddDevice(SSDPMessage notifyMessage)
         {

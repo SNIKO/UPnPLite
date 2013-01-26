@@ -1,14 +1,13 @@
 ﻿
 namespace SV.UPnP.DLNA
 {
+    using SV.UPnP.DLNA.Services.AvTransport;
+    using SV.UPnP.DLNA.Services.ContentDirectory;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
-    using System.Reactive.Subjects;
     using System.Threading.Tasks;
-    using SV.UPnP.DLNA.Services.AvTransport;
-    using SV.UPnP.DLNA.Services.ContentDirectory;
 
     /// <summary>
     ///     A device which renders content from Media Server.
@@ -19,9 +18,9 @@ namespace SV.UPnP.DLNA
 
         private readonly IAvTransportService avTransportService;
 
-        private readonly Subject<MediaRendererState> stateChanges;
+        private readonly OnDemandObservable<MediaRendererState> stateChangesObservableSequence;
 
-        private readonly Subject<TimeSpan> positionChanges;
+        private readonly OnDemandObservable<TimeSpan> positionChangesObservableSequence;
 
         private MediaRendererState currentState;
 
@@ -57,76 +56,68 @@ namespace SV.UPnP.DLNA
             : base(udn)
         {
             avTransportService.EnsureNotNull("avTransportService");
-            
-            this.stateChanges = new Subject<MediaRendererState>();
-            this.positionChanges = new Subject<TimeSpan>();
+
             this.avTransportService = avTransportService;
 
-            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
-                async _ =>
+            this.positionChangesObservableSequence = new OnDemandObservable<TimeSpan>(o =>
                 {
-                    var info = await this.avTransportService.GetTransportInfoAsync(0);
-                    var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
-                    
-                    this.State = ParseTransportState(info.State);
-                    this.CurrentPosition = positionInfo.RelativeTimePosition;
+                    var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
+                        async _ =>
+                        {
+                            var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
+
+                            if (this.currentPosition != positionInfo.RelativeTimePosition)
+                            {
+                                this.currentPosition = positionInfo.RelativeTimePosition;
+                                o.OnNext(positionInfo.RelativeTimePosition);
+                            }
+                        });
+
+                    return subscription.Dispose;
                 });
+
+            this.stateChangesObservableSequence = new OnDemandObservable<MediaRendererState>(o =>
+            {
+                var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
+                    async _ =>
+                    {
+                        var info = await this.avTransportService.GetTransportInfoAsync(0);
+                        var state = ParseTransportState(info.State);
+
+                        if (this.currentState != state)
+                        {
+                            this.currentState = state;
+                            o.OnNext(ParseTransportState(info.State));
+                        }
+                    });
+
+                return subscription.Dispose;
+            });
         }
 
         #endregion
 
         #region Events
 
+        /// <summary>
+        ///     Gets an observable sequence which notifies about renderer state changes.
+        /// </summary>
         public IObservable<MediaRendererState> StateChanges
         {
             get
             {
-                return this.stateChanges;
+                return this.stateChangesObservableSequence;
             }
         }
 
+        /// <summary>
+        ///     Gets an observable sequence which notifies about current playback position changes.
+        /// </summary>
         public IObservable<TimeSpan> PositionChanges
         {
             get
             {
-                return this.positionChanges;
-            }
-        }
-        
-        #endregion
-
-        #region Properties
-
-        public MediaRendererState State
-        {
-            get
-            {
-                return this.currentState;
-            }
-            private set
-            {
-                if (this.currentState != value)
-                {
-                    this.currentState = value;
-                    this.stateChanges.OnNext(value);
-                }
-            }
-        }
-
-        public TimeSpan CurrentPosition
-        {
-            get
-            {
-                return this.currentPosition;
-            }
-
-            private set
-            {
-                if (this.currentPosition != value)
-                {
-                    this.currentPosition = value;
-                    this.positionChanges.OnNext(value);
-                }
+                return this.positionChangesObservableSequence;
             }
         }
 
@@ -183,7 +174,33 @@ namespace SV.UPnP.DLNA
             await this.avTransportService.PauseAsync(0);
         }
 
-        private MediaRendererState ParseTransportState(string transportState)
+        /// <summary>
+        ///     Requests current playback position.
+        /// </summary>
+        /// <returns>
+        ///     The current position in terms of time, from the beginning of the current track.
+        /// </returns>
+        public async Task<TimeSpan> GetCurrentPosition()
+        {
+            var info = await this.avTransportService.GetPositionInfoAsync(0);
+
+            return info.RelativeTimePosition;
+        }
+
+        /// <summary>
+        ///     Requests current playback state.
+        /// </summary>
+        /// <returns>
+        ///     The conceptually top-level state of the MediaRenderer.
+        /// </returns>
+        public async Task<MediaRendererState> GetCurrentState()
+        {
+            var stateInfo = await this.avTransportService.GetTransportInfoAsync(0);
+
+            return ParseTransportState(stateInfo.State);
+        }
+
+        private static MediaRendererState ParseTransportState(string transportState)
         {
             MediaRendererState result;
 

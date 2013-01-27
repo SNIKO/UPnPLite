@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{75231886-4D22-4878-9F54-EEF32FCE2B50}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SV.UPnPLite</RootNamespace>
+    <AssemblyName>SV.UPnPLite</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\DictinonaryExtensions.cs">
+      <Link>Extensions\DictinonaryExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\ObjectExtenstions.cs">
+      <Link>Extensions\ObjectExtenstions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\ObservableCollectionExtensions.cs">
+      <Link>Extensions\ObservableCollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\StringExtensions.cs">
+      <Link>Extensions\StringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\XDocumentExtensions.cs">
+      <Link>Extensions\XDocumentExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\OnDemandObservable.cs">
+      <Link>OnDemandObservable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\IMediaRenderersDiscovery.cs">
+      <Link>Protocols\DLNA\IMediaRenderersDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\IMediaServersDiscovery.cs">
+      <Link>Protocols\DLNA\IMediaServersDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRenderer.cs">
+      <Link>Protocols\DLNA\MediaRenderer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRenderersDiscovery.cs">
+      <Link>Protocols\DLNA\MediaRenderersDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRendererState.cs">
+      <Link>Protocols\DLNA\MediaRendererState.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServer.cs">
+      <Link>Protocols\DLNA\MediaServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServersDiscovery.cs">
+      <Link>Protocols\DLNA\MediaServersDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\AvTransportService.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\AvTransportService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\IAvTransportService.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\IAvTransportService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\MediaInfo.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\MediaInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\PositionInfo.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\PositionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\TransportInfo.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\TransportInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\TransportState.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\TransportState.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\TransportStatus.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\TransportStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\AudioItem.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\AudioItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\BrowseFlag.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\BrowseFlag.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\BrowseResult.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\BrowseResult.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\ImageItem.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\ImageItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MediaContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MediaContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MediaItem.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MediaItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MediaObject.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MediaObject.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MediaResource.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MediaResource.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\VideoItem.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\VideoItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ParsingHelper.cs">
+      <Link>Protocols\DLNA\Services\ParsingHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\SSDP\ISSDPServer.cs">
+      <Link>Protocols\SSDP\ISSDPServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\SSDP\Messages\NotifyMessage.cs">
+      <Link>Protocols\SSDP\Messages\NotifyMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\SSDP\Messages\NotifyMessageType.cs">
+      <Link>Protocols\SSDP\Messages\NotifyMessageType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\SSDP\Messages\SearchResponseMessage.cs">
+      <Link>Protocols\SSDP\Messages\SearchResponseMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\SSDP\Messages\SSDPMessage.cs">
+      <Link>Protocols\SSDP\Messages\SSDPMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\CommonUPnPDevice.cs">
+      <Link>Protocols\UPnP\CommonUPnPDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\CommonUPnPDevicesDiscovery.cs">
+      <Link>Protocols\UPnP\CommonUPnPDevicesDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceActivity.cs">
+      <Link>Protocols\UPnP\DeviceActivity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceActivityEventArgs.cs">
+      <Link>Protocols\UPnP\DeviceActivityEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceError.cs">
+      <Link>Protocols\UPnP\DeviceError.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceException.cs">
+      <Link>Protocols\UPnP\DeviceException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceIcon.cs">
+      <Link>Protocols\UPnP\DeviceIcon.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPDevice.cs">
+      <Link>Protocols\UPnP\UPnPDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPDevicesDiscovery.cs">
+      <Link>Protocols\UPnP\UPnPDevicesDiscovery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPService.cs">
+      <Link>Protocols\UPnP\UPnPService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPVersion.cs">
+      <Link>Protocols\UPnP\UPnPVersion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Size.cs">
+      <Link>Size.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\XNameComparer.cs">
+      <Link>XNameComparer.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocols\SSDP\SSDPServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Reactive.Core, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=f300afd708cefcd3, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Interfaces, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=f300afd708cefcd3, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Linq, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=f300afd708cefcd3, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
+    <VisualStudioVersion>11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

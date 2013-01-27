@@ -2,7 +2,6 @@
 namespace SV.UPnPLite.Protocols.UPnP
 {
     using System;
-    using Windows.Foundation;
 
     public class DeviceIcon
     {

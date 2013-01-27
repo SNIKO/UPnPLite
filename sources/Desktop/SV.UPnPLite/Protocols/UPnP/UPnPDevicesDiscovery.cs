@@ -13,7 +13,6 @@ namespace SV.UPnPLite.Protocols.UPnP
     using System.Reactive.Linq;
     using System.Reactive.Subjects;
     using System.Xml.Linq;
-    using Windows.Foundation;
 
     public abstract class UPnPDevicesDiscovery<TDevice> where TDevice : UPnPDevice
     {
@@ -61,7 +60,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UPnPUPnPDevicesDiscovery{TDevice}"/> class.
+        ///     Initializes a new instance of the <see cref="UPnPDevicesDiscovery{TDevice}"/> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.
@@ -75,7 +74,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UPnPUPnPDevicesDiscovery{TDevice}" /> class.
+        ///     Initializes a new instance of the <see cref="UPnPDevicesDiscovery{TDevice}" /> class.
         /// </summary>
         /// <param name="targetDevices">
         ///     The type of the devices to discover.

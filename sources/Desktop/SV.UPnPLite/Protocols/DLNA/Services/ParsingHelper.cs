@@ -2,7 +2,6 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services
 {
     using System;
-    using Windows.Foundation;
 
     /// <summary>
     ///     Defines helper methods for parsing the DIDL-Lite XML.

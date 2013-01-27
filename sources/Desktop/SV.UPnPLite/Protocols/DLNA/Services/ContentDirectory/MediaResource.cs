@@ -4,8 +4,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
     using System;
     using System.Collections.Generic;
     using System.Xml.Linq;
-    using Windows.Foundation;
-
+    
     /// <summary>
     ///     Defines a media resource -  some type of a binary asset, such as photo, song, video, etc.
     ///  </summary>

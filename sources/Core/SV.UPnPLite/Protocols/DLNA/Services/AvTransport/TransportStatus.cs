@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.DLNA.Services.AvTransport
+namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 {
     /// <summary>
     ///     Defines statuses of the AVTransport which may change during it's work.

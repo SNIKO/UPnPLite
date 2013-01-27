@@ -1,6 +1,7 @@
 ﻿
-namespace SV.UPnP.DLNA
+namespace SV.UPnPLite.Protocols.DLNA
 {
+    using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
 

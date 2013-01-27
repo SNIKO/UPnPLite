@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.DLNA.Services
+namespace SV.UPnPLite.Protocols.DLNA.Services
 {
     using System;
     using Windows.Foundation;

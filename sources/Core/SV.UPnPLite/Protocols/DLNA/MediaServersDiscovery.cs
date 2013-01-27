@@ -1,7 +1,8 @@
 ﻿
-namespace SV.UPnP.DLNA
+namespace SV.UPnPLite.Protocols.DLNA
 {
-    using SV.UPnP.DLNA.Services.ContentDirectory;
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
+    using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -59,7 +60,7 @@ namespace SV.UPnP.DLNA
         /// <returns>
         ///     A concrete instance of the <see cref="UPnPService"/>.
         /// </returns>
-        protected override UPnPService CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri)        
+        protected override UPnPService CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri)
         {
             UPnPService service = null;
 

@@ -1,8 +1,9 @@
 ﻿
-namespace SV.UPnP.DLNA
+namespace SV.UPnPLite.Protocols.DLNA
 {
-    using SV.UPnP.DLNA.Services.AvTransport;
-    using SV.UPnP.DLNA.Services.ContentDirectory;
+    using SV.UPnPLite.Protocols.DLNA.Services.AvTransport;
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
+    using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
     using System.Linq;

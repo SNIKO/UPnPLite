@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.DLNA.Services.AvTransport
+namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 {
     /// <summary>
     ///     Defines the conceptually top-level state of the transport.

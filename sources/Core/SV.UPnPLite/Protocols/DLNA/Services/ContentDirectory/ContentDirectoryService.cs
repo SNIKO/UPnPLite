@@ -1,11 +1,12 @@
 ﻿
-namespace SV.UPnP.DLNA.Services.ContentDirectory
+namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
+    using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Xml.Linq;
-    using System.Linq;
 
     /// <summary>
     ///     Enables control of the media on a MediaServer.

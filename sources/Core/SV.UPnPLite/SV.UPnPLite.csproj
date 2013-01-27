@@ -100,6 +100,32 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Protocols\DLNA\IMediaRenderersDiscovery.cs" />
+    <Compile Include="Protocols\DLNA\IMediaServersDiscovery.cs" />
+    <Compile Include="Protocols\DLNA\MediaRenderer.cs" />
+    <Compile Include="Protocols\DLNA\MediaRenderersDiscovery.cs" />
+    <Compile Include="Protocols\DLNA\MediaRendererState.cs" />
+    <Compile Include="Protocols\DLNA\MediaServer.cs" />
+    <Compile Include="Protocols\DLNA\MediaServersDiscovery.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\AvTransportService.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\IAvTransportService.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\MediaInfo.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\PositionInfo.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\TransportInfo.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\TransportState.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\TransportStatus.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\AudioItem.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\BrowseFlag.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\BrowseResult.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\ImageItem.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaContainer.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaItem.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaObject.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaResource.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\VideoItem.cs" />
+    <Compile Include="Protocols\DLNA\Services\ParsingHelper.cs" />
     <Compile Include="Protocols\UPnP\CommonUPnPDevicesDiscovery.cs" />
     <Compile Include="Protocols\UPnP\DeviceIcon.cs" />
     <Compile Include="Protocols\UPnP\DeviceActivity.cs" />

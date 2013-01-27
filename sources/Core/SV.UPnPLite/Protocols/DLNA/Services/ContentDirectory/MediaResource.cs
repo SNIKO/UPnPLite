@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.DLNA.Services.ContentDirectory
+namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using System;
     using System.Collections.Generic;

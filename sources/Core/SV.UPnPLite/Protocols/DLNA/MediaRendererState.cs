@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.DLNA
+namespace SV.UPnPLite.Protocols.DLNA
 {
     /// <summary>
     ///     Defines the playback state of the renderer.

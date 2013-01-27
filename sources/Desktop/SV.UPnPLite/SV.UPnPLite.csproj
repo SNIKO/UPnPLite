@@ -62,6 +62,7 @@
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaResource.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\VideoItem.cs" />
     <Compile Include="Protocols\DLNA\Services\ParsingHelper.cs" />
+    <Compile Include="Protocols\SSDP\SSDPServer.cs" />
     <Compile Include="Protocols\UPnP\CommonUPnPDevicesDiscovery.cs" />
     <Compile Include="Protocols\UPnP\DeviceIcon.cs" />
     <Compile Include="Protocols\UPnP\DeviceActivity.cs" />

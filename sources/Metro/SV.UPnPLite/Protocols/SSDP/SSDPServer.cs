@@ -41,9 +41,9 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         #region Fields
 
-        private static ISSDPServer instance;
+        private static readonly object instanceSyncObject = new object();
 
-        private static object instanceSyncObject = new object();
+        private static ISSDPServer instance;
 
         private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
 
@@ -77,6 +77,9 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// </summary>
         public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
 
+        /// <summary>
+        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+        /// </summary>
         public static ISSDPServer Instance
         {
             get
@@ -91,7 +94,6 @@ namespace SV.UPnPLite.Protocols.SSDP
 
                 return instance;
             }
-
         }
 
         #endregion
@@ -208,7 +210,7 @@ namespace SV.UPnPLite.Protocols.SSDP
                     catch (FormatException ex)
                     {
                         Debug.WriteLine("An error occurred when parsing message from UPnP device \n\nMessage:\n{1}\n\nError:\n{2}:".F(message, ex));
-                    }                    
+                    }
                 }
             }
         }
@@ -265,35 +267,35 @@ namespace SV.UPnPLite.Protocols.SSDP
 
             if (headers.TryGetValue(key.ToUpper(), out val))
             {
-                if (typeof (TValue) == typeof (int))
+                if (typeof(TValue) == typeof(int))
                 {
-                    result = (TValue) (object) int.Parse(val);
+                    result = (TValue)(object)int.Parse(val);
                 }
-                else if (typeof (TValue) == typeof (NotifyMessageType?))
+                else if (typeof(TValue) == typeof(NotifyMessageType?))
                 {
                     switch (val.ToUpper())
                     {
                         case "SSDP:ALIVE":
-                            result = (TValue) (object) NotifyMessageType.Alive;
+                            result = (TValue)(object)NotifyMessageType.Alive;
                             break;
                         case "SSDP:BYEBYE":
-                            result = (TValue) (object) NotifyMessageType.ByeBye;
+                            result = (TValue)(object)NotifyMessageType.ByeBye;
                             break;
                         case "SSDP:UPDATE":
-                            result = (TValue) (object) NotifyMessageType.Update;
+                            result = (TValue)(object)NotifyMessageType.Update;
                             break;
                         default:
-                            result = (TValue) (object) null;
+                            result = (TValue)(object)null;
                             break;
                     }
                 }
-                else if (typeof (TValue) == typeof (DateTime))
+                else if (typeof(TValue) == typeof(DateTime))
                 {
-                    result = (TValue) (object) DateTime.ParseExact(val, RFC1123DateFormat, CultureInfo.InvariantCulture);
+                    result = (TValue)(object)DateTime.ParseExact(val, RFC1123DateFormat, CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    result = (TValue) (object) val;
+                    result = (TValue)(object)val;
                 }
             }
             else

@@ -6,8 +6,14 @@ namespace SV.UPnPLite.Extensions
     public static class ObjectExtenstions
     {
         public static void EnsureNotNull(this object obj, string name)
-        {
+        {            
             if (obj == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            var stringObj = obj as string;
+            if (string.IsNullOrEmpty(stringObj))
             {
                 throw new ArgumentNullException(name);
             }

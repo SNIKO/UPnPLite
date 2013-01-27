@@ -1,5 +1,5 @@
 ﻿
-namespace SV
+namespace SV.UPnPLite.Extensions
 {
     using System;
     using System.Collections.Generic;

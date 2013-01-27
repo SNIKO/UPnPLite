@@ -105,6 +105,7 @@
     <Compile Include="Extensions\ObservableCollectionExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XDocumentExtensions.cs" />
+    <Compile Include="OnDemandObservable.cs" />
     <Compile Include="Protocols\DLNA\IMediaRenderersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\IMediaServersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\MediaRenderer.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Protocols\UPnP\UPnPService.cs" />
     <Compile Include="Protocols\UPnP\UPnPDevice.cs" />
     <Compile Include="Protocols\UPnP\UPnPVersion.cs" />
+    <Compile Include="XNameComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SV\SV.csproj">

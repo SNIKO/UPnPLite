@@ -100,6 +100,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Extensions\DictinonaryExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtenstions.cs" />
+    <Compile Include="Extensions\ObservableCollectionExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\XDocumentExtensions.cs" />
     <Compile Include="Protocols\DLNA\IMediaRenderersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\IMediaServersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\MediaRenderer.cs" />

@@ -101,9 +101,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\SV.UPnP\SV.UPnP.csproj">
+    <ProjectReference Include="..\SV.UPnPLite\SV.UPnPLite.csproj">
       <Project>{f4c66e2b-97cc-4954-9c06-c54e8f000c96}</Project>
-      <Name>SV.UPnP</Name>
+      <Name>SV.UPnPLite</Name>
     </ProjectReference>
     <ProjectReference Include="..\SV\SV.csproj">
       <Project>{9e9e7d83-d777-490b-9240-0bc4b7a88750}</Project>

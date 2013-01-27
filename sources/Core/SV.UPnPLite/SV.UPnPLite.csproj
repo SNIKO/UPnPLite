@@ -100,14 +100,14 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CommonUPnPDevicesDiscovery.cs" />
-    <Compile Include="DeviceIcon.cs" />
-    <Compile Include="DeviceActivity.cs" />
-    <Compile Include="DeviceActivityEventArgs.cs" />
-    <Compile Include="DeviceError.cs" />
-    <Compile Include="DeviceException.cs" />
-    <Compile Include="UPnPDevicesDiscovery.cs" />
-    <Compile Include="CommonUPnPDevice.cs" />
+    <Compile Include="Protocols\UPnP\CommonUPnPDevicesDiscovery.cs" />
+    <Compile Include="Protocols\UPnP\DeviceIcon.cs" />
+    <Compile Include="Protocols\UPnP\DeviceActivity.cs" />
+    <Compile Include="Protocols\UPnP\DeviceActivityEventArgs.cs" />
+    <Compile Include="Protocols\UPnP\DeviceError.cs" />
+    <Compile Include="Protocols\UPnP\DeviceException.cs" />
+    <Compile Include="Protocols\UPnP\UPnPDevicesDiscovery.cs" />
+    <Compile Include="Protocols\UPnP\CommonUPnPDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocols\SSDP\ISSDPServer.cs" />
     <Compile Include="Protocols\SSDP\Messages\NotifyMessage.cs" />
@@ -115,9 +115,9 @@
     <Compile Include="Protocols\SSDP\Messages\SearchResponseMessage.cs" />
     <Compile Include="Protocols\SSDP\Messages\SSDPMessage.cs" />
     <Compile Include="Protocols\SSDP\SSDPServer.cs" />
-    <Compile Include="UPnPService.cs" />
-    <Compile Include="UPnPDevice.cs" />
-    <Compile Include="UPnPVersion.cs" />
+    <Compile Include="Protocols\UPnP\UPnPService.cs" />
+    <Compile Include="Protocols\UPnP\UPnPDevice.cs" />
+    <Compile Include="Protocols\UPnP\UPnPVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SV\SV.csproj">

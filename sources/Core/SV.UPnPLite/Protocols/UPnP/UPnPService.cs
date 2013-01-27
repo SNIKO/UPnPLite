@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP
+namespace SV.UPnPLite.Protocols.UPnP
 {
     using System;
     using System.Collections.Generic;

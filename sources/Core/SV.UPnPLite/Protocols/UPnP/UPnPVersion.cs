@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP
+namespace SV.UPnPLite.Protocols.UPnP
 {
     /// <summary>
     ///     Defines a version of the UPnP object (device/service).

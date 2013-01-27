@@ -9,8 +9,8 @@
     <ProjectGuid>{F4C66E2B-97CC-4954-9C06-C54E8F000C96}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SV.UPnP</RootNamespace>
-    <AssemblyName>SV.UPnP</AssemblyName>
+    <RootNamespace>SV.UPnPLite</RootNamespace>
+    <AssemblyName>SV.UPnPLite</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

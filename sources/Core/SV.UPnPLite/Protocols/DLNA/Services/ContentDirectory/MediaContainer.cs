@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
+    using SV.UPnPLite.Extensions;
     using System;
     using System.Xml.Linq;
 

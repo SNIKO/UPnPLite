@@ -1,6 +1,9 @@
 ﻿
 namespace SV.UPnPLite.Protocols.UPnP
 {
+    using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Protocols.SSDP;
+    using SV.UPnPLite.Protocols.SSDP.Messages;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -10,8 +13,6 @@ namespace SV.UPnPLite.Protocols.UPnP
     using System.Reactive.Linq;
     using System.Reactive.Subjects;
     using System.Xml.Linq;
-    using SV.UPnP.Protocols.SSDP;
-    using SV.UPnP.Protocols.SSDP.Messages;
     using Windows.Foundation;
 
     public abstract class UPnPDevicesDiscovery<TDevice> where TDevice : UPnPDevice

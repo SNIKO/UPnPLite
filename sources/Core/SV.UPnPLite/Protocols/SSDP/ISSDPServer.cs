@@ -1,8 +1,8 @@
 ﻿
-namespace SV.UPnP.Protocols.SSDP
+namespace SV.UPnPLite.Protocols.SSDP
 {
     using System;
-    using SV.UPnP.Protocols.SSDP.Messages;
+    using SV.UPnPLite.Protocols.SSDP.Messages;
 
     /// <summary>
     ///     Defines members for sending/receiving SSDP messages.

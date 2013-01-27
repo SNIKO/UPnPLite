@@ -1,6 +1,8 @@
 ﻿
-namespace SV.UPnP.Protocols.SSDP
+namespace SV.UPnPLite.Protocols.SSDP
 {
+    using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Protocols.SSDP.Messages;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -10,7 +12,6 @@ namespace SV.UPnP.Protocols.SSDP
     using System.Reactive.Subjects;
     using System.Runtime.InteropServices.WindowsRuntime;
     using System.Text;
-    using SV.UPnP.Protocols.SSDP.Messages;
     using Windows.Networking;
     using Windows.Networking.Sockets;
     using Windows.Storage.Streams;

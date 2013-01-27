@@ -1,6 +1,7 @@
 ﻿
-namespace SV
+namespace SV.UPnPLite
 {
+    using SV.UPnPLite.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;

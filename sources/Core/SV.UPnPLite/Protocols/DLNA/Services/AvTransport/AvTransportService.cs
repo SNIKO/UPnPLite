@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 {
+    using SV.UPnPLite.Extensions;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;

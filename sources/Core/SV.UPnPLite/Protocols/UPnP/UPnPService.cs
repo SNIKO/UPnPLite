@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.UPnP
 {
+    using SV.UPnPLite.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;

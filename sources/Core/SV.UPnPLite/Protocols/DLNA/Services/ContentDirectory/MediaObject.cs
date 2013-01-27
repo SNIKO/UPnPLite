@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
+    using SV.UPnPLite.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -157,11 +158,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </param>
         protected virtual void InitializePropertySetters(Dictionary<XName, Action<string>> propertyNameToSetterMap)
         {
-            propertyNameToSetterMap["id"] =                         value => this.Id = value;
-            propertyNameToSetterMap["parentID"] =                   value => this.ParentId = value;
-            propertyNameToSetterMap["restricted"] =                 value => this.Restricted = value.ToBool();
-            propertyNameToSetterMap[Namespaces.DC + "title"] =      value => this.Title = value;
-            propertyNameToSetterMap[Namespaces.DC + "creator"] =    value => this.Creator = value;
+            propertyNameToSetterMap["id"] = value => this.Id = value;
+            propertyNameToSetterMap["parentID"] = value => this.ParentId = value;
+            propertyNameToSetterMap["restricted"] = value => this.Restricted = value.ToBool();
+            propertyNameToSetterMap[Namespaces.DC + "title"] = value => this.Title = value;
+            propertyNameToSetterMap[Namespaces.DC + "creator"] = value => this.Creator = value;
         }
 
         private static void InitializeMediaObjectTypes()

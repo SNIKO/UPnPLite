@@ -1,5 +1,5 @@
 ﻿
-namespace SV.UPnP.Protocols.SSDP.Messages
+namespace SV.UPnPLite.Protocols.SSDP.Messages
 {
     using System;
 

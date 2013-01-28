@@ -12,11 +12,13 @@ namespace SV.UPnPLite.Extensions
                 throw new ArgumentNullException(name);
             }
 
-            var stringObj = obj as string;
-            if (string.IsNullOrEmpty(stringObj))
+            if (obj is string)
             {
-                throw new ArgumentNullException(name);
-            }
+                if (string.IsNullOrEmpty((string)obj))
+                {
+                    throw new ArgumentNullException(name);
+                }
+            }                        
         }
     }
 }

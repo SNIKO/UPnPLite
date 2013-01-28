@@ -50,7 +50,6 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
                 {
                     var headers = ParseHeaders(lines.Skip(1));
 
-                    response.Host               =                   headers.GetValue                <string>    ("HOST");
                     response.MaxAge             = ParseMaxAge(      headers.GetValue                <string>    ("CACHE-CONTROL"));
                     response.Location           =                   headers.GetValue                <string>    ("LOCATION");
                     response.SearchTarget       =                   headers.GetValue                <string>    ("ST");

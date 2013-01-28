@@ -10,8 +10,6 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
     /// </summary>
     internal class SSDPMessage
     {
-        public string Host { get; set; }
-
         public int MaxAge { get; set; }
 
         public string Location { get; set; }

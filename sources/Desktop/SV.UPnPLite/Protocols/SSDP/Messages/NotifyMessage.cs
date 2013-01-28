@@ -12,6 +12,8 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
     /// </summary>
     internal class NotifyMessage : SSDPMessage
     {
+        public string Host { get; set; }
+
         /// <summary>
         ///     Gets the type of source which sent a message.
         /// </summary>

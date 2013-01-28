@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="RegisterLibrary" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Register>true</Register>
+    <RegistrationKey>UPnPLite</RegistrationKey>
+    <_BinFolder>$(BinFolder)</_BinFolder>
+    <_BinFolder Condition=" '$(_BinFolder)' == '' ">\Bin</_BinFolder>
+    <_FullBinFolder>$([System.IO.Path]::GetFullPath($(_BinFolder)))</_FullBinFolder>
+    <_EscapedFullBinFolder>$(_FullBinFolder.Replace('\', '\\'))</_EscapedFullBinFolder>
+    <_DestopBinFolder>@="$(_EscapedFullBinFolder)\\Desktop\\"</_DestopBinFolder>
+    <_MetroBinFolder>@="$(_EscapedFullBinFolder)\\Metro\\"</_MetroBinFolder>
+    <_TempRegistrationFile>$([System.IO.Path]::GetTempFileName())</_TempRegistrationFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Register)' == 'true'">
+    <RegistrationLine Include="Windows Registry Editor Version 5.00"/>
+    <RegistrationLine Include="[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\v4.5.50709\AssemblyFoldersEx\$(RegistrationKey)]"/>    
+    <RegistrationLine Include="$(_DestopBinFolder)"/>
+    <RegistrationLine Include="[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETCore\v4.5\AssemblyFoldersEx\$(RegistrationKey)]"/>
+    <RegistrationLine Include="$(_MetroBinFolder)"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Register)' != 'true'">
+    <RegistrationLine Include="Windows Registry Editor Version 5.00"/>
+    <RegistrationLine Include="[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\v4.5.50709\AssemblyFoldersEx\$(RegistrationKey)]"/>
+    <RegistrationLine Include="[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETCore\v4.5\AssemblyFoldersEx\$(RegistrationKey)]"/>
+  </ItemGroup>
+
+  <Target Name="RegisterLibrary">
+    <WriteLinesToFile File="$(_TempRegistrationFile)" Lines="@(RegistrationLine)"/>
+    <Exec Command='regedit.exe /s "$(_TempRegistrationFile)"'/>
+    <Delete Files="$(_TempRegistrationFile)"/>
+  </Target>
+</Project>

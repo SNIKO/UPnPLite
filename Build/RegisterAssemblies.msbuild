@@ -9,6 +9,7 @@
     <_EscapedFullBinFolder>$(_FullBinFolder.Replace('\', '\\'))</_EscapedFullBinFolder>
     <_DestopBinFolder>@="$(_EscapedFullBinFolder)\\Desktop\\"</_DestopBinFolder>
     <_MetroBinFolder>@="$(_EscapedFullBinFolder)\\Metro\\"</_MetroBinFolder>
+    <_PhoneBinFolder>@="$(_EscapedFullBinFolder)\\Phone\\"</_PhoneBinFolder>
     <_TempRegistrationFile>$([System.IO.Path]::GetTempFileName())</_TempRegistrationFile>
   </PropertyGroup>
 
@@ -18,6 +19,8 @@
     <RegistrationLine Include="$(_DestopBinFolder)"/>
     <RegistrationLine Include="[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETCore\v4.5\AssemblyFoldersEx\$(RegistrationKey)]"/>
     <RegistrationLine Include="$(_MetroBinFolder)"/>
+    <RegistrationLine Include="[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\WindowsPhone\v8.0\AssemblyFoldersEx\$(RegistrationKey)]"/>
+    <RegistrationLine Include="$(_PhoneBinFolder)"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(Register)' != 'true'">

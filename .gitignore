@@ -1,0 +1,5 @@
+/_ReSharper.AirPlay/
+bin/
+obj/
+*.suo
+*.user

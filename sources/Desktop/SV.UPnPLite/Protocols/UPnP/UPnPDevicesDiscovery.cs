@@ -285,6 +285,7 @@ namespace SV.UPnPLite.Protocols.UPnP
 
             var deviceElement = xmlDoc.Descendants(upnpNamespace + "device").First();
             var deviceType = deviceElement.Element(upnpNamespace + "deviceType").Value;
+            var deviceUDN = deviceElement.Element(upnpNamespace + "UDN").Value;
             var serciceElements = deviceElement.Descendants(upnpNamespace + "service");
 
             var services = (from serciceElement in serciceElements
@@ -293,7 +294,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                             let eventsSunscriptionUri = new Uri(baseUri, serciceElement.Element(upnpNamespace + "eventSubURL").Value)
                             select this.CreateServiceInstance(serviceType, controlUri, eventsSunscriptionUri)).ToList();
 
-            var device = this.CreateDeviceInstance(deviceType, services);
+            var device = this.CreateDeviceInstance(deviceUDN, services);
 
             device.FriendlyName = deviceElement.Element(upnpNamespace + "friendlyName").Value;
             device.DeviceVersion = ParseDeviceVersion(deviceType);
@@ -309,7 +310,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                                             Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
                                         },
                                     ColorDepth = icon.Element(upnpNamespace + "depth").Value,
-                                    Url = new Uri(baseUri + icon.Element(upnpNamespace + "url").Value)
+                                    Url = new Uri(baseUri, icon.Element(upnpNamespace + "url").Value)
                                 }).ToList();
 
             return device;

@@ -6,6 +6,7 @@ namespace SV.UPnPLite.Protocols.DLNA
     using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -80,6 +81,25 @@ namespace SV.UPnPLite.Protocols.DLNA
             return browseResult.Result;
         }
 
+        /// <summary>
+        ///     Searches for a media of type <typeparamref name="TMedia"/>.
+        /// </summary>
+        /// <typeparam name="TMedia">
+        ///     The type of media items to search.
+        /// </typeparam>
+        /// <returns>
+        ///     A list of found media items of type <typeparamref name="TMedia"/>.
+        /// </returns>
+        public async Task<IEnumerable<TMedia>> SearchAsync<TMedia>() where TMedia : MediaItem
+        {
+            var objectClass = MediaObject.GetClass<TMedia>();
+            var searchCriteria = "upnp:class derivedfrom \"{0}\"".F(objectClass);
+            var searchResult = await this.contentDirectoryService.SearchAsync("0", searchCriteria, "*", 0, 0, string.Empty);
+
+            // TODO: Optimize it
+            return searchResult.Result.Select(o => (TMedia) o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+        }
+
         #endregion
-    }
+    }    
 }

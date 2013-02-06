@@ -101,6 +101,65 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             return result;
         }
 
+        /// <summary>
+        ///     Searches the content directory for objects that match some search criteria.
+        /// </summary>
+        /// <param name="containerId">
+        ///     The id of the conainer in which to proceed search.
+        /// </param>
+        /// <param name="searchCriteria">
+        ///     One or more search criteria to be used for querying the Content Directory.
+        /// </param>
+        /// <param name="filter">
+        ///     The comma-separated list of property specifiers (including namespaces) indicates which metadata properties are to be 
+        ///     returned in the results from browsing or searching.
+        /// </param>
+        /// <param name="startingIndex">
+        ///     Starting zero based offset to enumerate children under the container specified by <paramref name="containerId"/>.
+        /// </param>
+        /// <param name="requestedCount">
+        ///     Requested number of entries under the object specified by <paramref name="containerId"/>. The value '0' indicates request all entries.
+        /// </param>
+        /// <param name="sortCriteria">
+        ///     A CSV list of signed property names, where signed means preceded by ‘+’ or ‘-’ sign.  The ‘+’ and ‘-’Indicate the sort is in ascending or descending order, 
+        ///     respectively, with regard to the value of its associated property. Properties appear in the list in order of descending sort priority.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="BrowseResult"/> instance which contains result of the Search operation.
+        /// </returns>
+        /// <exception cref="DeviceException">
+        ///     An error occurred when sending request to device -OR-
+        ///     An error occurred when executing request on device -OR-
+        ///     The specified <paramref name="containerId"/> is invalid -OR-
+        ///     The sort criteria specified is not supported or is invalid -OR-
+        ///     The search criteria specified is not supported or is invalid.
+        /// </exception>
+        public async Task<BrowseResult> SearchAsync(string containerId, string searchCriteria, string filter, int startingIndex, int requestedCount, string sortCriteria)
+        {
+            var arguments = new Dictionary<string, object>
+                                {
+                                    {"ContainerID", containerId},
+                                    {"SearchCriteria", searchCriteria},
+                                    {"Filter", filter},
+                                    {"StartingIndex", startingIndex},
+                                    {"RequestedCount", requestedCount},
+                                    {"SortCriteria", sortCriteria},
+                                };
+
+            var response = await this.InvokeActionAsync("Search", arguments);
+            var resultXml = response["Result"];
+            var mediaObjects = ParseMediaObjects(resultXml);
+            var result = new BrowseResult
+            {
+                Result = mediaObjects,
+                NumberReturned = Convert.ToInt32(response["NumberReturned"]),
+                TotalMatches = Convert.ToInt32(response["TotalMatches"]),
+                UpdateId = Convert.ToInt32(response["UpdateId"])
+            };
+
+            return result;
+        }
+
         private static IEnumerable<MediaObject> ParseMediaObjects(string mediaObjectsXml)
         {
             var result = new List<MediaObject>();
@@ -116,7 +175,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
             foreach (var container in mediaObjects)
             {
-                var mediaObject = MediaObject.Create(container.ToString());
+                var mediaObject = MediaObject.Create(container);
 
                 if (mediaObject != null)
                 {

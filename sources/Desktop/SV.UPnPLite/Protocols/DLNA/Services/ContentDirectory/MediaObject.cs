@@ -78,6 +78,22 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         #region Methods
 
         /// <summary>
+        ///     Returns a class of the media object. 
+        /// </summary>
+        /// <typeparam name="TMediaObject">
+        ///     The type of the media object for which to get class.
+        /// </typeparam>
+        /// <returns>
+        ///     The class of the media object defined by <typeparamref name="TMediaObject"/>.
+        /// </returns>
+        public static string GetClass<TMediaObject>() where TMediaObject : MediaObject
+        {
+            var objectClass = knownMediaObjectTypes.First(pair => pair.Value == typeof (TMediaObject)).Key;
+
+            return objectClass;
+        }
+
+        /// <summary>
         ///     Creates a <see cref="MediaObject"/> instance from object defined in DIDL-Lite XML.
         /// </summary>
         /// <param name="didlLiteXml">

@@ -160,6 +160,36 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             return result;
         }
 
+        /// <summary>
+        ///     Returns the searching capabilities that are supported by the device. 
+        /// </summary>
+        /// <returns>
+        ///     The list of property names that can be used in search queries. An empty list indicates that the <see cref="IContentDirectoryService"/> does not support any 
+        ///     kind of searching. A wildcard (‘*’) indicates that the device supports search queries using all tags present in the <see cref="IContentDirectoryService"/>.
+        /// </returns>
+        /// <exception cref="DeviceException">
+        ///     An error occurred when sending request to device -OR-
+        ///     An error occurred when executing request on device.
+        /// </exception>
+        public async Task<IEnumerable<string>> GetSearchCapabilities()
+        {
+            IEnumerable<string> result;
+
+            var response = await this.InvokeActionAsync("GetSearchCapabilities");
+            var propertiesCSV = response["SearchCaps"];
+
+            if (string.IsNullOrWhiteSpace(propertiesCSV) == false)
+            {
+                result = propertiesCSV.Split(',');
+            }
+            else
+            {
+                result = new List<string>();
+            }
+
+            return result;
+        }
+
         private static IEnumerable<MediaObject> ParseMediaObjects(string mediaObjectsXml)
         {
             var result = new List<MediaObject>();

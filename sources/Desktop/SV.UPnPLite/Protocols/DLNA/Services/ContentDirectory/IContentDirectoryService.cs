@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using SV.UPnPLite.Protocols.UPnP;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -79,5 +80,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     The search criteria specified is not supported or is invalid.
         /// </exception>
         Task<BrowseResult> SearchAsync(string containerId, string searchCriteria, string filter, int startingIndex, int requestedCount, string sortCriteria);
+
+        /// <summary>
+        ///     Returns the searching capabilities that are supported by the device. 
+        /// </summary>
+        /// <returns>
+        ///     The list of property names that can be used in search queries. An empty list indicates that the <see cref="IContentDirectoryService"/> does not support any 
+        ///     kind of searching. A wildcard (‘*’) indicates that the device supports search queries using all tags present in the <see cref="IContentDirectoryService"/>.
+        /// </returns>
+        Task<IEnumerable<string>> GetSearchCapabilities();
     }
 }

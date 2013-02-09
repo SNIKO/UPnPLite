@@ -68,6 +68,29 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <param name="action">
         ///     An action to invoke.
         /// </param>
+        /// <returns>
+        ///     A dictionary with result of the action.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     An <see cref="action"/> is <c>null</c> or empty.
+        /// </exception>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="DeviceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task<Dictionary<string, string>> InvokeActionAsync(string action)
+        {
+            return await this.InvokeActionAsync(action, null);
+        }
+
+        /// <summary>
+        ///     Invokes an <paramref name="action"/> at the device's service.
+        /// </summary>
+        /// <param name="action">
+        ///     An action to invoke.
+        /// </param>
         /// <param name="parameters">
         ///     Invocation parameters.
         /// </param>
@@ -132,7 +155,7 @@ namespace SV.UPnPLite.Protocols.UPnP
 
             var actionElement = new XElement(u + action, new XAttribute(XNamespace.Xmlns + "u", u.NamespaceName));
 
-            if (parameters.Any())
+            if (parameters != null && parameters.Any())
             {
                 foreach (var parameter in parameters)
                 {

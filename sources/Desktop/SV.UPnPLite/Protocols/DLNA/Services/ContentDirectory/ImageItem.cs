@@ -63,13 +63,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 
-            propertyNameToSetterMap["StorageMedium"]                = value => this.StorageMedium = value;
-            propertyNameToSetterMap["longDescription"]              = value => this.LongDescription = value;
-            propertyNameToSetterMap["rating"]                       = value => this.Rating = value;
-            propertyNameToSetterMap[Namespaces.DC + "description"]  = value => this.Description = value;
-            propertyNameToSetterMap[Namespaces.DC + "publisher"]    = value => this.Publisher = value;
-            propertyNameToSetterMap[Namespaces.DC + "language"]     = value => this.Language = value;
-            propertyNameToSetterMap[Namespaces.DC + "rights"]       = value => this.Rights = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "StorageMedium"]      = value => this.StorageMedium = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "longDescription"]    = value => this.LongDescription = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "rating"]             = value => this.Rating = value;
+            propertyNameToSetterMap[Namespaces.DC   + "description"]        = value => this.Description = value;
+            propertyNameToSetterMap[Namespaces.DC   + "publisher"]          = value => this.Publisher = value;
+            propertyNameToSetterMap[Namespaces.DC   + "language"]           = value => this.Language = value;
+            propertyNameToSetterMap[Namespaces.DC   + "rights"]             = value => this.Rights = value;
         }
 
         #endregion

@@ -79,16 +79,16 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 
-            propertyNameToSetterMap["genre"]                            = value => this.Genre = value;
-            propertyNameToSetterMap["longDescription"]                  = value => this.LongDescription = value;
-            propertyNameToSetterMap["producer"]                         = value => this.Producer = value;
-            propertyNameToSetterMap["rating"]                           = value => this.Rating = value;
-            propertyNameToSetterMap["actor"]                            = value => this.Actor = value;
-            propertyNameToSetterMap["director"]                         = value => this.Director = value;
-            propertyNameToSetterMap[Namespaces.DC + "description"]      = value => this.Description = value;            
-            propertyNameToSetterMap[Namespaces.DC + "publisher"]        = value => this.Publisher = value;
-            propertyNameToSetterMap[Namespaces.DC + "language"]         = value => this.Language = value;
-            propertyNameToSetterMap[Namespaces.DC + "relation"]         = value => this.Relation = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "genre"]              = value => this.Genre = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "longDescription"]    = value => this.LongDescription = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "producer"]           = value => this.Producer = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "rating"]             = value => this.Rating = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "actor"]              = value => this.Actor = value;
+            propertyNameToSetterMap[Namespaces.UPnP + "director"]           = value => this.Director = value;
+            propertyNameToSetterMap[Namespaces.DC   + "description"]        = value => this.Description = value;            
+            propertyNameToSetterMap[Namespaces.DC   + "publisher"]          = value => this.Publisher = value;
+            propertyNameToSetterMap[Namespaces.DC   + "language"]           = value => this.Language = value;
+            propertyNameToSetterMap[Namespaces.DC   + "relation"]           = value => this.Relation = value;
         }
 
         #endregion

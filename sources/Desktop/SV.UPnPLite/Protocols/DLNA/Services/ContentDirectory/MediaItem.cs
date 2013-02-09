@@ -3,6 +3,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Linq;
 
     /// <summary>
     ///     Defines the media item which can be played on MediaRenderer.
@@ -26,7 +27,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<System.Xml.Linq.XName, Action<string>> propertyNameToSetterMap)
+        protected override void InitializePropertySetters(Dictionary<XName, Action<string>> propertyNameToSetterMap)
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 

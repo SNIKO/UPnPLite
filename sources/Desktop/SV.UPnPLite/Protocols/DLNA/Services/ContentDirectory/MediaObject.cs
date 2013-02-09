@@ -187,6 +187,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
             knownMediaObjectTypes["object.item"] = typeof(MediaItem);
             knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
+            knownMediaObjectTypes["object.item.audioItem.musicTrack"] = typeof(MusicTrack);
             knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
             knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
             knownMediaObjectTypes["object.container"] = typeof(MediaContainer);

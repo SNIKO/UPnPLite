@@ -60,6 +60,7 @@
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaItem.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaObject.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaResource.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\MusicTrack.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\VideoItem.cs" />
     <Compile Include="Protocols\DLNA\Services\ParsingHelper.cs" />
     <Compile Include="Protocols\SSDP\SSDPServer.cs" />

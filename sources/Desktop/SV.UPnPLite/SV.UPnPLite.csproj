@@ -31,10 +31,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Extensions\DictinonaryExtensions.cs" />
+    <Compile Include="Extensions\LoggerExtensions.cs" />
     <Compile Include="Extensions\ObjectExtenstions.cs" />
     <Compile Include="Extensions\ObservableCollectionExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XDocumentExtensions.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\ILogManager.cs" />
     <Compile Include="OnDemandObservable.cs" />
     <Compile Include="Protocols\DLNA\IMediaRenderersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\IMediaServersDiscovery.cs" />

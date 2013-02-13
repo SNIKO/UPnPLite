@@ -102,6 +102,9 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\DictinonaryExtensions.cs">
       <Link>Extensions\DictinonaryExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\LoggerExtensions.cs">
+      <Link>Extensions\LoggerExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\ObjectExtenstions.cs">
       <Link>Extensions\ObjectExtenstions.cs</Link>
     </Compile>
@@ -113,6 +116,12 @@
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\XDocumentExtensions.cs">
       <Link>Extensions\XDocumentExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Logging\ILogger.cs">
+      <Link>Logging\ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Logging\ILogManager.cs">
+      <Link>Logging\ILogManager.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\OnDemandObservable.cs">
       <Link>OnDemandObservable.cs</Link>

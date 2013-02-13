@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA
 {
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.DLNA.Services.AvTransport;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
@@ -19,6 +20,20 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </summary>
         public MediaRenderersDiscovery()
             : base("urn:schemas-upnp-org:device:MediaRenderer:1")
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MediaRenderersDiscovery" /> class.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public MediaRenderersDiscovery(ILogManager logManager)
+            : base("urn:schemas-upnp-org:device:MediaRenderer:1", logManager)
         {
         }
 
@@ -42,7 +57,7 @@ namespace SV.UPnPLite.Protocols.DLNA
         {
             var avTransportService = services.FirstOrDefault(s => s is IAvTransportService) as IAvTransportService;
 
-            return new MediaRenderer(udn, avTransportService);
+            return new MediaRenderer(udn, avTransportService, this.logManager);
         }
 
         /// <summary>
@@ -66,7 +81,7 @@ namespace SV.UPnPLite.Protocols.DLNA
 
             if (serviceType.StartsWith("urn:schemas-upnp-org:service:AVTransport", StringComparison.OrdinalIgnoreCase))
             {
-                service = new AvTransportService(serviceType, controlUri, eventsUri);
+                service = new AvTransportService(serviceType, controlUri, eventsUri, this.logManager);
             }
 
             return service;

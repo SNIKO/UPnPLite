@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.SSDP
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.SSDP.Messages;
     using System;
     using System.Collections.Generic;
@@ -40,6 +41,8 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         private static ISSDPServer instance;
 
+        private static ILogger logger;
+
         private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
 
         private UdpClient server;
@@ -49,6 +52,23 @@ namespace SV.UPnPLite.Protocols.SSDP
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        private SSDPServer(ILogManager logManager)
+            : this()
+        {
+            logManager.EnsureNotNull("logManager");
+
+            logger = logManager.GetLogger<SSDPServer>();
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
@@ -63,25 +83,6 @@ namespace SV.UPnPLite.Protocols.SSDP
         #region Properties
 
         /// <summary>
-        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
-        /// </summary>
-        public static ISSDPServer Instance
-        {
-            get
-            {
-                lock (instanceSyncObject)
-                {
-                    if (instance == null)
-                    {
-                        instance = new SSDPServer();
-                    }
-                }
-
-                return instance;
-            }
-        }
-
-        /// <summary>
         ///     An observable collection which contains notifications from devices.
         /// </summary>
         public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
@@ -89,6 +90,50 @@ namespace SV.UPnPLite.Protocols.SSDP
         #endregion
 
         #region Methods
+
+        /// <summary>
+        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+        /// </summary>
+        /// <returns>
+        ///     A singletone instance of the <see cref="SSDPServer"/>.
+        /// </returns>
+        public static ISSDPServer GetInstance()
+        {
+            lock (instanceSyncObject)
+            {
+                if (instance == null)
+                {
+                    instance = new SSDPServer();
+                }
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <returns>
+        ///     A singletone instance of the <see cref="SSDPServer"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public static ISSDPServer GetInstance(ILogManager logManager)
+        {
+            lock (instanceSyncObject)
+            {
+                if (instance == null)
+                {
+                    instance = new SSDPServer(logManager);
+                }
+            }
+
+            return instance;
+        }
 
         /// <summary>
         ///     Searches for an available devices of specified type.
@@ -176,15 +221,21 @@ namespace SV.UPnPLite.Protocols.SSDP
                             });
 
                         var responses = GetIncommingMessagesSequence(searchClient);
-                        responses.Subscribe(message => HandleSearchResponseMessage(message, observer));                        
+                        responses.Subscribe(message => HandleSearchResponseMessage(message, observer));
 
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
+
+                        logger.Instance().Debug(
+                            "Sent M-Search request from local endpoint '{0}' to a multicast endpoint '{1}' with search target '{2}'.", 
+                            localEndPoint, 
+                            multicastEndPoint, 
+                            searchTarget);
                     }
-                    catch (SocketException)
+                    catch (SocketException ex)
                     {
-                        // TODO: Log
+                        logger.Instance().Warning(ex, "Failed to send M-Search request from local endpoint '{0}' to a multicast endpoint '{1}'.", localEndPoint, multicastEndPoint);
                     }
                     catch (ObjectDisposedException)
                     {
@@ -243,38 +294,42 @@ namespace SV.UPnPLite.Protocols.SSDP
 
             return result;
         }
-        
+
         private static void HandleSearchResponseMessage(string message, IObserver<SearchResponseMessage> observer)
         {
+            logger.Instance().Trace("Received search response message :\n{0}", message);
+
             try
             {
                 var responseMessage = SearchResponseMessage.Create(message);
                 observer.OnNext(responseMessage);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                // TODO: Log
+                logger.Instance().Warning(ex, "The received M-Search response has missed header. The response is following:\n{0}", message);
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
-                // TODO: Log
+                logger.Instance().Warning(ex, "The received M-Search response has header in a bad format. The response is following:\n{0}", message);
             }
         }
 
         private static void HandleNotifyMessage(string message, IObserver<NotifyMessage> observer)
         {
+            logger.Instance().Trace("Received notification message :\n{0}", message);
+
             try
             {
                 var notifyMessage = NotifyMessage.Create(message);
                 observer.OnNext(notifyMessage);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                // TODO: Log
+                logger.Instance().Warning(ex, "The received notification message has missed header. The message is following:\n{0}", message);
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
-                // TODO: Log
+                logger.Instance().Warning(ex, "The received notification message has header in a bad format. The message is following:\n{0}", message);
             }
         }
 
@@ -282,15 +337,23 @@ namespace SV.UPnPLite.Protocols.SSDP
         {
             var localEndPoint = new IPEndPoint(IPAddress.Any, 1900);
 
-            this.server = new UdpClient();
-            this.server.ExclusiveAddressUse = false;
-            this.server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            this.server.Client.Bind(localEndPoint);
-            this.server.JoinMulticastGroup(IPAddress.Parse(MulticastAddress));
+            try
+            {
+                this.server = new UdpClient();
+                this.server.ExclusiveAddressUse = false;
+                this.server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                this.server.Client.Bind(localEndPoint);
+                this.server.JoinMulticastGroup(IPAddress.Parse(MulticastAddress));
 
-            var incommingMessages = GetIncommingMessagesSequence(this.server);
+                var incommingMessages = GetIncommingMessagesSequence(this.server);
+                incommingMessages.Subscribe(message => HandleNotifyMessage(message, this.notifyMessages));
 
-            incommingMessages.Subscribe(message => HandleNotifyMessage(message, this.notifyMessages));
+                logger.Instance().Info("Started listening for a notification messages at {0}", localEndPoint);
+            }
+            catch (SocketException ex)
+            {
+                logger.Instance().Error(ex, "Can't bind to a {0} for listening for a notification messages", localEndPoint);
+            }
         }
 
         #endregion

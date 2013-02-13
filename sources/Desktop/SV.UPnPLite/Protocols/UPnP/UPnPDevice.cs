@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.UPnP
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using System;
     using System.Collections.Generic;
 
@@ -10,6 +11,12 @@ namespace SV.UPnPLite.Protocols.UPnP
     /// </summary>
     public abstract class UPnPDevice
     {
+        #region Fields
+
+        protected readonly ILogger logger;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -26,6 +33,27 @@ namespace SV.UPnPLite.Protocols.UPnP
             udn.EnsureNotNull("udn");
 
             this.UDN = udn;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UPnPDevice"/> class.
+        /// </summary>
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>nukk</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        protected UPnPDevice(string udn, ILogManager logManager)
+            : this(udn)
+        {
+            logManager.EnsureNotNull("logManager");
+
+            this.logger = logManager.GetLogger(this.GetType());
         }
 
         #endregion
@@ -60,7 +88,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <summary>
         ///     Gets the list of icons to depict device in a UI.
         /// </summary>
-        public IEnumerable<DeviceIcon> Icons { get; internal set; }        
+        public IEnumerable<DeviceIcon> Icons { get; internal set; }
 
         #endregion
     }

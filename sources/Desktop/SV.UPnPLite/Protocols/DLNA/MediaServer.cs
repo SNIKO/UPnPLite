@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
@@ -17,6 +18,8 @@ namespace SV.UPnPLite.Protocols.DLNA
         #region Fields
 
         private readonly IContentDirectoryService contentDirectoryService;
+
+        private IEnumerable<string> searchCapabilities;
 
         #endregion
 
@@ -37,6 +40,31 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </exception>
         public MediaServer(string udn, IContentDirectoryService contentDirectoryService)
             : base(udn)
+        {
+            contentDirectoryService.EnsureNotNull("contentDirectoryService");
+
+            this.contentDirectoryService = contentDirectoryService;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MediaServer" /> class.
+        /// </summary>
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="contentDirectoryService">
+        ///     A <see cref="IContentDirectoryService"/> to use for managing the media content.
+        /// </param>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="contentDirectoryService"/> is <c>null</c> -OR-
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public MediaServer(string udn, IContentDirectoryService contentDirectoryService, ILogManager logManager)
+            : base(udn, logManager)
         {
             contentDirectoryService.EnsureNotNull("contentDirectoryService");
 
@@ -92,12 +120,22 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </returns>
         public async Task<IEnumerable<TMedia>> SearchAsync<TMedia>() where TMedia : MediaItem
         {
+            await this.EnsureSearchCapabilitesReceived();
+
             var objectClass = MediaObject.GetClass<TMedia>();
             var searchCriteria = "upnp:class derivedfrom \"{0}\"".F(objectClass);
             var searchResult = await this.contentDirectoryService.SearchAsync("0", searchCriteria, "*", 0, 0, string.Empty);
 
             // TODO: Optimize it
             return searchResult.Result.Select(o => (TMedia) o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+        }
+
+        private async Task EnsureSearchCapabilitesReceived()
+        {
+            if (this.searchCapabilities == null)
+            {
+                this.searchCapabilities = await this.contentDirectoryService.GetSearchCapabilities();
+            }
         }
 
         #endregion

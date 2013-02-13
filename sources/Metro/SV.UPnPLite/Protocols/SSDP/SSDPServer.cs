@@ -2,10 +2,10 @@
 namespace SV.UPnPLite.Protocols.SSDP
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.SSDP.Messages;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Reactive.Linq;
     using System.Reactive.Subjects;
     using System.Runtime.InteropServices.WindowsRuntime;
@@ -41,6 +41,8 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         private static ISSDPServer instance;
 
+        private static ILogger logger;
+
         private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
 
         private readonly DatagramSocket server;
@@ -54,6 +56,23 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// <summary>
         ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
         /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        private SSDPServer(ILogManager logManager)
+            : this()
+        {
+            logManager.EnsureNotNull("logManager");
+
+            logger = logManager.GetLogger<SSDPServer>();
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
+        /// </summary>
         private SSDPServer()
         {
             this.multicastHost = new HostName(MulticastAddress);
@@ -62,6 +81,8 @@ namespace SV.UPnPLite.Protocols.SSDP
             this.server.MessageReceived += this.NotifyMessageReceived;
             this.server.BindEndpointAsync(null, MulticastPort.ToString()).GetAwaiter().GetResult();
             this.server.JoinMulticastGroup(this.multicastHost);
+
+            logger.Instance().Info("Started listening for a notification messages at port {0} from multicast group '{1}'", MulticastPort, this.multicastHost);
         }
 
         #endregion
@@ -73,28 +94,53 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// </summary>
         public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
 
-        /// <summary>
-        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
-        /// </summary>
-        public static ISSDPServer Instance
-        {
-            get
-            {
-                lock (instanceSyncObject)
-                {
-                    if (instance == null)
-                    {
-                        instance = new SSDPServer();
-                    }
-                }
-
-                return instance;
-            }
-        }
-
         #endregion
 
         #region Members
+
+        /// <summary>
+        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+        /// </summary>
+        /// <returns>
+        ///     A singletone instance of the <see cref="SSDPServer"/>.
+        /// </returns>
+        public static ISSDPServer GetInstance()
+        {
+            lock (instanceSyncObject)
+            {
+                if (instance == null)
+                {
+                    instance = new SSDPServer();
+                }
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <returns>
+        ///     A singletone instance of the <see cref="SSDPServer"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public static ISSDPServer GetInstance(ILogManager logManager)
+        {
+            lock (instanceSyncObject)
+            {
+                if (instance == null)
+                {
+                    instance = new SSDPServer(logManager);
+                }
+            }
+
+            return instance;
+        }
 
         /// <summary>
         ///     Searches for an available devices of specified type.
@@ -128,6 +174,8 @@ namespace SV.UPnPLite.Protocols.SSDP
 
                             var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
 
+                            logger.Instance().Trace("Received search response message :\n{0}", message);
+
                             try
                             {
                                 var response = SearchResponseMessage.Create(message);
@@ -135,11 +183,11 @@ namespace SV.UPnPLite.Protocols.SSDP
                             }
                             catch (KeyNotFoundException ex)
                             {
-                                // TODO: Log
+                                logger.Instance().Warning(ex, "The received M-Search response has missed header. The response is following:\n{0}", message);
                             }
                             catch (FormatException ex)
                             {
-                                Debug.WriteLine("An error occurred when parsing message from UPnP device \n\nMessage:\n{1}\n\nError:\n{2}:".F(message, ex));
+                                logger.Instance().Warning(ex, "The received M-Search response has header in a bad format. The response is following:\n{0}", message);
                             }
                         };
 
@@ -161,6 +209,8 @@ namespace SV.UPnPLite.Protocols.SSDP
                             searchSocket.Dispose();
                         });
 
+                    logger.Instance().Debug("Sent M-Search request to a multicast host '{0}' with search target '{1}'.", multicastHost, searchTarget);
+
                     return searchSocket.Dispose;
                 });
         }
@@ -176,6 +226,7 @@ namespace SV.UPnPLite.Protocols.SSDP
             }
 
             var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
+            logger.Instance().Trace("Received notification message :\n{0}", message);
 
             try
             {
@@ -185,11 +236,11 @@ namespace SV.UPnPLite.Protocols.SSDP
             }
             catch (KeyNotFoundException ex)
             {
-                // TODO: Log
+                logger.Instance().Warning(ex, "The received notification message has missed header. The message is following:\n{0}", message);
             }
             catch (FormatException ex)
             {
-                Debug.WriteLine("An error occurred when parsing message from UPnP device \n\nMessage:\n{1}\n\nError:\n{2}:".F(message, ex));
+                logger.Instance().Warning(ex, "The received notification message has header in a bad format. The message is following:\n{0}", message);
             }
         }
         

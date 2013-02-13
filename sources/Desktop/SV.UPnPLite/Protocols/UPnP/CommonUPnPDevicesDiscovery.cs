@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.UPnP
 {
+    using SV.UPnPLite.Logging;
     using System;
     using System.Collections.Generic;
 
@@ -16,6 +17,20 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// </summary>
         public CommonUPnPDevicesDiscovery()
             : base("upnp:rootdevice")
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="CommonUPnPDevicesDiscovery" /> class.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public CommonUPnPDevicesDiscovery(ILogManager logManager)
+            : base("upnp:rootdevice", logManager)
         {
         }
 
@@ -71,7 +86,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// </exception>
         protected override UPnPService CreateServiceInstance(string serviceType, Uri controlUri, Uri eventsUri)
         {
-            return new UPnPService(serviceType, controlUri, eventsUri);
+            return new UPnPService(serviceType, controlUri, eventsUri, this.logManager);
         }
 
         #endregion

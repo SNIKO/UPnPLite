@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.DLNA.Services.AvTransport;
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
     using SV.UPnPLite.Protocols.UPnP;
@@ -20,14 +21,6 @@ namespace SV.UPnPLite.Protocols.DLNA
 
         private readonly IAvTransportService avTransportService;
 
-        private readonly OnDemandObservable<MediaRendererState> stateChangesObservableSequence;
-
-        private readonly OnDemandObservable<TimeSpan> positionChangesObservableSequence;
-
-        private MediaRendererState currentState;
-
-        private TimeSpan currentPosition;
-
         private readonly static Dictionary<string, MediaRendererState> statesMapper = new Dictionary<string, MediaRendererState>(StringComparer.OrdinalIgnoreCase)
                 {
                     { TransportState.NoMediaPresent, MediaRendererState.NoMediaPresent },
@@ -36,6 +29,14 @@ namespace SV.UPnPLite.Protocols.DLNA
                     { TransportState.Stopped, MediaRendererState.Stopped },
                     { TransportState.Transitioning, MediaRendererState.Buffering } 
                 };
+
+        private OnDemandObservable<MediaRendererState> stateChangesObservableSequence;
+
+        private OnDemandObservable<TimeSpan> positionChangesObservableSequence;
+
+        private MediaRendererState currentState;
+
+        private TimeSpan currentPosition;
 
         #endregion
 
@@ -61,40 +62,34 @@ namespace SV.UPnPLite.Protocols.DLNA
 
             this.avTransportService = avTransportService;
 
-            this.positionChangesObservableSequence = new OnDemandObservable<TimeSpan>(o =>
-                {
-                    var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
-                        async _ =>
-                        {
-                            var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
+            this.Initialize();
+        }
 
-                            if (this.currentPosition != positionInfo.RelativeTimePosition)
-                            {
-                                this.currentPosition = positionInfo.RelativeTimePosition;
-                                o.OnNext(positionInfo.RelativeTimePosition);
-                            }
-                        });
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MediaRenderer"/> class.
+        /// </summary>
+        /// <param name="udn">
+        ///     A universally-unique identifier for the device.
+        /// </param>
+        /// <param name="avTransportService">
+        ///     A <see cref="IAvTransportService"/> to use for controlling the transport of media streams.
+        /// </param>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="avTransportService"/> is <c>null</c> -OR-
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public MediaRenderer(string udn, IAvTransportService avTransportService, ILogManager logManager)
+            : base(udn, logManager)
+        {
+            avTransportService.EnsureNotNull("avTransportService");
 
-                    return subscription.Dispose;
-                });
+            this.avTransportService = avTransportService;
 
-            this.stateChangesObservableSequence = new OnDemandObservable<MediaRendererState>(o =>
-            {
-                var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
-                    async _ =>
-                    {
-                        var info = await this.avTransportService.GetTransportInfoAsync(0);
-                        var state = ParseTransportState(info.State);
-
-                        if (this.currentState != state)
-                        {
-                            this.currentState = state;
-                            o.OnNext(ParseTransportState(info.State));
-                        }
-                    });
-
-                return subscription.Dispose;
-            });
+            this.Initialize();
         }
 
         #endregion
@@ -214,6 +209,44 @@ namespace SV.UPnPLite.Protocols.DLNA
             }
 
             return result;
+        }
+
+        private void Initialize()
+        {
+            this.positionChangesObservableSequence = new OnDemandObservable<TimeSpan>(o =>
+            {
+                var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
+                    async _ =>
+                    {
+                        var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
+
+                        if (this.currentPosition != positionInfo.RelativeTimePosition)
+                        {
+                            this.currentPosition = positionInfo.RelativeTimePosition;
+                            o.OnNext(positionInfo.RelativeTimePosition);
+                        }
+                    });
+
+                return subscription.Dispose;
+            });
+
+            this.stateChangesObservableSequence = new OnDemandObservable<MediaRendererState>(o =>
+            {
+                var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
+                    async _ =>
+                    {
+                        var info = await this.avTransportService.GetTransportInfoAsync(0);
+                        var state = ParseTransportState(info.State);
+
+                        if (this.currentState != state)
+                        {
+                            this.currentState = state;
+                            o.OnNext(ParseTransportState(info.State));
+                        }
+                    });
+
+                return subscription.Dispose;
+            });
         }
 
         private MediaResource SelectResourceForPlayback(MediaItem mediaItem)

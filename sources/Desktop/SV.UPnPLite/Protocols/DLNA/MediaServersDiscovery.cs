@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA
 {
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
@@ -19,6 +20,20 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </summary>
         public MediaServersDiscovery()
             : base("urn:schemas-upnp-org:device:MediaServer:1")
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MediaServersDiscovery" /> class.
+        /// </summary>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public MediaServersDiscovery(ILogManager logManager)
+            : base("urn:schemas-upnp-org:device:MediaServer:1", logManager)
         {
         }
 
@@ -42,7 +57,7 @@ namespace SV.UPnPLite.Protocols.DLNA
         {
             var avTransportService = services.FirstOrDefault(s => s is IContentDirectoryService) as IContentDirectoryService;
 
-            return new MediaServer(udn, avTransportService);
+            return new MediaServer(udn, avTransportService, this.logManager);
         }
 
         /// <summary>
@@ -66,7 +81,7 @@ namespace SV.UPnPLite.Protocols.DLNA
 
             if (serviceType.StartsWith("urn:schemas-upnp-org:service:ContentDirectory", StringComparison.OrdinalIgnoreCase))
             {
-                service = new ContentDirectoryService(serviceType, controlUri, eventsUri);
+                service = new ContentDirectoryService(serviceType, controlUri, eventsUri, this.logManager);
             }
 
             return service;

@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
@@ -35,6 +36,32 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// </exception>
         public AvTransportService(string serviceType, Uri controlUri, Uri eventsUri)
             : base(serviceType, controlUri, eventsUri)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instanceId of the <see cref="AvTransportService" /> class.
+        /// </summary>
+        /// <param name="serviceType">
+        ///     A type of the service.
+        /// </param>
+        /// <param name="controlUri">
+        ///     An URL for sending commands to the service.
+        /// </param>
+        /// <param name="eventsUri">
+        ///     An URL for subscrinbing to service's events.
+        /// </param>
+        /// <param name="logManager">
+        ///     The <see cref="ILogManager"/> to use for logging the debug information.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
+        ///     <paramref name="controlUri"/> is <c>null</c> -OR-
+        ///     <paramref name="eventsUri"/> is <c>null</c> -OR-
+        ///     <paramref name="logManager"/> is <c>null</c>.
+        /// </exception>
+        public AvTransportService(string serviceType, Uri controlUri, Uri eventsUri, ILogManager logManager)
+            : base(serviceType, controlUri, eventsUri, logManager)
         {
         }
 

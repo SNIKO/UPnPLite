@@ -147,11 +147,13 @@ namespace SV.UPnPLite.Protocols.UPnP
         internal UPnPDevicesDiscovery(string targetDevices, ISSDPServer ssdpServer, ILogManager logManager)
             : this(targetDevices, ssdpServer)
         {
-            logManager.EnsureNotNull("logManager");
             this.logManager = logManager;
 
-            this.logger = logManager.GetLogger(this.GetType());
-            this.logger.Instance().Info("Started discovering for a '{0}' devices", targetDevices);
+            if (this.logManager != null)
+            {
+                this.logger = this.logManager.GetLogger(this.GetType());
+                this.logger.Instance().Info("Started discovering for a '{0}' devices", targetDevices);
+            }
         }
 
         #endregion

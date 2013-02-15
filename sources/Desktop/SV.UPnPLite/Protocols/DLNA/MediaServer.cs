@@ -127,7 +127,7 @@ namespace SV.UPnPLite.Protocols.DLNA
             var searchResult = await this.contentDirectoryService.SearchAsync("0", searchCriteria, "*", 0, 0, string.Empty);
 
             // TODO: Optimize it
-            return searchResult.Result.Select(o => (TMedia) o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+            return searchResult.Result.Select(o => (TMedia)o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
         }
 
         private async Task EnsureSearchCapabilitesReceived()
@@ -139,5 +139,5 @@ namespace SV.UPnPLite.Protocols.DLNA
         }
 
         #endregion
-    }    
+    }
 }

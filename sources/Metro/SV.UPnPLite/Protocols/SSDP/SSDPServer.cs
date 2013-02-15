@@ -59,15 +59,13 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// <param name="logManager">
         ///     The <see cref="ILogManager"/> to use for logging the debug information
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="logManager"/> is <c>null</c>.
-        /// </exception>
         private SSDPServer(ILogManager logManager)
             : this()
         {
-            logManager.EnsureNotNull("logManager");
-
-            logger = logManager.GetLogger<SSDPServer>();
+            if (logManager != null)
+            {
+                logger = logManager.GetLogger<SSDPServer>();
+            }
         }
 
         /// <summary>

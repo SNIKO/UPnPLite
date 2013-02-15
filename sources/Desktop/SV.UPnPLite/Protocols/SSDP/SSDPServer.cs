@@ -59,15 +59,13 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// <param name="logManager">
         ///     The <see cref="ILogManager"/> to use for logging the debug information
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="logManager"/> is <c>null</c>.
-        /// </exception>
         private SSDPServer(ILogManager logManager)
             : this()
         {
-            logManager.EnsureNotNull("logManager");
-
-            logger = logManager.GetLogger<SSDPServer>();
+            if (logManager != null)
+            {
+                logger = logManager.GetLogger<SSDPServer>();
+            }
         }
 
         /// <summary>
@@ -228,9 +226,9 @@ namespace SV.UPnPLite.Protocols.SSDP
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
 
                         logger.Instance().Debug(
-                            "Sent M-Search request from local endpoint '{0}' to a multicast endpoint '{1}' with search target '{2}'.", 
-                            localEndPoint, 
-                            multicastEndPoint, 
+                            "Sent M-Search request from local endpoint '{0}' to a multicast endpoint '{1}' with search target '{2}'.",
+                            localEndPoint,
+                            multicastEndPoint,
                             searchTarget);
                     }
                     catch (SocketException ex)

@@ -45,15 +45,15 @@ namespace SV.UPnPLite.Protocols.UPnP
         ///     The <see cref="ILogManager"/> to use for logging the debug information.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="udn"/> is <c>nukk</c> or <see cref="string.Empty"/> -OR-
-        ///     <paramref name="logManager"/> is <c>null</c>.
+        ///     <paramref name="udn"/> is <c>nukk</c> or <see cref="string.Empty"/>.
         /// </exception>
         protected UPnPDevice(string udn, ILogManager logManager)
             : this(udn)
         {
-            logManager.EnsureNotNull("logManager");
-
-            this.logger = logManager.GetLogger(this.GetType());
+            if (logManager != null)
+            {
+                this.logger = logManager.GetLogger(this.GetType());
+            }
         }
 
         #endregion

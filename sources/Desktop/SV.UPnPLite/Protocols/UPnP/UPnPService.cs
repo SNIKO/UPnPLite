@@ -70,15 +70,15 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="serviceType"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
         ///     <paramref name="controlUri"/> is <c>null</c> -OR-
-        ///     <paramref name="eventsUri"/> is <c>null</c> -OR- 
-        ///     <paramref name="logManager"/> is <c>null</c>.
+        ///     <paramref name="eventsUri"/> is <c>null</c>.
         /// </exception>
         public UPnPService(string serviceType, Uri controlUri, Uri eventsUri, ILogManager logManager)
             : this(serviceType, controlUri, eventsUri)
         {
-            logManager.EnsureNotNull("logManager");
-            
-            this.logger = logManager.GetLogger(this.GetType());
+            if (logManager != null)
+            {
+                this.logger = logManager.GetLogger(this.GetType());
+            }
         }
 
         #endregion

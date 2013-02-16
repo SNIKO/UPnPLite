@@ -117,6 +117,9 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\XDocumentExtensions.cs">
       <Link>Extensions\XDocumentExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Extensions\XElementExtensions.cs">
+      <Link>Extensions\XElementExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Logging\ILogger.cs">
       <Link>Logging\ILogger.cs</Link>
     </Compile>

@@ -36,6 +36,7 @@
     <Compile Include="Extensions\ObservableCollectionExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XDocumentExtensions.cs" />
+    <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\ILogManager.cs" />
     <Compile Include="OnDemandObservable.cs" />

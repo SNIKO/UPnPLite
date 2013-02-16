@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA
 {
+    using SV.UPnPLite.Extensions;
     using SV.UPnPLite.Logging;
     using SV.UPnPLite.Protocols.DLNA.Services.AvTransport;
     using SV.UPnPLite.Protocols.UPnP;
@@ -47,17 +48,39 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <param name="udn">
         ///     A universally-unique identifier for the device.
         /// </param>
+        /// <param name="name">
+        ///     A friendly name of the device.
+        /// </param>
         /// <param name="services">
         ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="UPnPDevice"/>.
+        ///     A concrete instance of the <see cref="UPnPDevice"/> if all reuqired service available; otherwise, <c>null</c>.
         /// </returns>
-        protected override MediaRenderer CreateDeviceInstance(string udn, IEnumerable<UPnPService> services)
+        protected override MediaRenderer CreateDeviceInstance(string udn, string name, IEnumerable<UPnPService> services)
         {
+            var missingServices = new List<string>();
+            
             var avTransportService = services.FirstOrDefault(s => s is IAvTransportService) as IAvTransportService;
+            if (avTransportService == null)
+            {
+                missingServices.Add(typeof(IAvTransportService).Name);
+            }
 
-            return new MediaRenderer(udn, avTransportService, this.logManager);
+            if (missingServices.Any() == false)
+            {
+                return new MediaRenderer(udn, avTransportService, this.logManager);
+            }
+            else
+            {
+                this.logger.Instance().Warning(
+                    "Can't add device as one of required services is missing. [missingServices=[{0}], deviceName={1}, deviceUDN={2}]",
+                    string.Join(",", missingServices),
+                    name,
+                    udn);
+
+                return null;
+            }
         }
 
         /// <summary>

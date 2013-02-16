@@ -44,20 +44,16 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <param name="udn">
         ///     A universally-unique identifier for the device.
         /// </param>
+        /// <param name="name">
+        ///     A friendly name of the device.
+        /// </param>
         /// <param name="services">
         ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="UPnPDevice"/>.
+        ///     A concrete instance of the <see cref="UPnPDevice"/> if all reuqired service available; otherwise, <c>null</c>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="udn"/> is <c>null</c> or <see cref="string.Empty"/> -OR-
-        ///     <paramref name="services"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     One of the required services is not found in <paramref name="services"/>.
-        /// </exception>
-        protected override CommonUPnPDevice CreateDeviceInstance(string udn, IEnumerable<UPnPService> services)
+        protected override CommonUPnPDevice CreateDeviceInstance(string udn, string name, IEnumerable<UPnPService> services)
         {
             var device = new CommonUPnPDevice(udn) { Services = services };
 

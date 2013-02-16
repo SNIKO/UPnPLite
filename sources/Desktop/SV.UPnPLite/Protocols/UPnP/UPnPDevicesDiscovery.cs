@@ -152,7 +152,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             if (this.logManager != null)
             {
                 this.logger = this.logManager.GetLogger(this.GetType());
-                this.logger.Instance().Info("Started discovering for a '{0}' devices", targetDevices);
+                this.logger.Instance().Info("Started listening for a devices' notifications. [targetDevices={0}]", targetDevices);
             }
         }
 
@@ -166,13 +166,16 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <param name="udn">
         ///     A universally-unique identifier for the device.
         /// </param>
+        /// <param name="name">
+        ///     A friendly name of the device.
+        /// </param>
         /// <param name="services">
         ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="UPnPDevice"/>.
+        ///     A concrete instance of the <see cref="UPnPDevice"/> if all reuqired service available; otherwise, <c>null</c>.
         /// </returns>
-        protected abstract TDevice CreateDeviceInstance(string udn, IEnumerable<UPnPService> services);
+        protected abstract TDevice CreateDeviceInstance(string udn, string name, IEnumerable<UPnPService> services);
 
         /// <summary>
         ///     Creates an instance of concrere <see cref="UPnPService"/> which manages concrete service on a device.
@@ -207,18 +210,30 @@ namespace SV.UPnPLite.Protocols.UPnP
                             var location = new Uri(notifyMessage.Location);
                             var host = "{0}:{1}".F(location.Host, location.Port);
 
-                            var device = CreateDevice(host, response.GetResponseStream());
-                            var deviceEx = new DeviceLifetimeControlInfo
-                                               {
-                                                   Device = device,
-                                                   LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN))
-                                               };
+                            var device = ParseDevice(host, response.GetResponseStream());
+                            if (device != null)
+                            {
+                                var deviceEx = new DeviceLifetimeControlInfo
+                                    {
+                                        Device = device,
+                                        LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN))
+                                    };
 
-                            availableDevices[notifyMessage.USN] = deviceEx;
+                                availableDevices[notifyMessage.USN] = deviceEx;
 
-                            this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice> { Activity = DeviceActivity.Available, Device = device });
+                                this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice>
+                                    {
+                                        Activity = DeviceActivity.Available,
+                                        Device = device
+                                    });
 
-                            this.logger.Instance().Info("Device '{0}' found. It will be valid for a {1} seconds. {2} devices in total", device.FriendlyName, notifyMessage.MaxAge, availableDevices.Count);
+                                this.logger.Instance().Info(
+                                    "Device found. [deviceName={0}, deviceUDN={1}, maxAge={2}, devicesInTotal={3}]",
+                                    device.FriendlyName, 
+                                    device.UDN,
+                                    notifyMessage.MaxAge, 
+                                    availableDevices.Count);
+                            }
                         }
                     }
                 }
@@ -241,7 +256,11 @@ namespace SV.UPnPLite.Protocols.UPnP
 
                 if (this.availableDevices.TryGetValue(notifyMessage.USN, out deviceLifetimeControl))
                 {
-                    this.logger.Instance().Info("Device '{0}' just renewed it's lifetime to a next {1} seconds.", deviceLifetimeControl.Device.FriendlyName, notifyMessage.MaxAge);
+                    this.logger.Instance().Info(
+                        "Device just renewed it's lifetime. [deviceName={0}, deviceUDN={1}, maxAge={2}]", 
+                        deviceLifetimeControl.Device.FriendlyName,
+                        deviceLifetimeControl.Device.UDN,
+                        notifyMessage.MaxAge);
 
                     deviceLifetimeControl.LifeTimeControl.Dispose();
                     deviceLifetimeControl.LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN));
@@ -262,7 +281,11 @@ namespace SV.UPnPLite.Protocols.UPnP
                     this.availableDevices.Remove(deviceUSN);
                     this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice> { Activity = DeviceActivity.Gone, Device = deviceLifetimeControl.Device });
 
-                    this.logger.Instance().Info("Device '{0}' gone. {1} devices left", deviceLifetimeControl.Device.FriendlyName, availableDevices.Count);
+                    this.logger.Instance().Info(
+                        "Device gone. [deviceName={0}, deviceUDN={1}, devicesLeft={2}]", 
+                        deviceLifetimeControl.Device.FriendlyName, 
+                        deviceLifetimeControl.Device.UDN, 
+                        availableDevices.Count);
                 }
             }
         }
@@ -286,7 +309,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                 {
                     version.Major = 1;
 
-                    this.logger.Instance().Warning("Can't parse major part of device's version '{0}'", deviceTypeString);
+                    this.logger.Instance().Warning("Can't parse major part of device's version. [deviceType={0}]", deviceTypeString);
                 }
 
                 if (majorMinorSplit.Length > 1 && int.TryParse(majorMinorSplit[1], out value))
@@ -296,59 +319,156 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
             else
             {
-                this.logger.Instance().Warning("The version is missing in device's type '{0}'", deviceTypeString);
+                this.logger.Instance().Warning("The version is missing in device's type. [deviceType={0}]", deviceTypeString);
             }
 
             return version;
         }
 
-        private TDevice CreateDevice(string host, Stream deviceDescription)
+        private TDevice ParseDevice(string host, Stream deviceDescription)
         {
+            TDevice device = null;
             var xmlDoc = XDocument.Load(deviceDescription);
-            var upnpNamespace = XNamespace.Get("urn:schemas-upnp-org:device-1-0");
-            var urlBaseNode = xmlDoc.Element(upnpNamespace + "URLBase");
 
-            Uri baseUri;
-            if (urlBaseNode == null || string.IsNullOrWhiteSpace(urlBaseNode.Value))
+            if (xmlDoc.Root != null)
             {
-                baseUri = new Uri("http://{0}".F(host));
+                Uri baseUri;
+                var urlBaseNode = xmlDoc.Root.Element(Namespaces.Device + "URLBase");
+                if (urlBaseNode == null || string.IsNullOrWhiteSpace(urlBaseNode.Value))
+                {
+                    baseUri = new Uri("http://{0}".F(host));
+                }
+                else
+                {
+                    baseUri = new Uri(urlBaseNode.Value);
+                }
+
+                var deviceElement = xmlDoc.Root.Element(Namespaces.Device + "device");
+                if (deviceElement != null)
+                {
+                    var deviceType          = deviceElement.Element(Namespaces.Device + "deviceType");
+                    var deviceUDN           = deviceElement.Element(Namespaces.Device + "UDN");
+                    var deviceName          = deviceElement.Element(Namespaces.Device + "friendlyName");
+                    var manufactuurer       = deviceElement.Element(Namespaces.Device + "manufacturer");
+                    var servicesElement     = deviceElement.Element(Namespaces.Device + "serviceList");
+                    var iconsElement        = deviceElement.Element(Namespaces.Device + "iconList");
+
+                    if (deviceType != null && deviceUDN != null && deviceName != null)
+                    {                        
+                        var services = this.ParseServices(host, deviceName.Value, deviceUDN.Value, baseUri, servicesElement);
+
+                        device = this.CreateDeviceInstance(deviceUDN.Value, deviceName.Value, services);
+                        if (device != null)
+                        {
+                            device.DeviceVersion = ParseDeviceVersion(deviceType.Value);
+                            device.FriendlyName = deviceName.Value;
+                            device.Manufacturer = manufactuurer.ValueOrDefault();
+                            device.Icons = this.ParseIcons(baseUri, iconsElement);
+                        }
+                    }
+                    else
+                    {
+                        this.logger.Instance().Warning(
+                            "Can't add device as one of required elements is missing. [host={0}, deviceName={1}, deviceType={2}, deviceUDN={3}]",
+                            host,
+                            deviceName.ValueOrDefault(),
+                            deviceType.ValueOrDefault(),
+                            deviceUDN.ValueOrDefault());
+                    }
+                }
+                else
+                {
+                    this.logger.Instance().Warning("Can't add device as it's description is missing. [host={0}]", host);
+                }
             }
             else
             {
-                baseUri = new Uri(urlBaseNode.Value);
+                this.logger.Instance().Warning("Can't add device as it's description is empty. [host={0}]", host);
             }
 
-            var deviceElement = xmlDoc.Descendants(upnpNamespace + "device").First();
-            var deviceType = deviceElement.Element(upnpNamespace + "deviceType").Value;
-            var deviceUDN = deviceElement.Element(upnpNamespace + "UDN").Value;
-            var serciceElements = deviceElement.Descendants(upnpNamespace + "service");
-
-            var services = (from serciceElement in serciceElements
-                            let serviceType = serciceElement.Element(upnpNamespace + "serviceType").Value
-                            let controlUri = new Uri(baseUri, serciceElement.Element(upnpNamespace + "controlURL").Value)
-                            let eventsSunscriptionUri = new Uri(baseUri, serciceElement.Element(upnpNamespace + "eventSubURL").Value)
-                            select this.CreateServiceInstance(serviceType, controlUri, eventsSunscriptionUri)).ToList();
-
-            var device = this.CreateDeviceInstance(deviceUDN, services);
-
-            device.FriendlyName = deviceElement.Element(upnpNamespace + "friendlyName").Value;
-            device.DeviceVersion = ParseDeviceVersion(deviceType);
-            device.Manufacturer = deviceElement.Element(upnpNamespace + "manufacturer").Value;
-
-            device.Icons = (from icon in deviceElement.Descendants(upnpNamespace + "icon")
-                            select new DeviceIcon
-                                {
-                                    Type = icon.Element(upnpNamespace + "mimetype").Value,
-                                    Size = new Size
-                                        {
-                                            Width = int.Parse(icon.Element(upnpNamespace + "width").Value),
-                                            Height = int.Parse(icon.Element(upnpNamespace + "height").Value),
-                                        },
-                                    ColorDepth = icon.Element(upnpNamespace + "depth").Value,
-                                    Url = new Uri(baseUri, icon.Element(upnpNamespace + "url").Value)
-                                }).ToList();
-
             return device;
+        }
+
+        private IEnumerable<UPnPService> ParseServices(string host, string deviceName, string deviceUDN, Uri baseUri, XElement servicesListElement)
+        {
+            var services = new List<UPnPService>();
+
+            if (servicesListElement != null)
+            {
+                var serviceElements = servicesListElement.Descendants(Namespaces.Device + "service");
+
+                foreach (var serviceElement in serviceElements)
+                {
+                    var serviceType             = serviceElement.Element(Namespaces.Device + "serviceType");
+                    var controlUri              = serviceElement.Element(Namespaces.Device + "controlURL");
+                    var eventsSubscriptionUri   = serviceElement.Element(Namespaces.Device + "eventSubURL");
+
+                    Uri completeControlUri;
+                    Uri completeSubscriptionUri;
+
+                    Uri.TryCreate(baseUri, controlUri.ValueOrDefault(), out completeControlUri);
+                    Uri.TryCreate(baseUri, eventsSubscriptionUri.ValueOrDefault(), out completeSubscriptionUri);
+
+                    if (serviceType != null && completeControlUri != null && completeSubscriptionUri != null)
+                    {
+                        var service = this.CreateServiceInstance(serviceType.Value, completeControlUri, completeSubscriptionUri);
+
+                        services.Add(service);
+                    }
+                    else
+                    {
+                        this.logger.Instance().Warning(
+                            "Can't use service as one of the reuqired elemetns is invalid. [serviceType={0}, controlUri={1}, eventsSubscriptionUri={2}, host={3}, deviceName={4}, deviceUDN={5}]",
+                            serviceType,
+                            controlUri.ValueOrDefault(),
+                            eventsSubscriptionUri.ValueOrDefault(),
+                            host,
+                            deviceName,
+                            deviceUDN);
+                    }
+                }
+            }
+
+            return services;
+        }
+
+        private IEnumerable<DeviceIcon> ParseIcons(Uri baseUri, XElement iconsListElement)
+        {
+            var icons = new List<DeviceIcon>();
+
+            if (iconsListElement != null)
+            {
+                var iconElements = iconsListElement.Descendants(Namespaces.Device + "icon");
+
+                foreach (var iconElement in iconElements)
+                {
+                    var width   = iconElement.Element(Namespaces.Device + "width");
+                    var height  = iconElement.Element(Namespaces.Device + "height");
+                    var uri     = iconElement.Element(Namespaces.Device + "url");
+                    var depth   = iconElement.Element(Namespaces.Device + "depth");
+                    var type    = iconElement.Element(Namespaces.Device + "mimetype");
+
+                    Uri completeUri;
+                    if (uri != null && Uri.TryCreate(baseUri, uri.Value, out completeUri))
+                    {
+                        var icon = new DeviceIcon();
+                        icon.Url = completeUri;
+                        icon.Type = type.ValueOrDefault();
+                        icon.ColorDepth = depth.ValueOrDefault();
+
+                        int parsedWidth;
+                        int parsedHeight;
+                        if (width != null && height != null && int.TryParse(width.Value, out parsedWidth) && int.TryParse(height.Value, out parsedHeight))
+                        {
+                            icon.Size = new Size(parsedWidth, parsedHeight);
+                        }
+
+                        icons.Add(icon);
+                    }
+                }
+            }
+
+            return icons;
         }
 
         #endregion
@@ -360,6 +480,14 @@ namespace SV.UPnPLite.Protocols.UPnP
             public TDevice Device { get; set; }
 
             public IDisposable LifeTimeControl { get; set; }
+        }
+
+        /// <summary>
+        ///     Defines some standard XML namespaces.
+        /// </summary>
+        protected static class Namespaces
+        {
+            public static XNamespace Device = XNamespace.Get("urn:schemas-upnp-org:device-1-0");
         }
 
         #endregion

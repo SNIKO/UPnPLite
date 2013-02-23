@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using SV.UPnPLite.Protocols.UPnP;
+    using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
@@ -42,6 +43,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
@@ -76,6 +80,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
@@ -90,6 +97,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </returns>
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
         /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.

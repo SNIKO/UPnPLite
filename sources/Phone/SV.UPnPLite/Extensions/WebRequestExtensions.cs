@@ -17,11 +17,26 @@ namespace SV.UPnPLite.Extensions
             return task;
         }
 
-        public static Task<WebResponse> GetResponseAsync(this WebRequest instance)
+        public static Task<WebResponse> GetResponseAsync(this WebRequest request)
         {
-            var task = Task.Factory.FromAsync(instance.BeginGetResponse, asyncResult => instance.EndGetResponse(asyncResult), null);
+            var taskComplete = new TaskCompletionSource<WebResponse>();
+            request.BeginGetResponse(asyncResponse =>
+            {
+                try
+                {
+                    var responseRequest = (WebRequest)asyncResponse.AsyncState;
+                    var response = responseRequest.EndGetResponse(asyncResponse);
 
-            return task;
+                    taskComplete.TrySetResult(response);
+                }
+                catch (WebException ex)
+                {
+                    var failedResponse = ex.Response;
+                    taskComplete.TrySetResult(failedResponse);
+                }
+            }, request);
+
+            return taskComplete.Task;
         }
     }
 }

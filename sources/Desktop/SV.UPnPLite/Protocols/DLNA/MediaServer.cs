@@ -90,6 +90,10 @@ namespace SV.UPnPLite.Protocols.DLNA
 
                 return browseResult.Result;
             }
+            catch (FormatException ex)
+            {
+                throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
+            }
             catch (UPnPServiceException ex)
             {
                 throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root folders", ex);
@@ -118,9 +122,13 @@ namespace SV.UPnPLite.Protocols.DLNA
 
                 return browseResult.Result;
             }
+            catch (FormatException ex)
+            {
+                throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
+            }
             catch (UPnPServiceException ex)
             {
-                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}".F(container.Title), ex);
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}'".F(container.Title), ex);
             }
         }
 
@@ -146,6 +154,10 @@ namespace SV.UPnPLite.Protocols.DLNA
 
                 // TODO: Optimize it
                 return searchResult.Result.Select(o => (TMedia)o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+            }
+            catch (FormatException ex)
+            {
+                throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
             }
             catch (UPnPServiceException ex)
             {

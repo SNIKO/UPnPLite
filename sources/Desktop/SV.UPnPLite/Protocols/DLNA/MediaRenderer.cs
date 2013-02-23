@@ -152,6 +152,10 @@ namespace SV.UPnPLite.Protocols.DLNA
             {
                 await this.avTransportService.SetAvTransportURIAsync(0, resource.Uri, resource.Metadata);
             }
+            catch (FormatException ex)
+            {
+                throw new MediaRendererException(this, MediaRendererError.UnexpectedError, "Received result is in a bad format", ex);
+            }
             catch (UPnPServiceException ex)
             {
                 throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when opening '{0}'".F(resource.Uri), ex);
@@ -250,6 +254,10 @@ namespace SV.UPnPLite.Protocols.DLNA
 
                 return info.RelativeTimePosition;
             }
+            catch (FormatException ex)
+            {
+                throw new MediaRendererException(this, MediaRendererError.UnexpectedError, "Received result is in a bad format", ex);
+            }
             catch (UPnPServiceException ex)
             {
                 throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting current position", ex);
@@ -275,6 +283,10 @@ namespace SV.UPnPLite.Protocols.DLNA
                 var stateInfo = await this.avTransportService.GetTransportInfoAsync(0);
 
                 return ParseTransportState(stateInfo.State);
+            }
+            catch (FormatException ex)
+            {
+                throw new MediaRendererException(this, MediaRendererError.UnexpectedError, "Received result is in a bad format", ex);
             }
             catch (UPnPServiceException ex)
             {
@@ -313,6 +325,14 @@ namespace SV.UPnPLite.Protocols.DLNA
                                 o.OnNext(positionInfo.RelativeTimePosition);
                             }
                         }
+                        catch (WebException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
+                        }
+                        catch (FormatException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
+                        }
                         catch (UPnPServiceException ex)
                         {
                             logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
@@ -337,6 +357,14 @@ namespace SV.UPnPLite.Protocols.DLNA
                                 this.currentState = state;
                                 o.OnNext(ParseTransportState(info.State));
                             }
+                        }
+                        catch (WebException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
+                        }
+                        catch (FormatException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
                         }
                         catch (UPnPServiceException ex)
                         {

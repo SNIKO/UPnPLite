@@ -90,6 +90,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An unexpected error occurred when executing request on service.
         /// </exception>
@@ -126,6 +129,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
@@ -152,6 +158,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// </returns>
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
         /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
@@ -190,6 +199,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
@@ -220,6 +232,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// </returns>
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
         /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
@@ -271,7 +286,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
                                         { "Speed", speed },
                                     };
 
-            await this.InvokeActionAsync("Play", arguments);
+            try
+            {
+                await this.InvokeActionAsync("Play", arguments);
+            }
+            catch (FormatException)
+            {
+                // We don't expect result, so, we don't care if parsing error occurred
+            }
         }
 
         /// <summary>
@@ -291,7 +313,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// </exception>
         public async Task PauseAsync(uint instanceId)
         {
-            await this.InvokeActionAsync("Pause", new Dictionary<string, object> { { "InstanceID", instanceId } });
+            try
+            {
+                await this.InvokeActionAsync("Pause", new Dictionary<string, object> { { "InstanceID", instanceId } });
+            }
+            catch (FormatException)
+            {
+                // We don't expect result, so, we don't care if parsing error occurred
+            }
         }
 
         /// <summary>
@@ -311,7 +340,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// </exception>
         public async Task StopAsync(uint instanceId)
         {
-            await this.InvokeActionAsync("Stop", new Dictionary<string, object> { { "InstanceID", instanceId } });
+            try
+            {
+                await this.InvokeActionAsync("Stop", new Dictionary<string, object> { { "InstanceID", instanceId } });
+            }
+            catch (FormatException)
+            {
+                // We don't expect result, so, we don't care if parsing error occurred
+            }
         }
 
         #endregion

@@ -5,10 +5,12 @@ namespace SV.UPnPLite.Protocols.UPnP
     using SV.UPnPLite.Logging;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Xml;
     using System.Xml.Linq;
 
     /// <summary>
@@ -109,6 +111,9 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
+        /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
@@ -134,6 +139,9 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// </exception>
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///     Received result is in a bad format.
         /// </exception>
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
@@ -170,8 +178,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                     var responseStream = ex.Response.GetResponseStream();
                     if (responseStream != null)
                     {
-                        var document = XDocument.Load(responseStream);
-                        var error = this.ParseActionError(document, ex);
+                        var error = this.ParseActionError(action, responseStream, ex);
                         if (error != null)
                         {
                             error.Action = action;
@@ -179,22 +186,14 @@ namespace SV.UPnPLite.Protocols.UPnP
 
                             throw error;
                         }
-                        else
-                        {
-                            this.logger.Warning("Can't parse an error response: [action={0}]: \n{1}", action, document.ToString());
+                    }
+                }
 
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
+            }
+            catch (XmlException ex)
+            {
+                throw new FormatException("An error occurred when parsing response for an action '{0}'".F(action), ex);
             }
         }
 
@@ -239,20 +238,34 @@ namespace SV.UPnPLite.Protocols.UPnP
             return result;
         }
 
-        private UPnPServiceException ParseActionError(XDocument error, Exception actualException)
+        private UPnPServiceException ParseActionError(string action, Stream responseStream, Exception actualException)
         {
             UPnPServiceException exception = null;
 
-            var upnpErrorElement = error.Descendants(Namespaces.Control + "UPnPError").FirstOrDefault();
-            if (upnpErrorElement != null)
-            {
-                var errorCodeElement = upnpErrorElement.Element(Namespaces.Control + "errorCode");
-                var errorDesctiptionElement = upnpErrorElement.Element(Namespaces.Control + "errorDescription");
+            var responseReader = new StreamReader(responseStream);
+            var response = responseReader.ReadToEnd();
 
-                int errorCode;
-                if (errorCodeElement != null && int.TryParse(errorCodeElement.ValueOrDefault(), out errorCode))
+            if (string.IsNullOrWhiteSpace(response) == false)
+            {
+                try
                 {
-                    exception = new UPnPServiceException(errorCode, errorDesctiptionElement.ValueOrDefault(), actualException);
+                    var document = XDocument.Load(response);
+                    var upnpErrorElement = document.Descendants(Namespaces.Control + "UPnPError").FirstOrDefault();
+                    if (upnpErrorElement != null)
+                    {
+                        var errorCodeElement = upnpErrorElement.Element(Namespaces.Control + "errorCode");
+                        var errorDesctiptionElement = upnpErrorElement.Element(Namespaces.Control + "errorDescription");
+
+                        int errorCode;
+                        if (errorCodeElement != null && int.TryParse(errorCodeElement.ValueOrDefault(), out errorCode))
+                        {
+                            exception = new UPnPServiceException(errorCode, errorDesctiptionElement.ValueOrDefault(), actualException);
+                        }
+                    }
+                }
+                catch (XmlException ex)
+                {
+                    this.logger.Instance().Warning(ex, "An error occurred when parsing error response. [action='{0}']\nResponse:\n{1}", action, response);
                 }
             }
 

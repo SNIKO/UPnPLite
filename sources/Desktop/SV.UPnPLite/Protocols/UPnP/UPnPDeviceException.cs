@@ -78,7 +78,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         {
             var description = new StringBuilder();
             description.AppendLine("{0}: {1}".F(this.GetType(), this.Message));
-            description.AppendLine("Device: address='{0}', name='{1}', udn='{2}".F(this.Device.Address, this.Device.FriendlyName, this.Device.UDN));
+            description.AppendLine("Device: address='{0}', name='{1}', udn='{2}'".F(this.Device.Address, this.Device.FriendlyName, this.Device.UDN));
 
             if (this.InnerException != null)
             {

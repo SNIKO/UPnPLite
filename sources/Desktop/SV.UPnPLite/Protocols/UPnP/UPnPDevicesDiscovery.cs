@@ -202,39 +202,47 @@ namespace SV.UPnPLite.Protocols.UPnP
                 {
                     var request = WebRequest.Create(notifyMessage.Location);
                     var response = await request.GetResponseAsync();
+                    var responseStream = response.GetResponseStream();
 
-                    lock (this.availableDevices)
+                    if (responseStream != null)
                     {
-                        if (availableDevices.ContainsKey(notifyMessage.USN) == false)
+                        lock (this.availableDevices)
                         {
-                            var location = new Uri(notifyMessage.Location);
-                            var host = "{0}:{1}".F(location.Host, location.Port);
-
-                            var device = ParseDevice(host, response.GetResponseStream());
-                            if (device != null)
+                            if (availableDevices.ContainsKey(notifyMessage.USN) == false)
                             {
-                                var deviceEx = new DeviceLifetimeControlInfo
-                                    {
-                                        Device = device,
-                                        LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN))
-                                    };
+                                var location = new Uri(notifyMessage.Location);
+                                var host = "{0}:{1}".F(location.Host, location.Port);
 
-                                availableDevices[notifyMessage.USN] = deviceEx;
+                                var device = ParseDevice(host, responseStream);
+                                if (device != null)
+                                {
+                                    var deviceEx = new DeviceLifetimeControlInfo
+                                        {
+                                            Device = device,
+                                            LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN))
+                                        };
 
-                                this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice>
-                                    {
-                                        Activity = DeviceActivity.Available,
-                                        Device = device
-                                    });
+                                    availableDevices[notifyMessage.USN] = deviceEx;
 
-                                this.logger.Instance().Info(
-                                    "Device found. [deviceName={0}, deviceUDN={1}, maxAge={2}, devicesInTotal={3}]",
-                                    device.FriendlyName, 
-                                    device.UDN,
-                                    notifyMessage.MaxAge, 
-                                    availableDevices.Count);
+                                    this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice>
+                                        {
+                                            Activity = DeviceActivity.Available,
+                                            Device = device
+                                        });
+
+                                    this.logger.Instance().Info(
+                                        "Device found. [deviceName={0}, deviceUDN={1}, maxAge={2}, devicesInTotal={3}]",
+                                        device.FriendlyName,
+                                        device.UDN,
+                                        notifyMessage.MaxAge,
+                                        availableDevices.Count);
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        this.logger.Instance().Warning("An error occurred when loading description for device '{0}", notifyMessage.USN);
                     }
                 }
                 catch (WebException ex)
@@ -360,6 +368,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                         device = this.CreateDeviceInstance(deviceUDN.Value, deviceName.Value, services);
                         if (device != null)
                         {
+                            device.Address = host;
                             device.DeviceVersion = ParseDeviceVersion(deviceType.Value);
                             device.FriendlyName = deviceName.Value;
                             device.Manufacturer = manufactuurer.ValueOrDefault();

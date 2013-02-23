@@ -86,6 +86,11 @@ namespace SV.UPnPLite.Protocols.UPnP
         public string UDN { get; private set; }
 
         /// <summary>
+        ///     Gets a network address of the device.
+        /// </summary>
+        public string Address { get; internal set; }
+
+        /// <summary>
         ///     Gets the list of icons to depict device in a UI.
         /// </summary>
         public IEnumerable<DeviceIcon> Icons { get; internal set; }

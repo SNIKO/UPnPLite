@@ -3,12 +3,14 @@ namespace SV.UPnPLite.Protocols.DLNA
 {
     using SV.UPnPLite.Extensions;
     using SV.UPnPLite.Logging;
+    using SV.UPnPLite.Protocols.DLNA.Extensions;
     using SV.UPnPLite.Protocols.DLNA.Services.AvTransport;
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
@@ -131,11 +133,29 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     An <see cref="Task"/> instance which notifies about completion the async operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="item"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task OpenAsync(MediaItem item)
         {
+            item.EnsureNotNull("item");
+
             var resource = this.SelectResourceForPlayback(item);
 
-            await this.avTransportService.SetAvTransportURIAsync(0, resource.Uri, resource.Metadata);
+            try
+            {
+                await this.avTransportService.SetAvTransportURIAsync(0, resource.Uri, resource.Metadata);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when opening '{0}'".F(resource.Uri), ex);
+            }
         }
 
         /// <summary>
@@ -144,9 +164,22 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     An <see cref="Task"/> instance which notifies about completion the async operation.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task PlayAsync()
         {
-            await this.avTransportService.PlayAsync(0, "1");
+            try
+            {
+                await this.avTransportService.PlayAsync(0, "1");
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting play current media", ex);
+            }
         }
 
         /// <summary>
@@ -155,9 +188,22 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     An <see cref="Task"/> instance which notifies about completion the async operation.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task StopAsync()
         {
-            await this.avTransportService.StopAsync(0);
+            try
+            {
+                await this.avTransportService.StopAsync(0);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting stop current media", ex);
+            }
         }
 
         /// <summary>
@@ -166,9 +212,22 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     An <see cref="Task"/> instance which notifies about completion the async operation.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task PauseAsync()
         {
-            await this.avTransportService.PauseAsync(0);
+            try
+            {
+                await this.avTransportService.PauseAsync(0);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting pause current media", ex);
+            }
         }
 
         /// <summary>
@@ -177,11 +236,24 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     The current position in terms of time, from the beginning of the current track.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task<TimeSpan> GetCurrentPosition()
         {
-            var info = await this.avTransportService.GetPositionInfoAsync(0);
+            try
+            {
+                var info = await this.avTransportService.GetPositionInfoAsync(0);
 
-            return info.RelativeTimePosition;
+                return info.RelativeTimePosition;
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting current position", ex);
+            }
         }
 
         /// <summary>
@@ -190,14 +262,27 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     The conceptually top-level state of the MediaRenderer.
         /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
         public async Task<MediaRendererState> GetCurrentState()
         {
-            var stateInfo = await this.avTransportService.GetTransportInfoAsync(0);
+            try
+            {
+                var stateInfo = await this.avTransportService.GetTransportInfoAsync(0);
 
-            return ParseTransportState(stateInfo.State);
+                return ParseTransportState(stateInfo.State);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting current state", ex);
+            }
         }
 
-        private static MediaRendererState ParseTransportState(string transportState)
+        private MediaRendererState ParseTransportState(string transportState)
         {
             MediaRendererState result;
 
@@ -205,7 +290,7 @@ namespace SV.UPnPLite.Protocols.DLNA
             {
                 result = MediaRendererState.Stopped;
 
-                // TODO: Log about unexpected state
+                this.logger.Warning("An enexpected transport state received. [device={0}, transportState={1}]", this.FriendlyName, transportState);
             }
 
             return result;
@@ -218,12 +303,19 @@ namespace SV.UPnPLite.Protocols.DLNA
                 var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
                     async _ =>
                     {
-                        var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
-
-                        if (this.currentPosition != positionInfo.RelativeTimePosition)
+                        try
                         {
-                            this.currentPosition = positionInfo.RelativeTimePosition;
-                            o.OnNext(positionInfo.RelativeTimePosition);
+                            var positionInfo = await this.avTransportService.GetPositionInfoAsync(0);
+
+                            if (this.currentPosition != positionInfo.RelativeTimePosition)
+                            {
+                                this.currentPosition = positionInfo.RelativeTimePosition;
+                                o.OnNext(positionInfo.RelativeTimePosition);
+                            }
+                        }
+                        catch (UPnPServiceException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting position info. [device={0}]", this.FriendlyName);
                         }
                     });
 
@@ -235,13 +327,20 @@ namespace SV.UPnPLite.Protocols.DLNA
                 var subscription = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(
                     async _ =>
                     {
-                        var info = await this.avTransportService.GetTransportInfoAsync(0);
-                        var state = ParseTransportState(info.State);
-
-                        if (this.currentState != state)
+                        try
                         {
-                            this.currentState = state;
-                            o.OnNext(ParseTransportState(info.State));
+                            var info = await this.avTransportService.GetTransportInfoAsync(0);
+                            var state = ParseTransportState(info.State);
+
+                            if (this.currentState != state)
+                            {
+                                this.currentState = state;
+                                o.OnNext(ParseTransportState(info.State));
+                            }
+                        }
+                        catch (UPnPServiceException ex)
+                        {
+                            logger.Warning(ex, "An error occurred when requesting transport info. [device={0}]", this.FriendlyName);
                         }
                     });
 

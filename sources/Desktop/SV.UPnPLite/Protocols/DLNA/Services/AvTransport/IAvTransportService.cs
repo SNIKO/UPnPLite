@@ -1,6 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 {
+    using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Net;
     using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task SetAvTransportURIAsync(uint instanceId, string currentUri, string currentUriMetadata);
@@ -58,7 +59,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task SetNextAvTransportURIAsync(uint instanceId, string nextUri, string nextUriMetadata);
@@ -75,7 +76,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task<MediaInfo> GetMediaInfoAsync(uint instanceId);
@@ -92,7 +93,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task<TransportInfo> GetTransportInfoAsync(uint instanceId);
@@ -109,7 +110,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task<PositionInfo> GetPositionInfoAsync(uint instanceId);
@@ -129,7 +130,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task PlayAsync(uint instanceId, string speed);
@@ -146,7 +147,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task PauseAsync(uint instanceId);
@@ -163,7 +164,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         Task StopAsync(uint instanceId);

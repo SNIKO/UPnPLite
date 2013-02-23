@@ -3,6 +3,7 @@ namespace SV.UPnPLite.Protocols.DLNA
 {
     using SV.UPnPLite.Extensions;
     using SV.UPnPLite.Logging;
+    using SV.UPnPLite.Protocols.DLNA.Extensions;
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory;
     using SV.UPnPLite.Protocols.UPnP;
     using System;
@@ -83,9 +84,16 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </returns>
         public async Task<IEnumerable<MediaObject>> BrowseAsync()
         {
-            var browseResult = await this.contentDirectoryService.BrowseAsync("0", BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
+            try
+            {
+                var browseResult = await this.contentDirectoryService.BrowseAsync("0", BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
 
-            return browseResult.Result;
+                return browseResult.Result;
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root folders", ex);
+            }
         }
 
         /// <summary>
@@ -102,11 +110,18 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </exception>
         public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container)
         {
-            container.EnsureNotNull("container");
+            try
+            {
+                container.EnsureNotNull("container");
 
-            var browseResult = await this.contentDirectoryService.BrowseAsync(container.Id, BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
+                var browseResult = await this.contentDirectoryService.BrowseAsync(container.Id, BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
 
-            return browseResult.Result;
+                return browseResult.Result;
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}".F(container.Title), ex);
+            }
         }
 
         /// <summary>
@@ -120,21 +135,29 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </returns>
         public async Task<IEnumerable<TMedia>> SearchAsync<TMedia>() where TMedia : MediaItem
         {
-            await this.EnsureSearchCapabilitesReceived();
-
             var objectClass = MediaObject.GetClass<TMedia>();
-            var searchCriteria = "upnp:class derivedfrom \"{0}\"".F(objectClass);
-            var searchResult = await this.contentDirectoryService.SearchAsync("0", searchCriteria, "*", 0, 0, string.Empty);
 
-            // TODO: Optimize it
-            return searchResult.Result.Select(o => (TMedia)o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+            try
+            {
+                await this.EnsureSearchCapabilitesReceivedAsync();
+
+                var searchCriteria = "upnp:class derivedfrom \"{0}\"".F(objectClass);
+                var searchResult = await this.contentDirectoryService.SearchAsync("0", searchCriteria, "*", 0, 0, string.Empty);
+
+                // TODO: Optimize it
+                return searchResult.Result.Select(o => (TMedia)o).GroupBy(m => m.Title).Select(g => g.FirstOrDefault());
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when searching for items of '{0}' class".F(objectClass), ex);
+            }
         }
 
-        private async Task EnsureSearchCapabilitesReceived()
+        private async Task EnsureSearchCapabilitesReceivedAsync()
         {
             if (this.searchCapabilities == null)
             {
-                this.searchCapabilities = await this.contentDirectoryService.GetSearchCapabilities();
+                this.searchCapabilities = await this.contentDirectoryService.GetSearchCapabilitiesAsync();
             }
         }
 

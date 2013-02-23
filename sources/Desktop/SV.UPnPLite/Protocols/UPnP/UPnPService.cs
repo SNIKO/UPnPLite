@@ -109,7 +109,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task<Dictionary<string, string>> InvokeActionAsync(string action)
@@ -135,7 +135,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <exception cref="WebException">
         ///     An error occurred when sending request to service.
         /// </exception>
-        /// <exception cref="DeviceException">
+        /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
@@ -147,6 +147,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             request.Method = "POST";
             request.ContentType = "text/xml; charset=\"utf-8\"";
             request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.ServiceType, action);
+
             using (var stream = await request.GetRequestStreamAsync())
             {
                 stream.Write(data, 0, data.Length);
@@ -155,22 +156,40 @@ namespace SV.UPnPLite.Protocols.UPnP
             try
             {
                 var response = await request.GetResponseAsync();
-                var result = ParseActionResponse(action, XDocument.Load(response.GetResponseStream()));
+                var responseStream = response.GetResponseStream();
+                var document = XDocument.Load(responseStream);
+
+                var result = this.ParseActionResponse(action, document);
 
                 return result;
             }
             catch (WebException ex)
             {
-                var serviceInternalError = (int)ex.Status == 7;
-
-                if (serviceInternalError)
+                if (ex.Response != null)
                 {
-                    var c = XNamespace.Get("urn:schemas-upnp-org:control-1-0");
-                    var doc = XDocument.Load(ex.Response.GetResponseStream());
-                    var errorCodeElement = doc.Descendants(c + "errorCode").FirstOrDefault();
-                    var errorDesctiptionElement = doc.Descendants(c + "errorDescription").FirstOrDefault();
+                    var responseStream = ex.Response.GetResponseStream();
+                    if (responseStream != null)
+                    {
+                        var document = XDocument.Load(responseStream);
+                        var error = this.ParseActionError(document, ex);
+                        if (error != null)
+                        {
+                            error.Action = action;
+                            error.Arguments = parameters;
 
-                    throw new DeviceException(Convert.ToInt32(errorCodeElement.Value), errorDesctiptionElement.Value, ex);
+                            throw error;
+                        }
+                        else
+                        {
+                            this.logger.Warning("Can't parse an error response: [action={0}]: \n{1}", action, document.ToString());
+
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
                 else
                 {
@@ -181,7 +200,6 @@ namespace SV.UPnPLite.Protocols.UPnP
 
         private string CreateActionRequest(string action, Dictionary<string, object> parameters)
         {
-            var s = XNamespace.Get("http://schemas.xmlsoap.org/soap/envelope/");
             var u = XNamespace.Get(this.ServiceType);
             var encodingStyle = XNamespace.Get("http://schemas.xmlsoap.org/soap/encoding/");
 
@@ -197,10 +215,10 @@ namespace SV.UPnPLite.Protocols.UPnP
 
             var envelope = new XDocument(
                 new XDeclaration("1.0", "utf-8", null),
-                new XElement(s + "Envelope",
-                    new XAttribute(XNamespace.Xmlns + "s", s.NamespaceName),
-                    new XAttribute(s + "encodingStyle", encodingStyle.NamespaceName),
-                    new XElement(s + "Body", actionElement)));
+                new XElement(Namespaces.Envelope + "Envelope",
+                    new XAttribute(XNamespace.Xmlns + "s", Namespaces.Envelope.NamespaceName),
+                    new XAttribute(Namespaces.Envelope + "encodingStyle", encodingStyle.NamespaceName),
+                    new XElement(Namespaces.Envelope + "Body", actionElement)));
 
             var stEnvelope = envelope.ToStringWithDeclaration();
             return stEnvelope;
@@ -219,6 +237,40 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
 
             return result;
+        }
+
+        private UPnPServiceException ParseActionError(XDocument error, Exception actualException)
+        {
+            UPnPServiceException exception = null;
+
+            var upnpErrorElement = error.Descendants(Namespaces.Control + "UPnPError").FirstOrDefault();
+            if (upnpErrorElement != null)
+            {
+                var errorCodeElement = upnpErrorElement.Element(Namespaces.Control + "errorCode");
+                var errorDesctiptionElement = upnpErrorElement.Element(Namespaces.Control + "errorDescription");
+
+                int errorCode;
+                if (errorCodeElement != null && int.TryParse(errorCodeElement.ValueOrDefault(), out errorCode))
+                {
+                    exception = new UPnPServiceException(errorCode, errorDesctiptionElement.ValueOrDefault(), actualException);
+                }
+            }
+
+            return exception;
+        }
+
+        #endregion
+
+        #region Types
+
+        /// <summary>
+        ///     Defines some standard XML namespaces.
+        /// </summary>
+        protected static class Namespaces
+        {
+            public static XNamespace Control = XNamespace.Get("urn:schemas-upnp-org:control-1-0");
+
+            public static XNamespace Envelope = XNamespace.Get("http://schemas.xmlsoap.org/soap/envelope/");
         }
 
         #endregion

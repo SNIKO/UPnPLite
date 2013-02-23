@@ -40,12 +40,17 @@
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\ILogManager.cs" />
     <Compile Include="OnDemandObservable.cs" />
+    <Compile Include="Protocols\DLNA\Extensions\IntExtensions.cs" />
     <Compile Include="Protocols\DLNA\IMediaRenderersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\IMediaServersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\MediaRenderer.cs" />
+    <Compile Include="Protocols\DLNA\MediaRendererError.cs" />
+    <Compile Include="Protocols\DLNA\MediaRendererException.cs" />
     <Compile Include="Protocols\DLNA\MediaRenderersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\MediaRendererState.cs" />
     <Compile Include="Protocols\DLNA\MediaServer.cs" />
+    <Compile Include="Protocols\DLNA\MediaServerError.cs" />
+    <Compile Include="Protocols\DLNA\MediaServerException.cs" />
     <Compile Include="Protocols\DLNA\MediaServersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\AvTransportService.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\IAvTransportService.cs" />
@@ -72,8 +77,7 @@
     <Compile Include="Protocols\UPnP\DeviceIcon.cs" />
     <Compile Include="Protocols\UPnP\DeviceActivity.cs" />
     <Compile Include="Protocols\UPnP\DeviceActivityEventArgs.cs" />
-    <Compile Include="Protocols\UPnP\DeviceError.cs" />
-    <Compile Include="Protocols\UPnP\DeviceException.cs" />
+    <Compile Include="Protocols\UPnP\UPnPDeviceException.cs" />
     <Compile Include="Protocols\UPnP\UPnPDevicesDiscovery.cs" />
     <Compile Include="Protocols\UPnP\CommonUPnPDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,6 +88,7 @@
     <Compile Include="Protocols\SSDP\Messages\SSDPMessage.cs" />
     <Compile Include="Protocols\UPnP\UPnPService.cs" />
     <Compile Include="Protocols\UPnP\UPnPDevice.cs" />
+    <Compile Include="Protocols\UPnP\UPnPServiceException.cs" />
     <Compile Include="Protocols\UPnP\UPnPVersion.cs" />
     <Compile Include="Size.cs" />
     <Compile Include="XNameComparer.cs" />

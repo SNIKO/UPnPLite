@@ -129,6 +129,9 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\OnDemandObservable.cs">
       <Link>OnDemandObservable.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Extensions\IntExtensions.cs">
+      <Link>Protocols\DLNA\Extensions\IntExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\IMediaRenderersDiscovery.cs">
       <Link>Protocols\DLNA\IMediaRenderersDiscovery.cs</Link>
     </Compile>
@@ -138,6 +141,12 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRenderer.cs">
       <Link>Protocols\DLNA\MediaRenderer.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRendererError.cs">
+      <Link>Protocols\DLNA\MediaRendererError.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRendererException.cs">
+      <Link>Protocols\DLNA\MediaRendererException.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaRenderersDiscovery.cs">
       <Link>Protocols\DLNA\MediaRenderersDiscovery.cs</Link>
     </Compile>
@@ -146,6 +155,12 @@
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServer.cs">
       <Link>Protocols\DLNA\MediaServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServerError.cs">
+      <Link>Protocols\DLNA\MediaServerError.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServerException.cs">
+      <Link>Protocols\DLNA\MediaServerException.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\MediaServersDiscovery.cs">
       <Link>Protocols\DLNA\MediaServersDiscovery.cs</Link>
@@ -237,23 +252,23 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceActivityEventArgs.cs">
       <Link>Protocols\UPnP\DeviceActivityEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceError.cs">
-      <Link>Protocols\UPnP\DeviceError.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceException.cs">
-      <Link>Protocols\UPnP\DeviceException.cs</Link>
-    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\DeviceIcon.cs">
       <Link>Protocols\UPnP\DeviceIcon.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPDevice.cs">
       <Link>Protocols\UPnP\UPnPDevice.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPDeviceException.cs">
+      <Link>Protocols\UPnP\UPnPDeviceException.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPDevicesDiscovery.cs">
       <Link>Protocols\UPnP\UPnPDevicesDiscovery.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPService.cs">
       <Link>Protocols\UPnP\UPnPService.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPServiceException.cs">
+      <Link>Protocols\UPnP\UPnPServiceException.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\UPnP\UPnPVersion.cs">
       <Link>Protocols\UPnP\UPnPVersion.cs</Link>

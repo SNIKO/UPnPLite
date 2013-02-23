@@ -6,6 +6,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using System.Xml.Linq;
 
@@ -93,14 +94,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     A CSV list of signed property names, where signed means preceded by ‘+’ or ‘-’ sign.  The ‘+’ and ‘-’Indicate the sort is in ascending or descending order, 
         ///     respectively, with regard to the value of its associated property. Properties appear in the list in order of descending sort priority.
         /// </param>
-        /// <returns>
-        ///     A <see cref="BrowseResult"/> instance which contains result of the Browse operation.
-        /// </returns>
-        /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="objectId"/> is invalid -OR-
-        ///     The sort criteria specified is not supported or is invalid.
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task<BrowseResult> BrowseAsync(string objectId, BrowseFlag browseFlag, string filter, int startingIndex, int requestedCount, string sortCriteria)
         {
@@ -154,12 +152,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <returns>
         ///     A <see cref="BrowseResult"/> instance which contains result of the Search operation.
         /// </returns>
-        /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="containerId"/> is invalid -OR-
-        ///     The sort criteria specified is not supported or is invalid -OR-
-        ///     The search criteria specified is not supported or is invalid.
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
         /// </exception>
         public async Task<BrowseResult> SearchAsync(string containerId, string searchCriteria, string filter, int startingIndex, int requestedCount, string sortCriteria)
         {
@@ -176,6 +173,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             var response = await this.InvokeActionAsync("Search", arguments);
             var resultXml = response["Result"];
             var mediaObjects = ParseMediaObjects(resultXml);
+
             var result = new BrowseResult
             {
                 Result = mediaObjects,
@@ -194,11 +192,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     The list of property names that can be used in search queries. An empty list indicates that the <see cref="IContentDirectoryService"/> does not support any 
         ///     kind of searching. A wildcard (‘*’) indicates that the device supports search queries using all tags present in the <see cref="IContentDirectoryService"/>.
         /// </returns>
-        /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device.
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
         /// </exception>
-        public async Task<IEnumerable<string>> GetSearchCapabilities()
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        public async Task<IEnumerable<string>> GetSearchCapabilitiesAsync()
         {
             IEnumerable<string> result;
 

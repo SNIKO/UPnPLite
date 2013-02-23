@@ -3,6 +3,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using SV.UPnPLite.Protocols.UPnP;
     using System.Collections.Generic;
+    using System.Net;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -38,11 +39,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <returns>
         ///     A <see cref="BrowseResult"/> instance which contains result of the Browse operation.
         /// </returns>
-        /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="objectId"/> is invalid -OR-
-        ///     The sort criteria specified is not supported or is invalid.
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
         /// </exception>
         Task<BrowseResult> BrowseAsync(string objectId, BrowseFlag browseFlag, string filter, int startingIndex, int requestedCount, string sortCriteria);
 
@@ -72,12 +73,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <returns>
         ///     A <see cref="BrowseResult"/> instance which contains result of the Search operation.
         /// </returns>
-        /// <exception cref="DeviceException">
-        ///     An error occurred when sending request to device -OR-
-        ///     An error occurred when executing request on device -OR-
-        ///     The specified <paramref name="containerId"/> is invalid -OR-
-        ///     The sort criteria specified is not supported or is invalid -OR-
-        ///     The search criteria specified is not supported or is invalid.
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
         /// </exception>
         Task<BrowseResult> SearchAsync(string containerId, string searchCriteria, string filter, int startingIndex, int requestedCount, string sortCriteria);
 
@@ -88,6 +88,12 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     The list of property names that can be used in search queries. An empty list indicates that the <see cref="IContentDirectoryService"/> does not support any 
         ///     kind of searching. A wildcard (‘*’) indicates that the device supports search queries using all tags present in the <see cref="IContentDirectoryService"/>.
         /// </returns>
-        Task<IEnumerable<string>> GetSearchCapabilities();
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="UPnPServiceException">
+        ///     An internal service error occurred when executing request.
+        /// </exception>
+        Task<IEnumerable<string>> GetSearchCapabilitiesAsync();
     }
 }

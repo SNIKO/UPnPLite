@@ -31,8 +31,7 @@ namespace SV.UPnPLite.Extensions
                 }
                 catch (WebException ex)
                 {
-                    var failedResponse = ex.Response;
-                    taskComplete.TrySetResult(failedResponse);
+                    taskComplete.TrySetException(ex);
                 }
             }, request);
 

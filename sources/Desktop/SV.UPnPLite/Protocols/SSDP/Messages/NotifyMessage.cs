@@ -57,13 +57,13 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
                 if (statusString.StartsWith("notify", StringComparison.OrdinalIgnoreCase))
                 {
                     notifyMessage.Host                    =                       headers.GetValue            <string>    ("HOST");
-                    notifyMessage.MaxAge                  =   ParseMaxAge(        headers.GetValue            <string>    ("CACHE-CONTROL"));
-                    notifyMessage.Location                =                       headers.GetValue            <string>    ("LOCATION");
                     notifyMessage.NotificationType        =                       headers.GetValue            <string>    ("NT");
                     notifyMessage.NotificationSubtype     =   ParseNotifyType(    headers.GetValue            <string>    ("NTS"));
-                    notifyMessage.Server                  =                       headers.GetValue            <string>    ("SERVER");
                     notifyMessage.USN                     =                       headers.GetValue            <string>    ("USN");
 
+                    notifyMessage.Location                =                       headers.GetValueOrDefault   <string>    ("LOCATION");
+                    notifyMessage.MaxAge                  =   ParseMaxAge(        headers.GetValueOrDefault   <string>    ("CACHE-CONTROL"));
+                    notifyMessage.Server                  =                       headers.GetValueOrDefault   <string>    ("SERVER");
                     notifyMessage.BootId                  =                       headers.GetValueOrDefault   <int>       ("BOOTID.UPNP.ORG");
                     notifyMessage.NextBootId              =                       headers.GetValueOrDefault   <int>       ("NEXTBOOTID.UPNP.ORG");
                     notifyMessage.ConfigId                =                       headers.GetValueOrDefault   <int>       ("CONFIGID.UPNP.ORG");

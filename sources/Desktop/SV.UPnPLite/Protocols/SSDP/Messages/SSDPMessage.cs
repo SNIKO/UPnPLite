@@ -33,15 +33,15 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
         /// <returns>
         ///     The retrieved MaxAge property.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="cacheControlSettings"/> is <c>null</c> or <see cref="string.Empty"/>.
-        /// </exception>
         /// <exception cref="FormatException">
         ///     The cache control settings are in bad format.
         /// </exception>
         protected static int ParseMaxAge(string cacheControlSettings)
         {
-            cacheControlSettings.EnsureNotNull("cacheControlSettings");
+            if (string.IsNullOrEmpty(cacheControlSettings))
+            {
+                return 0;
+            }
 
             var keyValue = cacheControlSettings.Split('=');
             if (keyValue.Length == 2)

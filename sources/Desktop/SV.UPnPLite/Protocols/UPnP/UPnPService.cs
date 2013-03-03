@@ -22,6 +22,13 @@ namespace SV.UPnPLite.Protocols.UPnP
 
         protected readonly ILogger logger;
 
+        private static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings
+        {
+            IgnoreComments = true,
+            IgnoreProcessingInstructions = true,
+            IgnoreWhitespace = true,
+        };
+
         private readonly Uri controlUri;
 
         private readonly Uri eventsUri;
@@ -163,28 +170,32 @@ namespace SV.UPnPLite.Protocols.UPnP
 
             try
             {
-                var response = await request.GetResponseAsync();
-                var responseStream = response.GetResponseStream();
-                var document = XDocument.Load(responseStream);
+                using (var response = await request.GetResponseAsync())
+                {
+                    using (var responseStream = response.GetResponseStream())
+                    {
+                        var result = this.ParseActionResponse(action, responseStream);
 
-                var result = this.ParseActionResponse(action, document);
-
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (WebException ex)
             {
                 if (ex.Response != null)
                 {
-                    var responseStream = ex.Response.GetResponseStream();
-                    if (responseStream != null)
+                    using (var responseStream = ex.Response.GetResponseStream())
                     {
-                        var error = this.ParseActionError(action, responseStream, ex);
-                        if (error != null)
+                        if (responseStream.Length > 0)
                         {
-                            error.Action = action;
-                            error.Arguments = parameters;
+                            var error = this.ParseActionError(action, responseStream, ex);
+                            if (error != null)
+                            {
+                                error.Action = action;
+                                error.Arguments = parameters;
 
-                            throw error;
+                                throw error;
+                            }
                         }
                     }
                 }
@@ -223,50 +234,93 @@ namespace SV.UPnPLite.Protocols.UPnP
             return stEnvelope;
         }
 
-        private Dictionary<string, string> ParseActionResponse(string action, XDocument response)
+        private Dictionary<string, string> ParseActionResponse(string action, Stream response)
         {
-            var u = XNamespace.Get(this.ServiceType);
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            var responseNode = response.Descendants(u + "{0}Response".F(action)).First();
+            var reader = XmlReader.Create(response, xmlReaderSettings);
 
-            foreach (var argumentElement in responseNode.Descendants())
+            if (reader.ReadToDescendant("{0}Response".F(action), this.ServiceType))
             {
-                result[argumentElement.Name.LocalName] = argumentElement.Value;
+                // Moving to a first parameter
+                reader.Read();
+
+                while (!reader.EOF)
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        result[reader.LocalName] = reader.ReadElementContentAsString();
+                    }
+                    else
+                    {
+                        reader.Read();
+                    }
+                }
+            }
+            else
+            {
+                throw new XmlException("The '{0}Response' element is missing".F(action));
             }
 
             return result;
         }
 
-        private UPnPServiceException ParseActionError(string action, Stream responseStream, Exception actualException)
+        private UPnPServiceException ParseActionError(string action, Stream response, Exception actualException)
         {
             UPnPServiceException exception = null;
 
-            var responseReader = new StreamReader(responseStream);
-            var response = responseReader.ReadToEnd();
-
-            if (string.IsNullOrWhiteSpace(response) == false)
+            try
             {
-                try
-                {
-                    var document = XDocument.Parse(response);
-                    var upnpErrorElement = document.Descendants(Namespaces.Control + "UPnPError").FirstOrDefault();
-                    if (upnpErrorElement != null)
-                    {
-                        var errorCodeElement = upnpErrorElement.Element(Namespaces.Control + "errorCode");
-                        var errorDesctiptionElement = upnpErrorElement.Element(Namespaces.Control + "errorDescription");
+                var reader = XmlReader.Create(response, xmlReaderSettings);
 
-                        int errorCode;
-                        if (errorCodeElement != null && int.TryParse(errorCodeElement.ValueOrDefault(), out errorCode))
+                if (reader.ReadToDescendant("UPnPError", Namespaces.Control.NamespaceName))
+                {
+                    // Moving to a first parameter
+                    reader.Read();
+
+                    int? errorCode = null;
+                    string errorDescription = null;
+
+                    while (!reader.EOF)
+                    {
+                        if (reader.NodeType == XmlNodeType.Element)
                         {
-                            exception = new UPnPServiceException(errorCode, errorDesctiptionElement.ValueOrDefault(), actualException);
+                            if (StringComparer.OrdinalIgnoreCase.Compare(reader.LocalName, "errorCode") == 0)
+                            {
+                                errorCode = reader.ReadElementContentAsInt();
+                            }
+                            else if (StringComparer.OrdinalIgnoreCase.Compare(reader.LocalName, "errorDescription") == 0)
+                            {
+                                errorDescription = reader.ReadElementContentAsString();
+                            }
+                            else
+                            {
+                                reader.Skip();
+                            }
+                        }
+                        else
+                        {
+                            reader.Read();
                         }
                     }
+
+                    if (errorCode.HasValue)
+                    {
+                        exception = new UPnPServiceException(errorCode.Value, errorDescription, actualException);
+                    }
+                    else
+                    {
+                        this.logger.Instance().Warning("Can't parse an action response with error. The 'errorCode' element is missing. [action='{0}']", action);
+                    }
                 }
-                catch (XmlException ex)
+                else
                 {
-                    this.logger.Instance().Warning(ex, "An error occurred when parsing error response. [action='{0}']\nResponse:\n{1}", action, response);
+                    this.logger.Instance().Warning("Can't parse an action response with error. The 'UPnPError' element is missing. [action='{0}']", action);
                 }
+            }
+            catch (XmlException ex)
+            {
+                this.logger.Instance().Warning(ex, "An error occurred when parsing action response with error. [action='{0}']", action);
             }
 
             return exception;

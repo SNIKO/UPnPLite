@@ -1,11 +1,11 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Xml;
-    
+
     /// <summary>
     ///     Defines a media resource -  some type of a binary asset, such as photo, song, video, etc.
     ///  </summary>
@@ -20,8 +20,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             CloseInput = true,
             IgnoreProcessingInstructions = true
         };
-
-        private Dictionary<string, Action<string>> propertySetters;
 
         #endregion
 
@@ -105,19 +103,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </param>
         public MediaResource Deserialize(string resourceXml)
         {
-            this.EnsurePropertySettersInititalized();
-
             using (var reader = XmlReader.Create(new StringReader(resourceXml), xmlReaderSettings))
             {
                 reader.Read();
 
                 while (reader.MoveToNextAttribute())
                 {
-                    Action<string> propertySetter;
-                    if (this.propertySetters.TryGetValue(reader.LocalName, out propertySetter))
-                    {
-                        propertySetter(reader.Value);
-                    }
+                    this.TrySetValue(reader.LocalName, reader.Value);
                 }
 
                 reader.MoveToElement();
@@ -131,34 +123,69 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         }
 
         /// <summary>
-        ///     Initializes delegates which sets the an appropriate properties according to read parameters from XML. 
+        ///     Sets a value read from an object's metadata XML.
         /// </summary>
-        /// <param name="propertyNameToSetterMap">
-        ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
+        /// <param name="key">
+        ///     The key of the property read from XML.
         /// </param>
-        protected virtual void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
+        /// <param name="value">
+        ///     The value of the property read from XML.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
+        /// </returns>
+        private bool TrySetValue(string key, string value)
         {
-            propertyNameToSetterMap["size"]             = value => this.Size = uint.Parse(value);
-            propertyNameToSetterMap["duration"]         = value => this.Duration = ParsingHelper.ParseTimeSpan(value);
-            propertyNameToSetterMap["bitrate"]          = value => this.Bitrate = uint.Parse(value);
-            propertyNameToSetterMap["sampleFrequency"]  = value => this.SampleFrequency = uint.Parse(value);
-            propertyNameToSetterMap["bitsPerSample"]    = value => this.BitsPerSample = uint.Parse(value);
-            propertyNameToSetterMap["nrAudioChannels"]  = value => this.NumberOfAudioChannels = uint.Parse(value);
-            propertyNameToSetterMap["resolution"]       = value => this.Resolution = ParsingHelper.ParseResolution(value);
-            propertyNameToSetterMap["colorDepth"]       = value => this.ColorDepth = uint.Parse(value);
-            propertyNameToSetterMap["protocolInfo"]     = value => this.ProtocolInfo = value;
-            propertyNameToSetterMap["protection"]       = value => this.Protection = value;
-            propertyNameToSetterMap["importUri"]        = value => this.ImportUri = value;
-        }
-
-        private void EnsurePropertySettersInititalized()
-        {
-            if (this.propertySetters == null)
+            if (key.Is("size"))
             {
-                this.propertySetters = new Dictionary<string, Action<string>>(StringComparer.OrdinalIgnoreCase);
-
-                this.InitializePropertySetters(this.propertySetters);
+                this.Size = uint.Parse(value);
             }
+            else if (key.Is("duration"))
+            {
+                this.Duration = ParsingHelper.ParseTimeSpan(value);
+            }
+            else if (key.Is("bitrate"))
+            {
+                this.Bitrate = uint.Parse(value);
+            }
+            else if (key.Is("sampleFrequency"))
+            {
+                this.SampleFrequency = uint.Parse(value);
+            }
+            else if (key.Is("bitsPerSample"))
+            {
+                this.BitsPerSample = uint.Parse(value);
+            }
+            else if (key.Is("nrAudioChannels"))
+            {
+                this.NumberOfAudioChannels = uint.Parse(value);
+            }
+            else if (key.Is("resolution"))
+            {
+                this.Resolution = ParsingHelper.ParseResolution(value);
+            }
+            else if (key.Is("colorDepth"))
+            {
+                this.ColorDepth = uint.Parse(value);
+            }
+            else if (key.Is("protocolInfo"))
+            {
+                this.ProtocolInfo = value;
+            }
+            else if (key.Is("protection"))
+            {
+                this.Protection = value;
+            }
+            else if (key.Is("importUri"))
+            {
+                this.ImportUri = value;
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

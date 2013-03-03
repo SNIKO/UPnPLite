@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using SV.UPnPLite.Extensions;
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -26,9 +27,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             IgnoreProcessingInstructions = true
         };
 
-        private Dictionary<string, Action<string>> propertySetters;
-
-        private List<MediaResource> resources;
+        private readonly List<MediaResource> resources = new List<MediaResource>();
 
         #endregion
 
@@ -98,7 +97,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </returns>
         public static string GetClass<TMediaObject>() where TMediaObject : MediaObject
         {
-            var objectClass = knownMediaObjectTypes.First(pair => pair.Value == typeof (TMediaObject)).Key;
+            var objectClass = knownMediaObjectTypes.First(pair => pair.Value == typeof(TMediaObject)).Key;
 
             return objectClass;
         }
@@ -149,9 +148,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </param>
         public void Deserialize(string objectXml)
         {
-            this.EnsurePropertySettersInititalized();
-            this.resources = new List<MediaResource>();
-
             using (var reader = XmlReader.Create(new StringReader(objectXml), xmlReaderSettings))
             {
                 reader.Read();
@@ -159,11 +155,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                 // Reading attribute parameters
                 while (reader.MoveToNextAttribute())
                 {
-                    Action<string> propertySetter;
-                    if (this.propertySetters.TryGetValue(reader.Name, out propertySetter))
-                    {
-                        propertySetter(reader.Value);
-                    }
+                    this.TrySetValue(reader.Name, reader.Value);
                 }
 
                 reader.MoveToElement();
@@ -174,21 +166,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                 {
                     if (reader.NodeType == XmlNodeType.Element)
                     {
-                        if (StringComparer.OrdinalIgnoreCase.Compare(reader.LocalName, "res") == 0)
+                        if (reader.LocalName.Is("res"))
                         {
-                            this.resources.Add(new MediaResource().Deserialize(reader.ReadOuterXml()));
+                            this.TrySetValue("res", reader.ReadOuterXml());
                         }
                         else
                         {
-                            Action<string> propertySetter;
-                            if (this.propertySetters.TryGetValue(reader.LocalName, out propertySetter))
-                            {
-                                propertySetter(reader.ReadElementContentAsString());
-                            }
-                            else
-                            {
-                                reader.Skip();
-                            }
+                            this.TrySetValue(reader.LocalName, reader.ReadElementContentAsString());
                         }
                     }
                     else
@@ -200,18 +184,49 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         }
 
         /// <summary>
-        ///     Initializes delegates which sets the an appropriate properties according to read parameters from XML. 
+        ///     Sets a value read from an object's metadata XML.
         /// </summary>
-        /// <param name="propertyNameToSetterMap">
-        ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
+        /// <param name="key">
+        ///     The key of the property read from XML.
         /// </param>
-        protected virtual void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
+        /// <param name="value">
+        ///     The value of the property read from XML.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool TrySetValue(string key, string value)
         {
-            propertyNameToSetterMap["id"]           = value => this.Id = value;
-            propertyNameToSetterMap["parentID"]     = value => this.ParentId = value;
-            propertyNameToSetterMap["restricted"]   = value => this.Restricted = value.ToBool();
-            propertyNameToSetterMap["title"]        = value => this.Title = value;
-            propertyNameToSetterMap["creator"]      = value => this.Creator = value;
+            if (key.Is("id"))
+            {
+                this.Id = value;
+            }
+            else if (key.Is("parentID"))
+            {
+                this.ParentId = value;
+            }
+            else if (key.Is("restricted"))
+            {
+                this.Restricted = value.ToBool();
+            }
+            else if (key.Is("title"))
+            {
+                this.Title = value;
+            }
+            else if (key.Is("creator"))
+            {
+                this.Creator = value;
+            }
+            else if (key.Is("res"))
+            {
+                this.resources.Add(new MediaResource().Deserialize(value));
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static void InitializeMediaObjectTypes()
@@ -251,32 +266,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
 
             return result;
-        }
-
-        private void EnsurePropertySettersInititalized()
-        {
-            if (this.propertySetters == null)
-            {
-                this.propertySetters = new Dictionary<string, Action<string>>(StringComparer.OrdinalIgnoreCase);
-
-                this.InitializePropertySetters(this.propertySetters);
-            }
-        }
-
-        #endregion
-
-        #region Types
-
-        /// <summary>
-        ///     Defines some standard XML namespaces.
-        /// </summary>
-        protected static class Namespaces
-        {
-            public static XNamespace DIDL = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
-
-            public static XNamespace DC = XNamespace.Get("http://purl.org/dc/elements/1.1/");
-
-            public static XNamespace UPnP = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/upnp/");
         }
 
         #endregion

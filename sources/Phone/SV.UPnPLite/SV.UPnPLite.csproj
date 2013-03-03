@@ -183,6 +183,9 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\Extensions\StringExtensions.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\Extensions\StringExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs</Link>
     </Compile>

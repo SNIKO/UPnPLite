@@ -1,12 +1,11 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using System;
-    using System.Collections.Generic;
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Represents a piece of content that, when rendered, generates some video. It is atomic in the sense that it does not contain other objects in the ContentDirectory. 
-    ///     It typically has at least 1 <res> element.
+    ///     It typically has at least 1 <see cref="MediaObject.Resources"/> element.
     /// </summary>
     public class VideoItem : MediaItem
     {
@@ -74,26 +73,73 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         #region Methods
 
         /// <summary>
-        ///     Initializes delegates which sets the an appropriate properties according to read parameters from XML. 
+        ///     Sets a value read from an object's metadata XML.
         /// </summary>
-        /// <param name="propertyNameToSetterMap">
-        ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
+        /// <param name="key">
+        ///     The key of the property read from XML.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
+        /// <param name="value">
+        ///     The value of the property read from XML.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool TrySetValue(string key, string value)
         {
-            base.InitializePropertySetters(propertyNameToSetterMap);
+            if (base.TrySetValue(key, value))
+            {
+                // The value is set by base object
+            }
+            else if (key.Is("genre"))
+            {
+                this.Genre = value;
+            }
+            else if (key.Is("longDescription"))
+            {
+                this.LongDescription = value;
+            }
+            else if (key.Is("producer"))
+            {
+                this.Producer = value;
+            }
+            else if (key.Is("rating"))
+            {
+                this.Rating = value;
+            }
+            else if (key.Is("actor"))
+            {
+                this.Actor = value;
+            }
+            else if (key.Is("director"))
+            {
+                this.Director = value;
+            }
+            else if (key.Is("albumArtURI"))
+            {
+                this.AlbumArtUri = value;
+            }
+            else if (key.Is("description"))
+            {
+                this.Description = value;
+            }
+            else if (key.Is("publisher"))
+            {
+                this.Publisher = value;
+            }
+            else if (key.Is("language"))
+            {
+                this.Language = value;
+            }
+            else if (key.Is("relation"))
+            {
+                this.Relation = value;
+            }
+            else
+            {
+                return false;
+            }
 
-            propertyNameToSetterMap["genre"]            = value => this.Genre = value;
-            propertyNameToSetterMap["longDescription"]  = value => this.LongDescription = value;
-            propertyNameToSetterMap["producer"]         = value => this.Producer = value;
-            propertyNameToSetterMap["rating"]           = value => this.Rating = value;
-            propertyNameToSetterMap["actor"]            = value => this.Actor = value;
-            propertyNameToSetterMap["director"]         = value => this.Director = value;
-            propertyNameToSetterMap["albumArtURI"]      = value => this.AlbumArtUri = value;
-            propertyNameToSetterMap["description"]      = value => this.Description = value;
-            propertyNameToSetterMap["publisher"]        = value => this.Publisher = value;
-            propertyNameToSetterMap["language"]         = value => this.Language = value;
-            propertyNameToSetterMap["relation"]         = value => this.Relation = value;            
+            return true;
         }
 
         #endregion

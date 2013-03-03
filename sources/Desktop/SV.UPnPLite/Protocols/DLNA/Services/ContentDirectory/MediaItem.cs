@@ -1,9 +1,7 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Xml.Linq;
+    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Defines the media item which can be played on MediaRenderer.
@@ -22,16 +20,33 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         #region Methods
 
         /// <summary>
-        ///     Initializes delegates which sets the an appropriate properties according to read parameters from XML. 
+        ///     Sets a value read from an object's metadata XML.
         /// </summary>
-        /// <param name="propertyNameToSetterMap">
-        ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
+        /// <param name="key">
+        ///     The key of the property read from XML.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
+        /// <param name="value">
+        ///     The value of the property read from XML.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool TrySetValue(string key, string value)
         {
-            base.InitializePropertySetters(propertyNameToSetterMap);
+            if (base.TrySetValue(key, value))
+            {
+                // The value is set by base object
+            }
+            else if (key.Is("refId"))
+            {
+                this.RefId = value;
+            }
+            else
+            {
+                return false;
+            }
 
-            propertyNameToSetterMap["refId"] = value => this.RefId = value;
+            return true;
         }
 
         #endregion

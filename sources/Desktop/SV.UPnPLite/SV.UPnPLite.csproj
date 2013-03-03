@@ -63,6 +63,7 @@
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\BrowseFlag.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\BrowseResult.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\ContentDirectoryService.cs" />
+    <Compile Include="Protocols\DLNA\Services\ContentDirectory\Extensions\StringExtensions.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\ImageItem.cs" />
     <Compile Include="Protocols\DLNA\Services\ContentDirectory\MediaContainer.cs" />

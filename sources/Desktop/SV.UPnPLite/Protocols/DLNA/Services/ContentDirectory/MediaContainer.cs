@@ -32,7 +32,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected override void InitializePropertySetters(System.Collections.Generic.Dictionary<XName, Action<string>> propertyNameToSetterMap)
+        protected override void InitializePropertySetters(System.Collections.Generic.Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 

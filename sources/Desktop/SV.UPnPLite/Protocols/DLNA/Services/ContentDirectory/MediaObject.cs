@@ -4,7 +4,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
     using SV.UPnPLite.Extensions;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Xml;
     using System.Xml.Linq;
 
     /// <summary>
@@ -16,7 +18,15 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         private static Dictionary<string, Type> knownMediaObjectTypes;
 
-        private Dictionary<XName, Action<string>> propertySetters;
+        private static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings
+        {
+            IgnoreComments = true,
+            IgnoreWhitespace = true,
+            CloseInput = true,
+            IgnoreProcessingInstructions = true
+        };
+
+        private Dictionary<string, Action<string>> propertySetters;
 
         private List<MediaResource> resources;
 
@@ -109,12 +119,23 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             didlLiteXml.EnsureNotNull("didlLiteXml");
 
-            var item = XElement.Parse(didlLiteXml);
-            var objectClass = item.Element(Namespaces.UPnP + "class").Value;
+            var objectClass = string.Empty;
+            var xmlReader = XmlReader.Create(new StringReader(didlLiteXml), xmlReaderSettings);
+
+            while (xmlReader.Read())
+            {
+                if (xmlReader.NodeType == XmlNodeType.Element && StringComparer.OrdinalIgnoreCase.Compare(xmlReader.LocalName, "class") == 0)
+                {
+                    objectClass = xmlReader.ReadElementContentAsString();
+
+                    break;
+                }
+            }
+
             var mediaObject = CreateMediaObject(objectClass);
             if (mediaObject != null)
             {
-                mediaObject.Deserialize(item.ToString());
+                mediaObject.Deserialize(didlLiteXml);
             }
 
             return mediaObject;
@@ -131,38 +152,50 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             this.EnsurePropertySettersInititalized();
             this.resources = new List<MediaResource>();
 
-            var mediaObject = XElement.Parse(objectXml);
-
-            foreach (var attribute in mediaObject.Attributes())
+            using (var reader = XmlReader.Create(new StringReader(objectXml), xmlReaderSettings))
             {
-                Action<string> propertySetter;
-                if (this.propertySetters.TryGetValue(attribute.Name, out propertySetter))
-                {
-                    propertySetter(attribute.Value);
-                }
-            }
+                reader.Read();
 
-            foreach (var element in mediaObject.Elements())
-            {
-                // TODO: Try to avoid this condition
-
-                if (XNameComparer.OrdinalIgnoreCase.Equals(element.Name, Namespaces.DIDL + "res"))
-                {
-                    this.resources.Add(new MediaResource().Deserialize(element.ToString()));
-                }
-                else
+                // Reading attribute parameters
+                while (reader.MoveToNextAttribute())
                 {
                     Action<string> propertySetter;
-                    if (this.propertySetters.TryGetValue(element.Name, out propertySetter))
+                    if (this.propertySetters.TryGetValue(reader.Name, out propertySetter))
                     {
-                        propertySetter(element.Value);
+                        propertySetter(reader.Value);
                     }
                 }
-            }
 
-            if (this.resources.Any() && typeof(ImageItem) == this.GetType())
-            {
-                this.Thumbnail = new Uri(this.resources[0].Uri);
+                reader.MoveToElement();
+                reader.Read();
+
+                // Reading element parameters
+                while (!reader.EOF)
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (StringComparer.OrdinalIgnoreCase.Compare(reader.LocalName, "res") == 0)
+                        {
+                            this.resources.Add(new MediaResource().Deserialize(reader.ReadOuterXml()));
+                        }
+                        else
+                        {
+                            Action<string> propertySetter;
+                            if (this.propertySetters.TryGetValue(reader.LocalName, out propertySetter))
+                            {
+                                propertySetter(reader.ReadElementContentAsString());
+                            }
+                            else
+                            {
+                                reader.Skip();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        reader.Read();
+                    }
+                }
             }
         }
 
@@ -172,13 +205,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected virtual void InitializePropertySetters(Dictionary<XName, Action<string>> propertyNameToSetterMap)
+        protected virtual void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
-            propertyNameToSetterMap["id"] = value => this.Id = value;
-            propertyNameToSetterMap["parentID"] = value => this.ParentId = value;
-            propertyNameToSetterMap["restricted"] = value => this.Restricted = value.ToBool();
-            propertyNameToSetterMap[Namespaces.DC + "title"] = value => this.Title = value;
-            propertyNameToSetterMap[Namespaces.DC + "creator"] = value => this.Creator = value;
+            propertyNameToSetterMap["id"]           = value => this.Id = value;
+            propertyNameToSetterMap["parentID"]     = value => this.ParentId = value;
+            propertyNameToSetterMap["restricted"]   = value => this.Restricted = value.ToBool();
+            propertyNameToSetterMap["title"]        = value => this.Title = value;
+            propertyNameToSetterMap["creator"]      = value => this.Creator = value;
         }
 
         private static void InitializeMediaObjectTypes()
@@ -224,7 +257,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             if (this.propertySetters == null)
             {
-                this.propertySetters = new Dictionary<XName, Action<string>>(XNameComparer.OrdinalIgnoreCase);
+                this.propertySetters = new Dictionary<string, Action<string>>(StringComparer.OrdinalIgnoreCase);
 
                 this.InitializePropertySetters(this.propertySetters);
             }

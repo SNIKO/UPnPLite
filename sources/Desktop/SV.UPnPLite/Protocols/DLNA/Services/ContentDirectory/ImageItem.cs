@@ -59,17 +59,17 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<System.Xml.Linq.XName, Action<string>> propertyNameToSetterMap)
+        protected override void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 
-            propertyNameToSetterMap[Namespaces.UPnP + "StorageMedium"]      = value => this.StorageMedium = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "longDescription"]    = value => this.LongDescription = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "rating"]             = value => this.Rating = value;
-            propertyNameToSetterMap[Namespaces.DC   + "description"]        = value => this.Description = value;
-            propertyNameToSetterMap[Namespaces.DC   + "publisher"]          = value => this.Publisher = value;
-            propertyNameToSetterMap[Namespaces.DC   + "language"]           = value => this.Language = value;
-            propertyNameToSetterMap[Namespaces.DC   + "rights"]             = value => this.Rights = value;
+            propertyNameToSetterMap["StorageMedium"]    = value => this.StorageMedium = value;
+            propertyNameToSetterMap["longDescription"]  = value => this.LongDescription = value;
+            propertyNameToSetterMap["rating"]           = value => this.Rating = value;
+            propertyNameToSetterMap["description"]      = value => this.Description = value;
+            propertyNameToSetterMap["publisher"]        = value => this.Publisher = value;
+            propertyNameToSetterMap["language"]         = value => this.Language = value;
+            propertyNameToSetterMap["rights"]           = value => this.Rights = value;
         }
 
         #endregion

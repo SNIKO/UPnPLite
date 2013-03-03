@@ -249,7 +249,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             {
                 try
                 {
-                    var document = XDocument.Load(response);
+                    var document = XDocument.Parse(response);
                     var upnpErrorElement = document.Descendants(Namespaces.Control + "UPnPError").FirstOrDefault();
                     if (upnpErrorElement != null)
                     {

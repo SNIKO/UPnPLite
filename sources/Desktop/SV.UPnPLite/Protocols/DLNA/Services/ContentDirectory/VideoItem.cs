@@ -45,7 +45,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         public string Rating { get; internal set; }
 
         /// <summary>
-        ///     Gets a name of an actor appearing in a video item
+        ///     Gets a name of an actor appearing in a video item.
         /// </summary>
         public string Actor { get; internal set; }
 
@@ -63,7 +63,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     Gets a related resource. Recommended best practice is to identify the related resource by means of a string conforming to a formal identification system.
         /// </summary>
         public string Relation { get; internal set; }
-        
+
+        /// <summary>
+        ///     Gets a URL to a album cover.
+        /// </summary>
+        public string AlbumArtUri { get; internal set; }
 
         #endregion
 
@@ -75,20 +79,21 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<System.Xml.Linq.XName, Action<string>> propertyNameToSetterMap)
+        protected override void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 
-            propertyNameToSetterMap[Namespaces.UPnP + "genre"]              = value => this.Genre = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "longDescription"]    = value => this.LongDescription = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "producer"]           = value => this.Producer = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "rating"]             = value => this.Rating = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "actor"]              = value => this.Actor = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "director"]           = value => this.Director = value;
-            propertyNameToSetterMap[Namespaces.DC   + "description"]        = value => this.Description = value;            
-            propertyNameToSetterMap[Namespaces.DC   + "publisher"]          = value => this.Publisher = value;
-            propertyNameToSetterMap[Namespaces.DC   + "language"]           = value => this.Language = value;
-            propertyNameToSetterMap[Namespaces.DC   + "relation"]           = value => this.Relation = value;
+            propertyNameToSetterMap["genre"]            = value => this.Genre = value;
+            propertyNameToSetterMap["longDescription"]  = value => this.LongDescription = value;
+            propertyNameToSetterMap["producer"]         = value => this.Producer = value;
+            propertyNameToSetterMap["rating"]           = value => this.Rating = value;
+            propertyNameToSetterMap["actor"]            = value => this.Actor = value;
+            propertyNameToSetterMap["director"]         = value => this.Director = value;
+            propertyNameToSetterMap["albumArtURI"]      = value => this.AlbumArtUri = value;
+            propertyNameToSetterMap["description"]      = value => this.Description = value;
+            propertyNameToSetterMap["publisher"]        = value => this.Publisher = value;
+            propertyNameToSetterMap["language"]         = value => this.Language = value;
+            propertyNameToSetterMap["relation"]         = value => this.Relation = value;            
         }
 
         #endregion

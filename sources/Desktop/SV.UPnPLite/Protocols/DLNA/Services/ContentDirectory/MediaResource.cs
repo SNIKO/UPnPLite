@@ -3,7 +3,8 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using System;
     using System.Collections.Generic;
-    using System.Xml.Linq;
+    using System.IO;
+    using System.Xml;
     
     /// <summary>
     ///     Defines a media resource -  some type of a binary asset, such as photo, song, video, etc.
@@ -12,7 +13,15 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
     {
         #region Fields
 
-        private Dictionary<XName, Action<string>> propertySetters;
+        private static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings
+        {
+            IgnoreComments = true,
+            IgnoreWhitespace = true,
+            CloseInput = true,
+            IgnoreProcessingInstructions = true
+        };
+
+        private Dictionary<string, Action<string>> propertySetters;
 
         #endregion
 
@@ -98,18 +107,24 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             this.EnsurePropertySettersInititalized();
 
-            var resourceElement = XElement.Parse(resourceXml);
-
-            foreach (var attribute in resourceElement.Attributes())
+            using (var reader = XmlReader.Create(new StringReader(resourceXml), xmlReaderSettings))
             {
-                Action<string> propertySetter;
-                if (this.propertySetters.TryGetValue(attribute.Name, out propertySetter))
+                reader.Read();
+
+                while (reader.MoveToNextAttribute())
                 {
-                    propertySetter(attribute.Value);
+                    Action<string> propertySetter;
+                    if (this.propertySetters.TryGetValue(reader.LocalName, out propertySetter))
+                    {
+                        propertySetter(reader.Value);
+                    }
                 }
+
+                reader.MoveToElement();
+
+                this.Uri = reader.ReadElementContentAsString();
             }
 
-            this.Uri = resourceElement.Value;
             this.Metadata = resourceXml;
 
             return this;
@@ -121,7 +136,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected virtual void InitializePropertySetters(Dictionary<XName, Action<string>> propertyNameToSetterMap)
+        protected virtual void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
             propertyNameToSetterMap["size"]             = value => this.Size = uint.Parse(value);
             propertyNameToSetterMap["duration"]         = value => this.Duration = ParsingHelper.ParseTimeSpan(value);
@@ -140,7 +155,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             if (this.propertySetters == null)
             {
-                this.propertySetters = new Dictionary<XName, Action<string>>(XNameComparer.OrdinalIgnoreCase);
+                this.propertySetters = new Dictionary<string, Action<string>>(StringComparer.OrdinalIgnoreCase);
 
                 this.InitializePropertySetters(this.propertySetters);
             }

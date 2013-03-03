@@ -5,16 +5,28 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
     using SV.UPnPLite.Protocols.UPnP;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.IO;
     using System.Net;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
+    using System.Xml;
 
     /// <summary>
     ///     Enables control of the media on a MediaServer.
     /// </summary>
     public class ContentDirectoryService : UPnPService, IContentDirectoryService
     {
+        #region Fields
+
+        private static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings
+        {
+            IgnoreComments = true,
+            IgnoreWhitespace = true,
+            CloseInput = true,
+            IgnoreProcessingInstructions = true
+        };
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -83,7 +95,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     The comma-separated list of property specifiers (including namespaces) indicates which metadata properties are to be 
         ///     returned in the results from browsing or searching.
         /// </param>
-        /// <param name="startingIndex">
+        /// <param name="startingIndex">    
         ///     Starting zero based offset to enumerate children under the container specified by <paramref name="objectId"/>. Must be 0 if <paramref name="browseFlag"/> is equal 
         ///     to <see cref="BrowseFlag.BrowseMetadata"/>.
         /// </param>
@@ -229,23 +241,24 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         private static IEnumerable<MediaObject> ParseMediaObjects(string mediaObjectsXml)
         {
             var result = new List<MediaObject>();
-            var document = XDocument.Parse(mediaObjectsXml);
-            var didl = XNamespace.Get("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
 
-            var mediaContainers = document.Descendants(didl + "container").Select(s => s.ToString()).ToList();
-            var mediaItems = document.Descendants(didl + "item").Select(s => s.ToString()).ToList();
-
-            var mediaObjects = new List<string>();
-            mediaObjects.AddRange(mediaContainers);
-            mediaObjects.AddRange(mediaItems);
-
-            foreach (var container in mediaObjects)
+            using (var xmlReader = XmlReader.Create(new StringReader(mediaObjectsXml), xmlReaderSettings))
             {
-                var mediaObject = MediaObject.Create(container);
+                xmlReader.MoveToContent();
+                xmlReader.Read();
 
-                if (mediaObject != null)
+                while (!xmlReader.EOF)
                 {
-                    result.Add(mediaObject);
+                    var element = xmlReader.ReadOuterXml();
+                    if (element != string.Empty)
+                    {
+                        var mediaObject = MediaObject.Create(element);
+
+                        if (mediaObject != null)
+                        {
+                            result.Add(mediaObject);
+                        }
+                    }
                 }
             }
 

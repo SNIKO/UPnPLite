@@ -31,6 +31,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </summary>
         public DateTime Date { get; internal set; }
 
+        /// <summary>
+        ///     Gets a URL to a album cover.
+        /// </summary>
+        public string AlbumArtUri { get; internal set; }
+
         #endregion
 
         #region Methods
@@ -41,14 +46,15 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="propertyNameToSetterMap">
         ///     A map between name of the parameter in XML and delegate which sets an appropriate property on object.
         /// </param>
-        protected override void InitializePropertySetters(Dictionary<System.Xml.Linq.XName, Action<string>> propertyNameToSetterMap)
+        protected override void InitializePropertySetters(Dictionary<string, Action<string>> propertyNameToSetterMap)
         {
             base.InitializePropertySetters(propertyNameToSetterMap);
 
-            propertyNameToSetterMap[Namespaces.UPnP + "artist"]         = value => this.Artist = value;
-            propertyNameToSetterMap[Namespaces.UPnP + "album"]          = value => this.Album = value;
-            propertyNameToSetterMap[Namespaces.DC   + "contributor"]    = value => this.Contributor = value;
-            propertyNameToSetterMap[Namespaces.DC   + "date"]           = value => this.Date = ParseDate(value);
+            propertyNameToSetterMap["artist"]         = value => this.Artist = value;
+            propertyNameToSetterMap["album"]          = value => this.Album = value;
+            propertyNameToSetterMap["albumArtURI"]    = value => this.AlbumArtUri = value;
+            propertyNameToSetterMap["contributor"]    = value => this.Contributor = value;
+            propertyNameToSetterMap["date"]           = value => this.Date = ParseDate(value);
         }
 
         private static DateTime ParseDate(string date)

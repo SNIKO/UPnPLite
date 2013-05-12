@@ -76,7 +76,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
             else if (key.Is("date"))
             {
-                this.Date = ParseDate(value);
+                this.Date = ParsingHelper.ParseDate(value);
             }
             else
             {
@@ -84,35 +84,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
 
             return true;
-        }
-
-        private static DateTime ParseDate(string date)
-        {
-            DateTime result;
-
-            var parts = date.Split('-');
-            if (parts.Length == 3)
-            {
-                int year;
-                int month;
-                int day;
-
-                if (int.TryParse(parts[0], out year) && int.TryParse(parts[1], out month) &&
-                    int.TryParse(parts[2], out day))
-                {
-                    result = new DateTime(year, month, day);
-                }
-                else
-                {
-                    result = default(DateTime);
-                }
-            }
-            else
-            {
-                result = default(DateTime);
-            }
-
-            return result;
         }
 
         #endregion

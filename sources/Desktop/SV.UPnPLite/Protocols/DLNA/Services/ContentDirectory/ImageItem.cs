@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
     using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
+    using System;
 
     /// <summary>
     ///     Represents a piece of content that, when rendered, generates some still image. It is atomic in the sense that it does not contain other objects in the ContentDirectory. 
@@ -31,12 +32,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Gets a rating of the object’s resource, for ‘parental control’ filtering purposes, such as “R”, “PG-13”, “X”, etc.,.
         /// </summary>
-        public string Rating { get; internal set; }
-
-        /// <summary>
-        ///     Gets a language of the media item.
-        /// </summary>
-        public string Language { get; internal set; }
+        public string Rating { get; internal set; }        
 
         /// <summary>
         ///     Gets an information about rights held in and over the resource.
@@ -47,6 +43,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     Gets a type of storage medium used for the content. Potentially useful for user-interface purposes.
         /// </summary>
         public string StorageMedium { get; internal set; }
+
+        /// <summary>
+        ///     Gets a date when the item was created.
+        /// </summary>
+        public DateTime Date { get; internal set; }
 
         #endregion
 
@@ -90,9 +91,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             {
                 this.Publisher = value;
             }
-            else if (key.Is("language"))
+            else if (key.Is("date"))
             {
-                this.Language = value;
+                this.Date = ParsingHelper.ParseDate(value);
             }
             else if (key.Is("rights"))
             {

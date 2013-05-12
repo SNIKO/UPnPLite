@@ -70,5 +70,45 @@ namespace SV.UPnPLite.Protocols.DLNA.Services
 
             return new Size(width, height);
         }
+
+        /// <summary>
+        ///     Parses the date string into <see cref="DateTime"/> instance.
+        /// </summary>
+        /// <param name="date">
+        ///     The date string to parse;
+        /// </param>
+        /// <returns>
+        ///     A <see cref="DateTime"/> instance which represents <paramref name="date"/>.
+        /// </returns>
+        /// <remarks>
+        ///     The date string has next format: yyyy-mm-dd.
+        /// </remarks>
+        public static DateTime ParseDate(string date)
+        {
+            DateTime result;
+
+            var parts = date.Split('-');
+            if (parts.Length == 3)
+            {
+                int year;
+                int month;
+                int day;
+
+                if (int.TryParse(parts[0], out year) && int.TryParse(parts[1], out month) && int.TryParse(parts[2], out day))
+                {
+                    result = new DateTime(year, month, day);
+                }
+                else
+                {
+                    result = default(DateTime);
+                }
+            }
+            else
+            {
+                result = default(DateTime);
+            }
+
+            return result;
+        }
     }
 }

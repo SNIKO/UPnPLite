@@ -18,6 +18,12 @@ namespace SV.UPnPLite.Protocols.UPnP
     /// </summary>
     public class UPnPService
     {
+        #region Constants
+
+        private const int MaxConcurentRequests = 10;
+
+        #endregion
+
         #region Fields
 
         protected readonly ILogger logger;
@@ -32,6 +38,10 @@ namespace SV.UPnPLite.Protocols.UPnP
         private readonly Uri controlUri;
 
         private readonly Uri eventsUri;
+
+        private readonly Queue<RequestInfo> pendingRequests = new Queue<RequestInfo>();
+
+        private readonly List<RequestInfo> executingRequests = new List<RequestInfo>();
 
         #endregion
 
@@ -153,30 +163,51 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// <exception cref="UPnPServiceException">
         ///     An internal service error occurred when executing request.
         /// </exception>
-        public async Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
+        public Task<Dictionary<string, string>> InvokeActionAsync(string action, Dictionary<string, object> parameters)
         {
-            var requestXml = this.CreateActionRequest(action, parameters);
-            var data = Encoding.UTF8.GetBytes(requestXml);
-
-            var request = WebRequest.Create(this.controlUri);
-            request.Method = "POST";
-            request.ContentType = "text/xml; charset=\"utf-8\"";
-            request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.ServiceType, action);
-
-            using (var stream = await request.GetRequestStreamAsync())
+            var requestInfo = new RequestInfo
             {
-                stream.Write(data, 0, data.Length);
+                Action = action,
+                Arguments = parameters,
+                CompletionSource = new TaskCompletionSource<Dictionary<string, string>>()
+            };
+
+            lock (this.pendingRequests)
+            {
+                this.pendingRequests.Enqueue(requestInfo);
+                this.TryProcessPendingRequests();
             }
 
+            return requestInfo.CompletionSource.Task;
+        }
+
+        private void TryProcessPendingRequests()
+        {
+            lock (this.pendingRequests)
+            {
+                while (this.executingRequests.Count < MaxConcurentRequests && this.pendingRequests.Any())
+                {
+                    var requestToProcess = this.pendingRequests.Dequeue();
+
+                    this.executingRequests.Add(requestToProcess);
+                    this.ProcessRequest(requestToProcess);
+                }
+            }
+        }
+
+        private async void ProcessRequest(RequestInfo requestInfo)
+        {
             try
             {
+                var request = this.CreateRequest(requestInfo.Action, requestInfo.Arguments);
+
                 using (var response = await request.GetResponseAsync())
                 {
                     using (var responseStream = response.GetResponseStream())
                     {
-                        var result = this.ParseActionResponse(action, responseStream);
+                        var result = this.ParseActionResponse(requestInfo.Action, responseStream);
 
-                        return result;
+                        requestInfo.CompletionSource.TrySetResult(result);
                     }
                 }
             }
@@ -188,24 +219,50 @@ namespace SV.UPnPLite.Protocols.UPnP
                     {
                         if (responseStream.Length > 0)
                         {
-                            var error = this.ParseActionError(action, responseStream, ex);
+                            var error = this.ParseActionError(requestInfo.Action, responseStream, ex);
                             if (error != null)
                             {
-                                error.Action = action;
-                                error.Arguments = parameters;
+                                error.Action = requestInfo.Action;
+                                error.Arguments = requestInfo.Arguments;
 
-                                throw error;
+                                requestInfo.CompletionSource.TrySetException(error);
                             }
                         }
                     }
                 }
 
-                throw;
+                requestInfo.CompletionSource.TrySetException(ex);
             }
             catch (XmlException ex)
             {
-                throw new FormatException("An error occurred when parsing response for an action '{0}'".F(action), ex);
+                requestInfo.CompletionSource.TrySetException(new FormatException("An error occurred when parsing response for an action '{0}'".F(requestInfo.Action), ex));
             }
+            finally
+            {
+                lock (this.pendingRequests)
+                {
+                    this.executingRequests.Remove(requestInfo);
+                    this.TryProcessPendingRequests();
+                }
+            }
+        }
+
+        private WebRequest CreateRequest(string action, Dictionary<string, object> parameters)
+        {
+            var requestXml = this.CreateActionRequest(action, parameters);
+            var data = Encoding.UTF8.GetBytes(requestXml);
+
+            var request = WebRequest.Create(this.controlUri);
+            request.Method = "POST";
+            request.ContentType = "text/xml; charset=\"utf-8\"";
+            request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.ServiceType, action);
+
+            using (var stream = request.GetRequestStreamAsync().GetAwaiter().GetResult())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+
+            return request;
         }
 
         private string CreateActionRequest(string action, Dictionary<string, object> parameters)
@@ -339,6 +396,15 @@ namespace SV.UPnPLite.Protocols.UPnP
             public static XNamespace Control = XNamespace.Get("urn:schemas-upnp-org:control-1-0");
 
             public static XNamespace Envelope = XNamespace.Get("http://schemas.xmlsoap.org/soap/envelope/");
+        }
+
+        private class RequestInfo
+        {
+            public string Action { get; set; }
+
+            public Dictionary<string, object> Arguments { get; set; }
+
+            public TaskCompletionSource<Dictionary<string, string>> CompletionSource { get; set; }
         }
 
         #endregion

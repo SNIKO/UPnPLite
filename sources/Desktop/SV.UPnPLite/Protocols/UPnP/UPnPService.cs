@@ -238,28 +238,29 @@ namespace SV.UPnPLite.Protocols.UPnP
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            var reader = XmlReader.Create(response, xmlReaderSettings);
-
-            if (reader.ReadToDescendant("{0}Response".F(action), this.ServiceType))
+            using (var reader = XmlReader.Create(response, xmlReaderSettings))
             {
-                // Moving to a first parameter
-                reader.Read();
-
-                while (!reader.EOF)
+                if (reader.ReadToDescendant("{0}Response".F(action), this.ServiceType))
                 {
-                    if (reader.NodeType == XmlNodeType.Element)
+                    // Moving to a first parameter
+                    reader.Read();
+
+                    while (!reader.EOF)
                     {
-                        result[reader.LocalName] = reader.ReadElementContentAsString();
-                    }
-                    else
-                    {
-                        reader.Read();
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            result[reader.LocalName] = reader.ReadElementContentAsString();
+                        }
+                        else
+                        {
+                            reader.Read();
+                        }
                     }
                 }
-            }
-            else
-            {
-                throw new XmlException("The '{0}Response' element is missing".F(action));
+                else
+                {
+                    throw new XmlException("The '{0}Response' element is missing".F(action));
+                }
             }
 
             return result;

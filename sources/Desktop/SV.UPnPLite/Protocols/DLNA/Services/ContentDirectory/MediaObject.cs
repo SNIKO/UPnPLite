@@ -82,6 +82,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </summary>
         public virtual Uri Thumbnail { get; private set; }
 
+        /// <summary>
+        ///     Gets a UPnP class of the media object.
+        /// </summary>
+        public string Class
+        {
+            get { return knownMediaObjectTypes.First(pair => pair.Value == this.GetType()).Key; }
+        }
+
         #endregion
 
         #region Methods
@@ -119,15 +127,20 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             didlLiteXml.EnsureNotNull("didlLiteXml");
 
             var objectClass = string.Empty;
-            var xmlReader = XmlReader.Create(new StringReader(didlLiteXml), xmlReaderSettings);
-
-            while (xmlReader.Read())
+            using (var reader = new StringReader(didlLiteXml))
             {
-                if (xmlReader.NodeType == XmlNodeType.Element && StringComparer.OrdinalIgnoreCase.Compare(xmlReader.LocalName, "class") == 0)
+                using (var xmlReader = XmlReader.Create(reader, xmlReaderSettings))
                 {
-                    objectClass = xmlReader.ReadElementContentAsString();
+                    while (xmlReader.Read())
+                    {
+                        if (xmlReader.NodeType == XmlNodeType.Element &&
+                            StringComparer.OrdinalIgnoreCase.Compare(xmlReader.LocalName, "class") == 0)
+                        {
+                            objectClass = xmlReader.ReadElementContentAsString();
 
-                    break;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -148,36 +161,39 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </param>
         public void Deserialize(string objectXml)
         {
-            using (var reader = XmlReader.Create(new StringReader(objectXml), xmlReaderSettings))
+            using (var reader = new StringReader(objectXml))
             {
-                reader.Read();
-
-                // Reading attribute parameters
-                while (reader.MoveToNextAttribute())
+                using (var xmlReader = XmlReader.Create(reader, xmlReaderSettings))
                 {
-                    this.TrySetValue(reader.Name, reader.Value);
-                }
+                    xmlReader.Read();
 
-                reader.MoveToElement();
-                reader.Read();
-
-                // Reading element parameters
-                while (!reader.EOF)
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
+                    // Reading attribute parameters
+                    while (xmlReader.MoveToNextAttribute())
                     {
-                        if (reader.LocalName.Is("res"))
+                        this.TrySetValue(xmlReader.Name, xmlReader.Value);
+                    }
+
+                    xmlReader.MoveToElement();
+                    xmlReader.Read();
+
+                    // Reading element parameters
+                    while (!xmlReader.EOF)
+                    {
+                        if (xmlReader.NodeType == XmlNodeType.Element)
                         {
-                            this.TrySetValue("res", reader.ReadOuterXml());
+                            if (xmlReader.LocalName.Is("res"))
+                            {
+                                this.TrySetValue("res", xmlReader.ReadOuterXml());
+                            }
+                            else
+                            {
+                                this.TrySetValue(xmlReader.LocalName, xmlReader.ReadElementContentAsString());
+                            }
                         }
                         else
                         {
-                            this.TrySetValue(reader.LocalName, reader.ReadElementContentAsString());
+                            xmlReader.Read();
                         }
-                    }
-                    else
-                    {
-                        reader.Read();
                     }
                 }
             }

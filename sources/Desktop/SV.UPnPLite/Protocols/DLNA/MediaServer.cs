@@ -83,11 +83,14 @@ namespace SV.UPnPLite.Protocols.DLNA
         #region Methods
 
         /// <summary>
-        ///     Loads the root media object.
+        ///     Loads root media objects.
         /// </summary>
         /// <returns>
         ///     A list of root media objects.
         /// </returns>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
         public async Task<IEnumerable<MediaObject>> BrowseAsync()
         {
             try
@@ -102,7 +105,7 @@ namespace SV.UPnPLite.Protocols.DLNA
             }
             catch (UPnPServiceException ex)
             {
-                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root folders", ex);
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root objects", ex);
             }
         }
 
@@ -116,6 +119,9 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     A list of root media objects.
         /// </returns>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
         public async Task<IEnumerable<MediaObject>> BrowseAsync(IEnumerable<string> properties)
         {
             try
@@ -155,6 +161,9 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="container"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
         public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container)
         {
             container.EnsureNotNull("container");
@@ -162,6 +171,7 @@ namespace SV.UPnPLite.Protocols.DLNA
             try
             {
                 var browseResult = await this.contentDirectoryService.BrowseAsync(container.Id, BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
+                container.Revision = browseResult.UpdateId;
 
                 return browseResult.Result;
             }
@@ -190,6 +200,9 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="container"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
         /// </exception>
         public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container, IEnumerable<string> properties)
         {
@@ -221,6 +234,50 @@ namespace SV.UPnPLite.Protocols.DLNA
         }
 
         /// <summary>
+        ///     Gets metadata of the container referenced by <paramref name="containerId"/>.
+        /// </summary>
+        /// <param name="containerId">
+        ///     An id of the container on media server.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="MediaContainer"/> instance which defines an information about container.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="containerId"/> is <c>null</c> or <see cref="string.Empty"/>.
+        /// </exception>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
+        public async Task<MediaContainer> GetContainerInfoAsync(string containerId)
+        {
+            containerId.EnsureNotNull("containerId");
+
+            try
+            {
+                var browseResult = await this.contentDirectoryService.BrowseAsync(containerId, BrowseFlag.BrowseMetadata, "*", 0, 0, string.Empty);
+                var newContainer = browseResult.Result.FirstOrDefault() as MediaContainer;
+                if (newContainer != null)
+                {
+                    newContainer.Revision = browseResult.UpdateId;
+
+                    return newContainer;
+                }
+                else
+                {
+                    throw new FormatException("Container tag is missing in response");
+                }
+            }
+            catch (FormatException ex)
+            {
+                throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}'".F(containerId), ex);
+            }
+        }
+
+        /// <summary>
         ///     Searches for a media of type <typeparamref name="TMedia"/>.
         /// </summary>
         /// <typeparam name="TMedia">
@@ -229,6 +286,9 @@ namespace SV.UPnPLite.Protocols.DLNA
         /// <returns>
         ///     A list of found media items of type <typeparamref name="TMedia"/>.
         /// </returns>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
         public async Task<IEnumerable<TMedia>> SearchAsync<TMedia>() where TMedia : MediaItem
         {
             var objectClass = MediaObject.GetClass<TMedia>();

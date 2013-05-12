@@ -32,7 +32,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         ///     If the control point has an UpdateID for the container that is not equal to the UpdateID last returned, then the control point should refresh all 
         ///     its state relative to that container. If the ObjectID is zero, then the UpdateID returned is SystemUpdateID.
         /// </remarks>
-        public int UpdateId { get; internal set; }
+        public uint UpdateId { get; internal set; }
 
         #endregion
     }

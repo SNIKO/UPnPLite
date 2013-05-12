@@ -135,7 +135,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                                  Result = mediaObjects,
                                  NumberReturned = Convert.ToInt32(response["NumberReturned"]),
                                  TotalMatches = Convert.ToInt32(response["TotalMatches"]),
-                                 UpdateId = Convert.ToInt32(response["UpdateId"])
+                                 UpdateId = Convert.ToUInt32(response["UpdateId"])
                              };
 
             return result;
@@ -197,7 +197,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                 Result = mediaObjects,
                 NumberReturned = Convert.ToInt32(response["NumberReturned"]),
                 TotalMatches = Convert.ToInt32(response["TotalMatches"]),
-                UpdateId = Convert.ToInt32(response["UpdateId"])
+                UpdateId = Convert.ToUInt32(response["UpdateId"])
             };
 
             return result;
@@ -242,21 +242,24 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         {
             var result = new List<MediaObject>();
 
-            using (var xmlReader = XmlReader.Create(new StringReader(mediaObjectsXml), xmlReaderSettings))
+            using (var reader = new StringReader(mediaObjectsXml))
             {
-                xmlReader.MoveToContent();
-                xmlReader.Read();
-
-                while (!xmlReader.EOF)
+                using (var xmlReader = XmlReader.Create(reader, xmlReaderSettings))
                 {
-                    var element = xmlReader.ReadOuterXml();
-                    if (element != string.Empty)
-                    {
-                        var mediaObject = MediaObject.Create(element);
+                    xmlReader.MoveToContent();
+                    xmlReader.Read();
 
-                        if (mediaObject != null)
+                    while (!xmlReader.EOF)
+                    {
+                        var element = xmlReader.ReadOuterXml();
+                        if (element != string.Empty)
                         {
-                            result.Add(mediaObject);
+                            var mediaObject = MediaObject.Create(element);
+
+                            if (mediaObject != null)
+                            {
+                                result.Add(mediaObject);
+                            }
                         }
                     }
                 }

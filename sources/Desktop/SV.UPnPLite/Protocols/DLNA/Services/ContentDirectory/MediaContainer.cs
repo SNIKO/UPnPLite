@@ -21,6 +21,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </summary>
         public bool Searchable { get; internal set; }
 
+        /// <summary>
+        ///     Gets a revision of the currrent container.
+        /// </summary>
+        public uint Revision { get; internal set; }
+
         #endregion
 
         #region Methods

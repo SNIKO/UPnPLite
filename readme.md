@@ -36,44 +36,34 @@ To start using the UPnPLite, please follow next steps:
 
 #### UPnP Examples
 
-* Displaying all UPnP devices found so far:
+* Discovering UPnP devices:
 
 ```csharp
+// Receiving a notification when new UPnP device is added to a network:
+var devicesDiscovery = new CommonUPnPDevicesDiscovery();
+
+// Enumerating currently available UPnP devices
 var devicesDiscovery = new CommonUPnPDevicesDiscovery();
 foreach (var device in devicesDiscovery.DiscoveredDevices)
 {
   Console.WriteLine(device.FriendlyName);
 }
-```
 
-* Receiving a notification when new UPnP device is added to a network:
-
-```csharp
-var devicesDiscovery = new CommonUPnPDevicesDiscovery();
 devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Available).Subscribe(activityInfo =>
 {
 	Console.WriteLine("{0} found", activityInfo.Device.FriendlyName);
 });
-```
 
-* Receiving a notification when UPnP device is removed from a network:
-
-```csharp
-var devicesDiscovery = new CommonUPnPDevicesDiscovery();
+// Receiving a notification when UPnP device is removed from a network
 devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Gone).Subscribe(activityInfo =>
 {
 	Console.WriteLine("{0} gone", activityInfo.Device.FriendlyName);
 });
-```
 
-* Receiving a notification when device of specific type is added to a network:
-
-```csharp
-var devicesDiscovery = new CommonUPnPDevicesDiscovery();
-
+// Receiving a notification when device of specific type is added to a network
 var newMediaServers = from activityInfo in devicesDiscovery.DevicesActivity
-					  where activityInfo.Activity == DeviceActivity.Available && activityInfo.Device.DeviceType == "urn:schemas-upnp-org:device:MediaServer"
-					  select activityInfo.Device;
+		  where activityInfo.Activity == DeviceActivity.Available && activityInfo.Device.DeviceType == "urn:schemas-upnp-org:device:MediaServer"
+		  select activityInfo.Device;
 
 newMediaServers.Subscribe(server => 
 {
@@ -95,3 +85,99 @@ args["DesiredVolume"] = 80;
 
 var response = await renderingControlService.InvokeActionAsync("SetVolume", args);
 ```
+
+#### DLNA Examples
+
+* Discovering media devices:
+
+```csharp
+var mediaServersDiscovery = new MediaServersDiscovery();
+var mediaRenderersDiscovery = new MediaRenderersDiscovery();
+
+// Enumerating currently available servers
+foreach (var server in mediaServersDiscovery.DiscoveredDevices)
+{
+	Console.WriteLine("Server found: {0}", server.FriendlyName);
+}
+
+// Receiving notifications when a new media server is added to a network
+mediaServersDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Available).Subscribe(e =>
+{
+	Console.WriteLine("Server found: {0}", e.Device.FriendlyName);
+});
+
+// Receiving notifications when the media renderer is removed from the network
+mediaRenderersDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Gone).Subscribe(e =>
+{
+	Console.WriteLine("Renderer gone: {0}", e.Device.FriendlyName);
+});
+```
+
+* Browsing the MediaServer:
+
+```csharp
+var mediaServersDiscovery = new MediaServersDiscovery();
+var server = mediaServersDiscovery.DiscoveredDevices.First();
+
+// Requesting root media objects
+var rootObjects = await server.BrowseAsync();
+var rootContainers = rootObjects.OfType<MediaContainer>();
+var rootMediaItems = rootObjects.OfType<MediaItem>();			
+
+// Requesting media objects from child container
+var containerToBrowse = rootContainers.First();
+var childContainerObjects = await server.BrowseAsync(containerToBrowse);
+```
+
+* Searching for media items on MediaServer:
+
+```csharp
+var mediaServersDiscovery = new MediaServersDiscovery();
+var server = mediaServersDiscovery.DiscoveredDevices.First();
+
+// Requesting all music tracks
+var musicTracks = await server.SearchAsync<MusicTrack>();
+foreach (var track in musicTracks)
+{
+	Console.WriteLine("Title={0}, Album={1}, Artist={2}", track.Title, track.Album, track.Artist);
+}
+
+// Requesting all video items
+var videos = await server.SearchAsync<VideoItem>();
+foreach (var video in videos)
+{
+	Console.WriteLine("Title={0}, Genre={1}", video.Title, video.Genre);
+}
+```
+
+* Playback controlling on MediaRenderer:
+
+```csharp
+var mediaServersDiscovery = new MediaServersDiscovery();
+var mediaRenderersDiscovery = new MediaRenderersDiscovery();
+			
+var server = mediaServersDiscovery.DiscoveredDevices.First();
+var renderer = mediaRenderersDiscovery.DiscoveredDevices.First();
+
+var musicTracks = await server.SearchAsync<MusicTrack>();
+var trackToPlay = musicTracks.First();
+						
+await renderer.OpenAsync(trackToPlay);
+await renderer.PlayAsync();
+
+// Subscribing for a playback position change
+renderer.PositionChanges.Subscribe(position =>
+{
+	Console.WriteLine("Position changed: {0}", position);
+});
+
+// Subscribing for a playback state change
+renderer.StateChanges.Subscribe(state =>
+{
+	Console.WriteLine("Playback state changed: {0}", state);
+});
+```
+
+## Copyright
+
+Copyright (c) 2013 Sergii Vashchyshchuk

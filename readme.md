@@ -2,14 +2,12 @@
 
 The UPnPLite is a high-performance, lite UPnP/DLNA framework for discovering and controlling media devices over the network. 
 
-### Supported Platforms
-
-Currently, the next platforms are supported:
+Currently, next platforms are supported:
 * .NET 4.5
 * WinRT
 * Windows Phone 8
 
-### Prerequisites:
+### Prerequisites
 
 In order to build sources, be sure that next prerequisites are installed:
 

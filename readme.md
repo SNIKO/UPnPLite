@@ -30,53 +30,49 @@ To start using the UPnPLite, please follow next steps:
 
 * Run <code>RegisterBinaries.bat</code> script. It will register binaries into GAC to make them available in "Reference Manager";
 
-* Add <code>UPnPLite.dll</code> assembly to your project and enjoy using it.
+* Add <code>SV.UPnPLite.dll</code> assembly to your project and enjoy using it.
 
 ### Usage
 
 #### UPnP Examples
 
-* Discovering UPnP devices:
+* Searching for UPnP devices:
 
 ```csharp
-// Receiving a notification when new UPnP device is added to a network:
 var devicesDiscovery = new CommonUPnPDevicesDiscovery();
 
-// Enumerating currently available UPnP devices
-var devicesDiscovery = new CommonUPnPDevicesDiscovery();
-foreach (var device in devicesDiscovery.DiscoveredDevices)
-{
-  Console.WriteLine(device.FriendlyName);
-}
-
-devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Available).Subscribe(activityInfo =>
-{
-	Console.WriteLine("{0} found", activityInfo.Device.FriendlyName);
+// Receiving notifications about new devices added to a network
+devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Available).Subscribe(e =>
+{	
+	Console.WriteLine("{0} found", e.Device.FriendlyName);
 });
 
-// Receiving a notification when UPnP device is removed from a network
-devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Gone).Subscribe(activityInfo =>
+// Receiving notifications about devices left the network
+devicesDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Gone).Subscribe(e =>
 {
-	Console.WriteLine("{0} gone", activityInfo.Device.FriendlyName);
+	Console.WriteLine("{0} gone", e.Device.FriendlyName);
 });
 
-// Receiving a notification when device of specific type is added to a network
+//  Receiving notifications about new devices of specific type added to the network
 var newMediaServers = from activityInfo in devicesDiscovery.DevicesActivity
-		  where activityInfo.Activity == DeviceActivity.Available && activityInfo.Device.DeviceType == "urn:schemas-upnp-org:device:MediaServer"
-		  select activityInfo.Device;
+                      where activityInfo.Activity == DeviceActivity.Available && activityInfo.Device.DeviceType == "urn:schemas-upnp-org:device:MediaServer"
+                      select activityInfo.Device;
 
 newMediaServers.Subscribe(server => 
 {
 	Console.WriteLine("{0} found", server.FriendlyName);
 });
+
+// Getting currently available devices
+var devices = devicesDiscovery.DiscoveredDevices;
 ```
 
 * Invoking action on UPnP service:
 
 ```csharp
 var devicesDiscovery = new CommonUPnPDevicesDiscovery();
-var rendererDevice = devicesDiscovery.DiscoveredDevices.FirstOrDefault(d => d.DeviceType == "urn:schemas-upnp-org:device:MediaRenderer");
-var renderingControlService = rendererDevice.Services.FirstOrDefault(service => service.ServiceType == "urn:upnp-org:serviceId:RenderingControl");
+var rendererDevice = devicesDiscovery.DiscoveredDevices.First(device => device.DeviceType == "urn:schemas-upnp-org:device:MediaRenderer");
+var renderingControlService = rendererDevice.Services.First(service => service.ServiceType == "urn:upnp-org:serviceId:RenderingControl");
 			
 var args = new Dictionary<string, object>();
 args["InstanceID"] = 0;
@@ -88,7 +84,7 @@ var response = await renderingControlService.InvokeActionAsync("SetVolume", args
 
 #### DLNA Examples
 
-* Discovering media devices:
+* Searching for media devices:
 
 ```csharp
 var mediaServersDiscovery = new MediaServersDiscovery();
@@ -100,20 +96,20 @@ foreach (var server in mediaServersDiscovery.DiscoveredDevices)
 	Console.WriteLine("Server found: {0}", server.FriendlyName);
 }
 
-// Receiving notifications when a new media server is added to a network
+// Receiving notifications about new media servers added to a network
 mediaServersDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Available).Subscribe(e =>
 {
 	Console.WriteLine("Server found: {0}", e.Device.FriendlyName);
 });
 
-// Receiving notifications when the media renderer is removed from the network
+// Receiving notifications about media renderers left the network
 mediaRenderersDiscovery.DevicesActivity.Where(e => e.Activity == DeviceActivity.Gone).Subscribe(e =>
 {
 	Console.WriteLine("Renderer gone: {0}", e.Device.FriendlyName);
 });
 ```
 
-* Browsing the MediaServer:
+* Browsing media on MediaServer:
 
 ```csharp
 var mediaServersDiscovery = new MediaServersDiscovery();
@@ -135,14 +131,14 @@ var childContainerObjects = await server.BrowseAsync(containerToBrowse);
 var mediaServersDiscovery = new MediaServersDiscovery();
 var server = mediaServersDiscovery.DiscoveredDevices.First();
 
-// Requesting all music tracks
+// Find all music tracks
 var musicTracks = await server.SearchAsync<MusicTrack>();
 foreach (var track in musicTracks)
 {
 	Console.WriteLine("Title={0}, Album={1}, Artist={2}", track.Title, track.Album, track.Artist);
 }
 
-// Requesting all video items
+// Find all video items
 var videos = await server.SearchAsync<VideoItem>();
 foreach (var video in videos)
 {
@@ -150,7 +146,7 @@ foreach (var video in videos)
 }
 ```
 
-* Playback controlling on MediaRenderer:
+* Playing the media on MediaRenderer:
 
 ```csharp
 var mediaServersDiscovery = new MediaServersDiscovery();
@@ -160,9 +156,9 @@ var server = mediaServersDiscovery.DiscoveredDevices.First();
 var renderer = mediaRenderersDiscovery.DiscoveredDevices.First();
 
 var musicTracks = await server.SearchAsync<MusicTrack>();
-var trackToPlay = musicTracks.First();
+var track = musicTracks.First();
 						
-await renderer.OpenAsync(trackToPlay);
+await renderer.OpenAsync(track);
 await renderer.PlayAsync();
 
 // Subscribing for a playback position change

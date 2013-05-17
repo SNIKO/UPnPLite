@@ -19,7 +19,7 @@ In order to build sources, be sure that next prerequisites are installed:
 
 ### Installation
 
-The installation process is quite manual at the moment, but it Will be improved subsequently.
+The installation process is quite manual at the moment, but it will be improved subsequently.
 
 To start using the UPnPLite, please follow next steps:
 

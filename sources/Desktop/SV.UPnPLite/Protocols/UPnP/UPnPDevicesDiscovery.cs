@@ -294,14 +294,14 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
         }
 
-        private UPnPVersion ParseDeviceVersion(string deviceTypeString)
+        private UPnPVersion ParseDeviceVersion(string deviceTypeWithVersion)
         {
             var version = new UPnPVersion();
 
-            var lastColonIndex = deviceTypeString.LastIndexOf(':');
+            var lastColonIndex = deviceTypeWithVersion.LastIndexOf(':');
             if (lastColonIndex != -1)
             {
-                var versionString = deviceTypeString.Substring(lastColonIndex + 1, deviceTypeString.Length - lastColonIndex - 1);
+                var versionString = deviceTypeWithVersion.Substring(lastColonIndex + 1, deviceTypeWithVersion.Length - lastColonIndex - 1);
                 var majorMinorSplit = versionString.Split('.');
 
                 int value;
@@ -313,7 +313,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                 {
                     version.Major = 1;
 
-                    this.logger.Instance().Warning("Can't parse major part of device's version. [deviceType={0}]", deviceTypeString);
+                    this.logger.Instance().Warning("Can't parse major part of device's version. [deviceType={0}]", deviceTypeWithVersion);
                 }
 
                 if (majorMinorSplit.Length > 1 && int.TryParse(majorMinorSplit[1], out value))
@@ -323,10 +323,17 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
             else
             {
-                this.logger.Instance().Warning("The version is missing in device's type. [deviceType={0}]", deviceTypeString);
+                this.logger.Instance().Warning("The version is missing in device's type. [deviceType={0}]", deviceTypeWithVersion);
             }
 
             return version;
+        }
+
+        private string ParseDeviceType(string deviceTypeWithVersion)
+        {
+            var type = deviceTypeWithVersion.Substring(0, deviceTypeWithVersion.LastIndexOf(':'));
+
+            return type;
         }
 
         private TDevice ParseDevice(string host, Stream deviceDescription)
@@ -365,6 +372,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                         if (device != null)
                         {
                             device.Address = host;
+                            device.DeviceType = ParseDeviceType(deviceType.Value);
                             device.DeviceVersion = ParseDeviceVersion(deviceType.Value);
                             device.FriendlyName = deviceName.Value;
                             device.Manufacturer = manufactuurer.ValueOrDefault();

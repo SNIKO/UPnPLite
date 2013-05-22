@@ -22,7 +22,7 @@ The installation process is quite manual at the moment, but it will be improved 
 To start using the UPnPLite, please follow next steps:
 
 * Download sources 
-<code>git clone https://github.com/SNIKO/UPnPLite.git</code>
+<code>git clone git://github.com/SNIKO/UPnPLite.git</code>
 
 * Build <code>\sources\UPnPLite.sln</code> solution;
 

@@ -294,6 +294,36 @@ namespace SV.UPnPLite.Protocols.DLNA
             }
         }
 
+        /// <summary>
+        ///     Requests current uri.
+        /// </summary>
+        /// <returns>
+        ///     The conceptually top-level state of the MediaRenderer.
+        /// </returns>
+        /// <exception cref="WebException">
+        ///     An error occurred when sending request to service.
+        /// </exception>
+        /// <exception cref="MediaRendererException">
+        ///     An unexpected error occurred when executing request on device.
+        /// </exception>
+        public async Task<Uri> GetCurrentUriAsync()
+        {
+            try
+            {
+                var mediaInfo = await this.avTransportService.GetMediaInfoAsync(0);
+
+                return mediaInfo.CurrentUri;
+            }
+            catch (FormatException ex)
+            {
+                throw new MediaRendererException(this, MediaRendererError.UnexpectedError, "Received result is in a bad format", ex);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when requesting current state", ex);
+            }
+        }
+
         private MediaRendererState ParseTransportState(string transportState)
         {
             MediaRendererState result;

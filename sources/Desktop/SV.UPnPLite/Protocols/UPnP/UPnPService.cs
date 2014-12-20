@@ -94,6 +94,8 @@ namespace SV.UPnPLite.Protocols.UPnP
         public UPnPService(string serviceType, Uri controlUri, Uri eventsUri, ILogManager logManager)
             : this(serviceType, controlUri, eventsUri)
         {
+			this.LogManager = logManager;
+
             if (logManager != null)
             {
                 this.logger = logManager.GetLogger(this.GetType());
@@ -108,6 +110,8 @@ namespace SV.UPnPLite.Protocols.UPnP
         ///     Gets a type of the service.
         /// </summary>
         public string ServiceType { get; internal set; }
+
+		protected ILogManager LogManager { get; private set; }
 
         #endregion
 

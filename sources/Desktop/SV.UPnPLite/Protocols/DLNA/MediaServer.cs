@@ -278,6 +278,67 @@ namespace SV.UPnPLite.Protocols.DLNA
         }
 
         /// <summary>
+        ///     Gets metadata of the item referenced by <paramref name="itemId"/>.
+        /// </summary>
+        /// <param name="itemId">
+        ///     An id of the item on media server.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="MediaContainer"/> instance which defines an information about container.
+        /// </returns>
+        /// <param name="properties">
+        ///     The properties of the media objects to load. Use this property to load only needed properties instead of loading all of them. It will reduce the server and network load.
+        ///     All properties are listed here: <see cref="MediaObject.Properties"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="itemId"/> is <c>null</c> or <see cref="string.Empty"/>.
+        /// </exception>
+        /// <exception cref="MediaServerException">
+        ///     An error occurred when receiving result from media server.
+        /// </exception>
+        public async Task<MediaItem> GetItemInfoAsync(string itemId, params string[] properties)
+        {
+            itemId.EnsureNotNull("containerId");
+
+            string filter;
+            
+            if (properties.Any())
+            {
+                var propertiesFilter = new List<string>();
+                propertiesFilter.AddRange(this.requiredPropertiesFilter);
+                propertiesFilter.AddRange(properties);
+
+                filter = string.Join(",", propertiesFilter);
+            }
+            else
+            {
+                filter = "*";
+            }
+
+            try
+            {
+                var browseResult = await this.contentDirectoryService.BrowseAsync(itemId, BrowseFlag.BrowseMetadata, filter, 0, 0, string.Empty);
+                var mediaItem = browseResult.Result.FirstOrDefault() as MediaItem;
+                if (mediaItem != null)
+                {
+                    return mediaItem;
+                }
+                else
+                {
+                    throw new FormatException("Container tag is missing in response");
+                }
+            }
+            catch (FormatException ex)
+            {
+                throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
+            }
+            catch (UPnPServiceException ex)
+            {
+                throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing item '{0}'".F(itemId), ex);
+            }
+        }
+
+        /// <summary>
         ///     Searches for a media of type <typeparamref name="TMedia"/>.
         /// </summary>
         /// <typeparam name="TMedia">

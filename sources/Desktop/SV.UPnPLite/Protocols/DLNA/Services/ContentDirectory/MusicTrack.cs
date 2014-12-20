@@ -1,8 +1,9 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
-    using System;
+	using System;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///      Represents a discrete piece of audio that should be interpreted as music.
@@ -38,6 +39,15 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         #endregion
 
+		#region Constructors
+
+		public MusicTrack(ILogManager logManager)
+			: base(logManager)
+		{
+		}
+
+		#endregion
+
         #region Methods
 
         /// <summary>
@@ -49,16 +59,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="value">
         ///     The value of the property read from XML.
         /// </param>
-        /// <returns>
-        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
-        /// </returns>
-        protected override bool TrySetValue(string key, string value)
+        protected override void SetValue(string key, string value)
         {
-            if (base.TrySetValue(key, value))
-            {
-                // The value is set by base object
-            }
-            else if (key.Is("artist"))
+            if (key.Is("artist"))
             {
                 this.Artist = value;
             }
@@ -80,10 +83,8 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
             else
             {
-                return false;
+				base.SetValue(key, value);
             }
-
-            return true;
         }
 
         #endregion

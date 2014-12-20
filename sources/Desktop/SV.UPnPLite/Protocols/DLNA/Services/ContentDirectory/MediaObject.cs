@@ -1,14 +1,14 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Extensions;
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Xml;
-    using System.Xml.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using System.Xml;
+	using SV.UPnPLite.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     The base class for all media hosted by Media Server.
@@ -29,6 +29,10 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         private readonly List<MediaResource> resources = new List<MediaResource>();
 
+		private readonly ILogger logger;
+
+		private readonly ILogManager logManager;
+
         #endregion
 
         #region Constructors
@@ -36,10 +40,26 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Initializes the <see cref="MediaObject" /> class.
         /// </summary>
-        static MediaObject()
+		static MediaObject()
         {
             InitializeMediaObjectTypes();
         }
+
+		/// <summary>
+		///		Initializes a new instance of the <see cref="MediaObject"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public MediaObject(ILogManager logManager = null)
+		{
+			this.logManager = logManager;
+
+			if (logManager != null)
+			{
+				this.logger = logManager.GetLogger<MediaResource>();
+			}
+		}
 
         #endregion
 
@@ -80,7 +100,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <summary>
         ///     Gets a thumbnail of the media item.
         /// </summary>
-        public virtual Uri Thumbnail { get; private set; }
+        public virtual string ThumbnailUri { get; protected set; }
 
         /// <summary>
         ///     Gets a UPnP class of the media object.
@@ -122,7 +142,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="didlLiteXml"/> is <c>null</c> or <see cref="string.Empty"/>.
         /// </exception>
-        public static MediaObject Create(string didlLiteXml)
+        public static MediaObject Create(string didlLiteXml, ILogManager logManager)
         {
             didlLiteXml.EnsureNotNull("didlLiteXml");
 
@@ -144,7 +164,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                 }
             }
 
-            var mediaObject = CreateMediaObject(objectClass);
+            var mediaObject = CreateMediaObject(objectClass, logManager);
             if (mediaObject != null)
             {
                 mediaObject.Deserialize(didlLiteXml);
@@ -170,7 +190,18 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                     // Reading attribute parameters
                     while (xmlReader.MoveToNextAttribute())
                     {
-                        this.TrySetValue(xmlReader.Name, xmlReader.Value);
+						try
+						{
+							this.SetValue(xmlReader.Name, xmlReader.Value);
+						}
+						catch (FormatException ex)
+						{
+							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".AsKeyFor(objectXml));
+						}
+						catch (OverflowException ex)
+						{
+							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".AsKeyFor(objectXml));
+						}
                     }
 
                     xmlReader.MoveToElement();
@@ -183,11 +214,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                         {
                             if (xmlReader.LocalName.Is("res"))
                             {
-                                this.TrySetValue("res", xmlReader.ReadOuterXml());
+                                this.SetValue("res", xmlReader.ReadOuterXml());
                             }
                             else
                             {
-                                this.TrySetValue(xmlReader.LocalName, xmlReader.ReadElementContentAsString());
+                                this.SetValue(xmlReader.LocalName, xmlReader.ReadElementContentAsString());
                             }
                         }
                         else
@@ -208,10 +239,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="value">
         ///     The value of the property read from XML.
         /// </param>
-        /// <returns>
-        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
-        /// </returns>
-        protected virtual bool TrySetValue(string key, string value)
+        protected virtual void SetValue(string key, string value)
         {
             if (key.Is("id"))
             {
@@ -235,29 +263,23 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
             else if (key.Is("res"))
             {
-                this.resources.Add(new MediaResource().Deserialize(value));
+                this.resources.Add(new MediaResource(this.logManager).Deserialize(value));
             }
-            else
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private static void InitializeMediaObjectTypes()
         {
             knownMediaObjectTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
-            knownMediaObjectTypes["object.item"] = typeof(MediaItem);
-            knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
+            knownMediaObjectTypes["object.item"] 					  = typeof(MediaItem);
+            knownMediaObjectTypes["object.item.audioItem"] 			  = typeof(AudioItem);
             knownMediaObjectTypes["object.item.audioItem.musicTrack"] = typeof(MusicTrack);
-            knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
-            knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
-            knownMediaObjectTypes["object.container"] = typeof(MediaContainer);
+            knownMediaObjectTypes["object.item.videoItem"] 			  = typeof(VideoItem);
+            knownMediaObjectTypes["object.item.imageItem"] 			  = typeof(ImageItem);
+            knownMediaObjectTypes["object.container"] 				  = typeof(MediaContainer);
         }
 
-        private static MediaObject CreateMediaObject(string contentClass)
+        private static MediaObject CreateMediaObject(string contentClass, ILogManager logManager)
         {
             MediaObject result = null;
             Type mediaObjectType;
@@ -278,7 +300,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
             if (mediaObjectType != null)
             {
-                result = Activator.CreateInstance(mediaObjectType) as MediaObject;
+                result = Activator.CreateInstance(mediaObjectType, logManager) as MediaObject;
             }
 
             return result;

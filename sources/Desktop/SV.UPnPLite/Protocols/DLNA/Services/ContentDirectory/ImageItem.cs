@@ -1,8 +1,9 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
-    using System;
+	using System;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Represents a piece of content that, when rendered, generates some still image. It is atomic in the sense that it does not contain other objects in the ContentDirectory. 
@@ -51,6 +52,21 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         #endregion
 
+		#region Constructors
+
+		/// <summary>
+		///		Initializes a new instance of the <see cref="ImageItem"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public ImageItem(ILogManager logManager = null)
+			: base(logManager)
+		{
+		}
+
+		#endregion
+
         #region Methods
 
         /// <summary>
@@ -65,13 +81,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <returns>
         ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
         /// </returns>
-        protected override bool TrySetValue(string key, string value)
+        protected override void SetValue(string key, string value)
         {
-            if (base.TrySetValue(key, value))
-            {
-                // The value is set by base object
-            }
-            else if (key.Is("StorageMedium"))
+            if (key.Is("StorageMedium"))
             {
                 this.StorageMedium = value;
             }
@@ -99,12 +111,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             {
                 this.Rights = value;
             }
+            else if (key.Is("albumArtURI"))
+            {
+                this.ThumbnailUri = value;
+            }
             else
             {
-                return false;
+				base.SetValue(key, value);
             }
-
-            return true;
         }
 
         #endregion

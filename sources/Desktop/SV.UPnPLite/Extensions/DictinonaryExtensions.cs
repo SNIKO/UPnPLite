@@ -154,29 +154,35 @@ namespace SV.UPnPLite.Extensions
         {
             instance.EnsureNotNull("instance");
             TValue result;
+			string value;
 
-            var value = instance[key];
-
-            if (typeof(TValue) == typeof(int))
-            {
-                result = (TValue)(object)int.Parse(value);
-            }
-            else if (typeof(TValue) == typeof(uint))
-            {
-                result = (TValue)(object)int.Parse(value);
-            }
-            else if (typeof(TValue) == typeof(bool))
-            {
-                result = (TValue)(object)value.ToBool();
-            }
-            else if (typeof(TValue) == typeof(string))
-            {
-                result = (TValue)(object)value;
-            }
-            else
-            {
-                throw new NotSupportedException("The value type '{0}' is not supported".F(typeof(TValue).Name));
-            }
+			if (instance.TryGetValue(key, out value))
+			{
+				if (typeof(TValue) == typeof(int))
+				{
+					result = (TValue)(object)int.Parse(value);
+				}
+				else if (typeof(TValue) == typeof(uint))
+				{
+					result = (TValue)(object)int.Parse(value);
+				}
+				else if (typeof(TValue) == typeof(bool))
+				{
+					result = (TValue)(object)value.ToBool();
+				}
+				else if (typeof(TValue) == typeof(string))
+				{
+					result = (TValue)(object)value;
+				}
+				else
+				{
+					throw new NotSupportedException("The value type '{0}' is not supported".F(typeof(TValue).Name));
+				}
+			}
+			else
+			{
+				throw new KeyNotFoundException("The key '{0}' was not present in the dictionary.".F(key));
+			}
 
             return result;
         }

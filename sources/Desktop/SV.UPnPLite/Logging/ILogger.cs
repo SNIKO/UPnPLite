@@ -2,6 +2,7 @@
 namespace SV.UPnPLite.Logging
 {
     using System;
+	using System.Collections.Generic;
 
     /// <summary>
     ///     Defines methods for logging debug information.
@@ -107,6 +108,20 @@ namespace SV.UPnPLite.Logging
         ///     Am argumets for formatted <paramref name="message"/>.
         /// </param>
         void Warning(Exception ex, string message, params object[] args);
+
+		/// <summary>
+		///     Writes a warning messages, typically for non-critical issues, which can be recovered or which are temporary failures.
+		/// </summary>
+		/// <param name="ex">
+		///     An exception associated with log message.
+		/// </param>
+		/// <param name="message">
+		///     The formatted text of the log.
+		/// </param>
+		/// <param name="parameters">
+		///     The list of custom parameters.
+		/// </param>
+		void Warning(Exception ex, string message, params KeyValuePair<string, string>[] parameters);
 
         /// <summary>
         ///     Writes an error message.

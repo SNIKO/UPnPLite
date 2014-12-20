@@ -1,10 +1,12 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
-    using System;
-    using System.IO;
-    using System.Xml;
+	using System;
+	using System.IO;
+	using System.Xml;
+	using SV.UPnPLite.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Defines a media resource -  some type of a binary asset, such as photo, song, video, etc.
@@ -21,11 +23,31 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             IgnoreProcessingInstructions = true
         };
 
+		private ILogger logger;
+
         #endregion
 
-        #region Properties
+		#region Constructors
 
-        /// <summary>
+		/// <summary>
+		///		Initializes a new instance of the <see cref="MediaResource"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public MediaResource(ILogManager logManager = null)
+		{
+			if (logManager != null)
+			{
+				this.logger = logManager.GetLogger<MediaResource>();
+			}
+		}
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
         ///     Gets size in bytes of the resource.
         /// </summary>
         public ulong Size { get; internal set; }
@@ -109,7 +131,18 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
                 while (reader.MoveToNextAttribute())
                 {
-                    this.TrySetValue(reader.LocalName, reader.Value);
+					try
+					{
+						this.SetValue(reader.LocalName, reader.Value);
+					}
+					catch(FormatException ex)
+					{
+						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".AsKeyFor(resourceXml));
+					}
+					catch(OverflowException ex)
+					{
+						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".AsKeyFor(resourceXml));
+					}
                 }
 
                 reader.MoveToElement();
@@ -117,7 +150,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
                 this.Uri = reader.ReadElementContentAsString();
             }
 
-            this.Metadata = resourceXml;
+			this.Metadata = resourceXml;
 
             return this;
         }
@@ -134,11 +167,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <returns>
         ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
         /// </returns>
-        private bool TrySetValue(string key, string value)
+        private void SetValue(string key, string value)
         {
             if (key.Is("size"))
             {
-                this.Size = uint.Parse(value);
+                this.Size = ulong.Parse(value);
             }
             else if (key.Is("duration"))
             {
@@ -180,12 +213,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             {
                 this.ImportUri = value;
             }
-            else
-            {
-                return false;
-            }
-
-            return true;
         }
 
         #endregion

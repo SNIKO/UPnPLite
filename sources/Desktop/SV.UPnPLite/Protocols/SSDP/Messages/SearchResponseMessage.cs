@@ -35,42 +35,53 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
         /// <exception cref="KeyNotFoundException">
         ///     One of the reuqired headers not found.
         /// </exception>
-        /// <exception cref="FormatException">
-        ///     One of the headers has value in a bad format.
+        /// <exception cref="ArgumentException">
+		///     The <paramref name="message"/> is not valid search repsonse message.
         /// </exception>
         internal static SearchResponseMessage Create(string message)
         {
             var response = new SearchResponseMessage();
-
             var lines = message.SplitIntoLines();
+
             if (lines.Count() > 1)
             {
                 var statusString = lines[0];
-                if (statusString == "HTTP/1.1 200 OK")
+                if (StringComparer.OrdinalIgnoreCase.Compare(statusString, "HTTP/1.1 200 OK") == 0)
                 {
                     var headers = ParseHeaders(lines.Skip(1));
 
-                    response.MaxAge             = ParseMaxAge(      headers.GetValue                <string>    ("CACHE-CONTROL"));
-                    response.Location           =                   headers.GetValue                <string>    ("LOCATION");
-                    response.SearchTarget       =                   headers.GetValue                <string>    ("ST");
-                    response.Server             =                   headers.GetValue                <string>    ("SERVER");
-                    response.USN                =                   headers.GetValue                <string>    ("USN");
+					try
+					{
+						response.MaxAge 	  = ParseMaxAge(headers.GetValue<string>("CACHE-CONTROL"));
+						response.Location 	  = headers.GetValue<string>("LOCATION");
+						response.SearchTarget = headers.GetValue<string>("ST");
+						response.Server 	  = headers.GetValue<string>("SERVER");
+						response.USN 		  = headers.GetValue<string>("USN");
 
-                    response.BootId             =                   headers.GetValueOrDefault       <int>       ("BOOTID.UPNP.ORG");
-                    response.ConfigId           =                   headers.GetValueOrDefault       <int>       ("CONFIGID.UPNP.ORG");
-                    response.SearchPort         =                   headers.GetValueOrDefault       <int>       ("SEARCHPORT.UPNP.ORG");
+						response.BootId 	  = headers.GetValueOrDefault<int>("BOOTID.UPNP.ORG");
+						response.ConfigId 	  = headers.GetValueOrDefault<int>("CONFIGID.UPNP.ORG");
+						response.SearchPort   = headers.GetValueOrDefault<int>("SEARCHPORT.UPNP.ORG");
 
-                    // TODO: Parse Date
-                    ////message.Date = headers.GetValueOrDefault<string>("DATE");
+						// TODO: Parse Date
+						////message.Date = headers.GetValueOrDefault<string>("DATE");
+					}
+					catch (KeyNotFoundException ex)
+					{
+						throw new ArgumentException("The given message is not valid search response message", "message", ex);
+					}
+					catch (FormatException ex)
+					{
+						throw new ArgumentException("The given message is not valid search response message", "message", ex);
+					}
                 }
                 else
                 {
-                    throw new FormatException("The message has bad format".F(message));
+					throw new ArgumentException("The given message is not valid search response message", "message");
                 }
             }
             else
             {
-                throw new FormatException("The message has bad format".F(message));
+				throw new ArgumentException("The given message is not valid search response message", "message");
             }
 
             return response;

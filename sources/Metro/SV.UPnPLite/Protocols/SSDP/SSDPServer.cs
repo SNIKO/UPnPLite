@@ -177,14 +177,10 @@ namespace SV.UPnPLite.Protocols.SSDP
                                 var response = SearchResponseMessage.Create(message);
                                 observer.OnNext(response);
                             }
-                            catch (KeyNotFoundException ex)
-                            {
-                                logger.Instance().Warning(ex, "The received M-Search response has missed header. The response is following:\n{0}", message);
-                            }
-                            catch (FormatException ex)
-                            {
-                                logger.Instance().Warning(ex, "The received M-Search response has header in a bad format. The response is following:\n{0}", message);
-                            }
+							catch (ArgumentException ex)
+							{
+								logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".AsKeyFor(message));
+							}
                         };
 
                     searchSocket.BindEndpointAsync(null, "0").GetAwaiter().GetResult();
@@ -205,7 +201,7 @@ namespace SV.UPnPLite.Protocols.SSDP
                             searchSocket.Dispose();
                         });
 
-                    logger.Instance().Debug("Sent M-Search request. [multicastHost={0}, searchTarget={1}.", multicastHost.DisplayName, searchTarget);
+                    logger.Instance().Debug("Sent M-Search request. [multicastHost={0}, searchTarget={1}]", multicastHost.DisplayName, searchTarget);
 
                     return searchSocket.Dispose;
                 });
@@ -229,14 +225,10 @@ namespace SV.UPnPLite.Protocols.SSDP
 
                 this.notifyMessages.OnNext(notifyMessage);
             }
-            catch (KeyNotFoundException ex)
-            {
-                logger.Instance().Warning(ex, "The received notification message has missed header. The message is following:\n{0}", message);
-            }
-            catch (FormatException ex)
-            {
-                logger.Instance().Warning(ex, "The received notification message has header in a bad format. The message is following:\n{0}", message);
-            }
+			catch (ArgumentException ex)
+			{
+				logger.Instance().Warning(ex, "The received notification message has been ignored.", "Message".AsKeyFor(message));
+			}
         }
         
         #endregion

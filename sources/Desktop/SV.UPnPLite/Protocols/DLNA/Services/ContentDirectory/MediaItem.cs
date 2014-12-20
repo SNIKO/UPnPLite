@@ -1,7 +1,8 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Defines the media item which can be played on MediaRenderer.
@@ -17,9 +18,24 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         #endregion
 
-        #region Methods
+		#region Constructors
 
-        /// <summary>
+		/// <summary>
+		///		Initializes a new instance of the <see cref="MediaItem"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public MediaItem(ILogManager logManager = null)
+			: base(logManager)
+		{
+		}
+
+		#endregion
+
+		#region Methods
+
+		/// <summary>
         ///     Sets a value read from an object's metadata XML.
         /// </summary>
         /// <param name="key">
@@ -28,25 +44,16 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="value">
         ///     The value of the property read from XML.
         /// </param>
-        /// <returns>
-        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
-        /// </returns>
-        protected override bool TrySetValue(string key, string value)
+        protected override void SetValue(string key, string value)
         {
-            if (base.TrySetValue(key, value))
-            {
-                // The value is set by base object
-            }
-            else if (key.Is("refId"))
+            if (key.Is("refId"))
             {
                 this.RefId = value;
             }
-            else
-            {
-                return false;
-            }
-
-            return true;
+			else
+			{
+				base.SetValue(key, value);
+			}
         }
 
         #endregion

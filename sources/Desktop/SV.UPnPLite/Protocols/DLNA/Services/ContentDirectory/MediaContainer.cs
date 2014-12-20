@@ -1,8 +1,9 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Extensions;
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
+	using SV.UPnPLite.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Defines a media object which contains other media objects.
@@ -28,6 +29,21 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         #endregion
 
+		#region Constructors
+
+		/// <summary>
+		///		Initializes a new instance of the <see cref="MediaContainer"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public MediaContainer(ILogManager logManager)
+			: base(logManager)
+		{
+		}
+
+		#endregion
+
         #region Methods
 
         /// <summary>
@@ -39,16 +55,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="value">
         ///     The value of the property read from XML.
         /// </param>
-        /// <returns>
-        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
-        /// </returns>
-        protected override bool TrySetValue(string key, string value)
+        protected override void SetValue(string key, string value)
         {
-            if (base.TrySetValue(key, value))
-            {
-                // The value is set by base object
-            }
-            else if (key.Is("childCount"))
+            if (key.Is("childCount"))
             {
                 this.ChildCount = int.Parse(value);
             }
@@ -58,10 +67,8 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
             else
             {
-                return false;
+                base.SetValue(key, value);
             }
-
-            return true;
         }
 
         #endregion

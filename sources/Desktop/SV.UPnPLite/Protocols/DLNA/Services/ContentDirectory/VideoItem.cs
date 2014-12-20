@@ -1,7 +1,8 @@
 ﻿
 namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
-    using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory.Extensions;
 
     /// <summary>
     ///     Represents a piece of content that, when rendered, generates some video. It is atomic in the sense that it does not contain other objects in the ContentDirectory. 
@@ -70,6 +71,21 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
         #endregion
 
+		#region Constructors
+
+		/// <summary>
+		///		Initializes a new instance of the <see cref="VideoItem"/> class.
+		/// </summary>
+		/// <param name="logManager">
+		///		The log manager to use for logging.
+		///	</param>
+		public VideoItem(ILogManager logManager = null)
+			: base(logManager)
+		{
+		}
+
+		#endregion
+
         #region Methods
 
         /// <summary>
@@ -81,16 +97,9 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// <param name="value">
         ///     The value of the property read from XML.
         /// </param>
-        /// <returns>
-        ///     <c>true</c>, if the value was set; otherwise, <c>false</c>.
-        /// </returns>
-        protected override bool TrySetValue(string key, string value)
+        protected override void SetValue(string key, string value)
         {
-            if (base.TrySetValue(key, value))
-            {
-                // The value is set by base object
-            }
-            else if (key.Is("genre"))
+            if (key.Is("genre"))
             {
                 this.Genre = value;
             }
@@ -136,10 +145,8 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             }
             else
             {
-                return false;
+				base.SetValue(key, value);
             }
-
-            return true;
         }
 
         #endregion

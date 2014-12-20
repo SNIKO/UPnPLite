@@ -302,14 +302,10 @@ namespace SV.UPnPLite.Protocols.SSDP
                 var responseMessage = SearchResponseMessage.Create(message);
                 observer.OnNext(responseMessage);
             }
-            catch (KeyNotFoundException ex)
-            {
-                logger.Instance().Warning(ex, "The received M-Search response has missed header. The response is following:\n{0}", message);
-            }
-            catch (FormatException ex)
-            {
-                logger.Instance().Warning(ex, "The received M-Search response has header in a bad format. The response is following:\n{0}", message);
-            }
+			catch (ArgumentException ex)
+			{
+				logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".AsKeyFor(message));
+			}
         }
 
         private static void HandleNotifyMessage(string message, IObserver<NotifyMessage> observer)
@@ -321,13 +317,9 @@ namespace SV.UPnPLite.Protocols.SSDP
                 var notifyMessage = NotifyMessage.Create(message);
                 observer.OnNext(notifyMessage);
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
-                logger.Instance().Warning(ex, "The received notification message has missed header. The message is following:\n{0}", message);
-            }
-            catch (FormatException ex)
-            {
-                logger.Instance().Warning(ex, "The received notification message has header in a bad format. The message is following:\n{0}", message);
+                logger.Instance().Warning(ex, "The received notification message has been discarded.", "Message".AsKeyFor(message));
             }
         }
 

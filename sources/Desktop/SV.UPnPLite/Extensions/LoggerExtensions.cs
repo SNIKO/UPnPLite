@@ -60,6 +60,10 @@ namespace SV.UPnPLite.Extensions
             {
             }
 
+			public void Warning(Exception ex, string message, params System.Collections.Generic.KeyValuePair<string, string>[] parameters)
+			{
+			}
+
             public void Error(string message, params object[] args)
             {
             }
@@ -75,6 +79,6 @@ namespace SV.UPnPLite.Extensions
             public void Critical(Exception ex, string message, params object[] args)
             {
             }
-        }
+		}
     }
 }

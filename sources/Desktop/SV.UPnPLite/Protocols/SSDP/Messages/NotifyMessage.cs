@@ -38,11 +38,8 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
         /// <returns>
         ///     A new instance of <see cref="NotifyMessage"/>.
         /// </returns>
-        /// <exception cref="KeyNotFoundException">
-        ///     One of the reuqired headers not found.
-        /// </exception>
-        /// <exception cref="FormatException">
-        ///     One of the headers has value in a bad format.
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="message"/> is not valid notify message.
         /// </exception>
         internal static NotifyMessage Create(string message)
         {
@@ -56,18 +53,29 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
 
                 if (statusString.StartsWith("notify", StringComparison.OrdinalIgnoreCase))
                 {
-                    notifyMessage.Host                    =                       headers.GetValue            <string>    ("HOST");
-                    notifyMessage.NotificationType        =                       headers.GetValue            <string>    ("NT");
-                    notifyMessage.NotificationSubtype     =   ParseNotifyType(    headers.GetValue            <string>    ("NTS"));
-                    notifyMessage.USN                     =                       headers.GetValue            <string>    ("USN");
+					try
+					{
+						notifyMessage.Host 				  = headers.GetValue<string>("HOST");
+						notifyMessage.NotificationType 	  = headers.GetValue<string>("NT");
+						notifyMessage.NotificationSubtype = ParseNotifyType(headers.GetValue<string>("NTS"));
+						notifyMessage.USN 				  = headers.GetValue<string>("USN");
 
-                    notifyMessage.Location                =                       headers.GetValueOrDefault   <string>    ("LOCATION");
-                    notifyMessage.MaxAge                  =   ParseMaxAge(        headers.GetValueOrDefault   <string>    ("CACHE-CONTROL"));
-                    notifyMessage.Server                  =                       headers.GetValueOrDefault   <string>    ("SERVER");
-                    notifyMessage.BootId                  =                       headers.GetValueOrDefault   <int>       ("BOOTID.UPNP.ORG");
-                    notifyMessage.NextBootId              =                       headers.GetValueOrDefault   <int>       ("NEXTBOOTID.UPNP.ORG");
-                    notifyMessage.ConfigId                =                       headers.GetValueOrDefault   <int>       ("CONFIGID.UPNP.ORG");
-                    notifyMessage.SearchPort              =                       headers.GetValueOrDefault   <int>       ("SEARCHPORT.UPNP.ORG");
+						notifyMessage.Location 	 = headers.GetValueOrDefault<string>("LOCATION");
+						notifyMessage.MaxAge 	 = ParseMaxAge(headers.GetValueOrDefault<string>("CACHE-CONTROL"));
+						notifyMessage.Server 	 = headers.GetValueOrDefault<string>("SERVER");
+						notifyMessage.BootId 	 = headers.GetValueOrDefault<int>("BOOTID.UPNP.ORG");
+						notifyMessage.NextBootId = headers.GetValueOrDefault<int>("NEXTBOOTID.UPNP.ORG");
+						notifyMessage.ConfigId 	 = headers.GetValueOrDefault<int>("CONFIGID.UPNP.ORG");
+						notifyMessage.SearchPort = headers.GetValueOrDefault<int>("SEARCHPORT.UPNP.ORG");
+					}
+					catch (KeyNotFoundException ex)
+					{
+						throw new ArgumentException("The given message is not valid notify message", "message", ex);
+					}
+					catch (FormatException ex)
+					{
+						throw new ArgumentException("The given message is not valid notify message", "message", ex);
+					}
                 }
             }
 
@@ -91,7 +99,6 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
                     break;
                 default:
                     throw new FormatException("Unknown notification type: '{0}'".F(notifyType));
-                    break;
             }
 
             return result;

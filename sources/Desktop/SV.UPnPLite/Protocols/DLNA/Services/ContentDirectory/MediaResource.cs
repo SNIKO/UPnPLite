@@ -118,7 +118,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         #region Methods
 
         /// <summary>
-        ///     Deserilizes the resource from a DIDL-Lite XML.
+        ///     Deserializes the resource from a DIDL-Lite XML.
         /// </summary>
         /// <param name="resourceXml">
         ///     A resource XML created according to DIDL-Lite schema.

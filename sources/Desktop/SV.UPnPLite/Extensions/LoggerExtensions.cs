@@ -3,6 +3,7 @@ namespace SV.UPnPLite.Extensions
 {
     using SV.UPnPLite.Logging;
     using System;
+	using System.Collections.Generic;
 
     /// <summary>
     ///     Defines extension methods for <see cref="ILogger"/>.
@@ -28,55 +29,51 @@ namespace SV.UPnPLite.Extensions
 
         internal class StubLogger : ILogger
         {
-            public void Trace(string message, params object[] args)
+			public void Trace(string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 
-            public void Trace(Exception ex, string message, params object[] args)
+			public void Trace(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 
-            public void Debug(string message, params object[] args)
-            {
-            }
-
-            public void Debug(Exception ex, string message, params object[] args)
-            {
-            }
-
-            public void Info(string message, params object[] args)
-            {
-            }
-
-            public void Info(Exception ex, string message, params object[] args)
-            {
-            }
-
-            public void Warning(string message, params object[] args)
-            {
-            }
-
-            public void Warning(Exception ex, string message, params object[] args)
-            {
-            }
-
-			public void Warning(Exception ex, string message, params System.Collections.Generic.KeyValuePair<string, string>[] parameters)
+			public void Debug(string message, params KeyValuePair<string, object>[] parameters)
 			{
 			}
 
-            public void Error(string message, params object[] args)
+			public void Debug(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
+			{
+			}
+
+			public void Info(string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 
-            public void Error(Exception ex, string message, params object[] args)
+			public void Info(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 
-            public void Critical(string message, params object[] args)
+			public void Warning(string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 
-            public void Critical(Exception ex, string message, params object[] args)
+			public void Warning(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
+			{
+			}
+
+			public void Error(string message, params KeyValuePair<string, object>[] parameters)
+            {
+            }
+
+			public void Error(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
+            {
+            }
+
+			public void Critical(string message, params KeyValuePair<string, object>[] parameters)
+            {
+            }
+
+			public void Critical(Exception ex, string message, params KeyValuePair<string, object>[] parameters)
             {
             }
 		}

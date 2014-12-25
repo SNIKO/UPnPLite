@@ -80,7 +80,7 @@ namespace SV.UPnPLite.Protocols.SSDP
             this.server.BindEndpointAsync(null, MulticastPort.ToString()).GetAwaiter().GetResult();
             this.server.JoinMulticastGroup(this.multicastHost);
 
-            logger.Instance().Info("Started listening for a notification messages. [port={0}, multicastGroup={1}", MulticastPort, this.multicastHost);
+            logger.Instance().Info("Started listening for notification messages", "Port".AsKeyFor(MulticastPort), "MulticastGroup".AsKeyFor(this.multicastHost));
         }
 
         #endregion
@@ -201,7 +201,7 @@ namespace SV.UPnPLite.Protocols.SSDP
                             searchSocket.Dispose();
                         });
 
-                    logger.Instance().Debug("Sent M-Search request. [multicastHost={0}, searchTarget={1}]", multicastHost.DisplayName, searchTarget);
+                    logger.Instance().Debug("Sent M-Search request. [multicastHost={0}, searchTarget={1}]".F(multicastHost.DisplayName, searchTarget));
 
                     return searchSocket.Dispose;
                 });

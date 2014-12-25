@@ -203,6 +203,8 @@ namespace SV.UPnPLite.Protocols.UPnP
         {
             try
             {
+				logger.Trace("Request has been sent: {0}?{1}".F(this.controlUri, requestInfo.Action), requestInfo.Arguments.ToArray());
+
                 var request = this.CreateRequest(requestInfo.Action, requestInfo.Arguments);
 
                 using (var response = await request.GetResponseAsync())
@@ -212,6 +214,8 @@ namespace SV.UPnPLite.Protocols.UPnP
                         var result = this.ParseActionResponse(requestInfo.Action, responseStream);
 
                         requestInfo.CompletionSource.TrySetResult(result);
+
+						logger.Trace("Response has been processed: {0}?{1}".F(this.controlUri, requestInfo.Action), requestInfo.Arguments.ToArray());
                     }
                 }
             }
@@ -372,17 +376,17 @@ namespace SV.UPnPLite.Protocols.UPnP
                     }
                     else
                     {
-                        this.logger.Instance().Warning("Can't parse an action response with error. The 'errorCode' element is missing. [action='{0}']", action);
+                        this.logger.Instance().Warning("Can't parse '{0}' response with error. The 'errorCode' element is missing".F(action));
                     }
                 }
                 else
                 {
-                    this.logger.Instance().Warning("Can't parse an action response with error. The 'UPnPError' element is missing. [action='{0}']", action);
+					this.logger.Instance().Warning("Can't parse '{0}' response with error. The 'UPnPError' element is missing".F(action));
                 }
             }
             catch (XmlException ex)
             {
-                this.logger.Instance().Warning(ex, "An error occurred when parsing action response with error. [action='{0}']", action);
+				this.logger.Instance().Warning(ex, "An error occurred when parsing '{0}' response with error".F(action));
             }
 
             return exception;

@@ -55,7 +55,7 @@ namespace SV.UPnPLite.Protocols.DLNA
         ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="UPnPDevice"/> if all reuqired service available; otherwise, <c>null</c>.
+		///     A concrete instance of the <see cref="UPnPDevice"/> if all required service available; otherwise, <c>null</c>.
         /// </returns>
         protected override MediaRenderer CreateDeviceInstance(string udn, string name, IEnumerable<UPnPService> services)
         {
@@ -73,18 +73,18 @@ namespace SV.UPnPLite.Protocols.DLNA
             }
             else
             {
-                this.logger.Instance().Warning(
-                    "Can't add device as one of required services is missing. [missingServices=[{0}], deviceName={1}, deviceUDN={2}]",
-                    string.Join(",", missingServices),
-                    name,
-                    udn);
+				this.logger.Instance().Warning(
+					"The media renderer has been ignored as it doesn't implement some mandatory services",
+					"MissingServices".AsKeyFor(string.Join(",", missingServices)),
+					"DeviceName".AsKeyFor(name),
+					"DeviceUDN".AsKeyFor(udn));
 
                 return null;
             }
         }
 
         /// <summary>
-        ///     Creates an instance of concrere <see cref="UPnPService"/> which manages concrete service on a device.
+		///     Creates an instance of concrete <see cref="UPnPService"/> which manages concrete service on a device.
         /// </summary>
         /// <param name="serviceType">
         ///     A type of the service.
@@ -93,7 +93,7 @@ namespace SV.UPnPLite.Protocols.DLNA
         ///     An URL for sending commands to the service.
         /// </param>
         /// <param name="eventsUri">
-        ///     An URL for subscrinbing to service's events.
+		///     An URL for subscribing to service's events.
         /// </param>
         /// <returns>
         ///     A concrete instance of the <see cref="UPnPService"/>.

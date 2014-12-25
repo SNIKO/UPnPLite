@@ -152,7 +152,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             if (this.logManager != null)
             {
                 this.logger = this.logManager.GetLogger(this.GetType());
-                this.logger.Instance().Info("Started listening for a devices' notifications. [targetDevices={0}]", targetDevices);
+                this.logger.Instance().Info("Started listening for upnp devices", "TargetDevices".AsKeyFor(targetDevices));
             }
         }
 
@@ -173,12 +173,12 @@ namespace SV.UPnPLite.Protocols.UPnP
         ///     A set of UPnP service found on the device.
         /// </param>
         /// <returns>
-        ///     A concrete instance of the <see cref="UPnPDevice"/> if all reuqired service available; otherwise, <c>null</c>.
+        ///     A concrete instance of the <see cref="UPnPDevice"/> if all required service available; otherwise, <c>null</c>.
         /// </returns>
         protected abstract TDevice CreateDeviceInstance(string udn, string name, IEnumerable<UPnPService> services);
 
         /// <summary>
-        ///     Creates an instance of concrere <see cref="UPnPService"/> which manages concrete service on a device.
+        ///     Creates an instance of concrete <see cref="UPnPService"/> which manages concrete service on a device.
         /// </summary>
         /// <param name="serviceType">
         ///     A type of the service.
@@ -187,7 +187,7 @@ namespace SV.UPnPLite.Protocols.UPnP
         ///     An URL for sending commands to the service.
         /// </param>
         /// <param name="eventsUri">
-        ///     An URL for subscrinbing to service's events.
+        ///     An URL for subscribing to service's events.
         /// </param>
         /// <returns>
         ///     A concrete instance of the <see cref="UPnPService"/>.
@@ -230,11 +230,11 @@ namespace SV.UPnPLite.Protocols.UPnP
                                         });
 
                                         this.logger.Instance().Info(
-                                            "Device found. [deviceName={0}, deviceUDN={1}, maxAge={2}, devicesInTotal={3}]",
-                                            device.FriendlyName,
-                                            device.UDN,
-                                            notifyMessage.MaxAge,
-                                            availableDevices.Count);
+                                            "A new device has been found",
+											"DeviceName".AsKeyFor(device.FriendlyName),
+											"DeviceUDN".AsKeyFor(device.UDN),
+                                            "MaxAge".AsKeyFor(notifyMessage.MaxAge),
+                                            "DevicesOnline".AsKeyFor(availableDevices.Count));
                                     }
                                 }
                             }
@@ -243,7 +243,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                 }
                 catch (WebException ex)
                 {
-                    this.logger.Instance().Warning(ex, "An error occurred when loading description for device '{0}", notifyMessage.USN);
+                    this.logger.Instance().Warning(ex, "Failed to load description of device '{0}'".F(notifyMessage.USN));
                 }
             }
             else
@@ -260,11 +260,11 @@ namespace SV.UPnPLite.Protocols.UPnP
 
                 if (this.availableDevices.TryGetValue(notifyMessage.USN, out deviceLifetimeControl))
                 {
-                    this.logger.Instance().Info(
-                        "Device just renewed it's lifetime. [deviceName={0}, deviceUDN={1}, maxAge={2}]", 
-                        deviceLifetimeControl.Device.FriendlyName,
-                        deviceLifetimeControl.Device.UDN,
-                        notifyMessage.MaxAge);
+					this.logger.Instance().Info(
+						"A device has just renewed its lifetime",
+						"DeviceName".AsKeyFor(deviceLifetimeControl.Device.FriendlyName),
+						"DeviceUDN".AsKeyFor(deviceLifetimeControl.Device.UDN),
+						"MaxAge".AsKeyFor(notifyMessage.MaxAge));
 
                     deviceLifetimeControl.LifeTimeControl.Dispose();
                     deviceLifetimeControl.LifeTimeControl = Observable.Timer(TimeSpan.FromSeconds(notifyMessage.MaxAge)).Subscribe(_ => RemoveDevice(notifyMessage.USN));
@@ -285,11 +285,11 @@ namespace SV.UPnPLite.Protocols.UPnP
                     this.availableDevices.Remove(deviceUSN);
                     this.devicesActivity.OnNext(new DeviceActivityEventArgs<TDevice> { Activity = DeviceActivity.Gone, Device = deviceLifetimeControl.Device });
 
-                    this.logger.Instance().Info(
-                        "Device gone. [deviceName={0}, deviceUDN={1}, devicesLeft={2}]", 
-                        deviceLifetimeControl.Device.FriendlyName, 
-                        deviceLifetimeControl.Device.UDN, 
-                        availableDevices.Count);
+					this.logger.Instance().Info(
+						"A device has just gone.",
+						"DeviceName".AsKeyFor(deviceLifetimeControl.Device.FriendlyName),
+						"DeviceUDN".AsKeyFor(deviceLifetimeControl.Device.UDN),
+						"DevicesOnline".AsKeyFor(availableDevices.Count));
                 }
             }
         }
@@ -313,7 +313,7 @@ namespace SV.UPnPLite.Protocols.UPnP
                 {
                     version.Major = 1;
 
-                    this.logger.Instance().Warning("Can't parse major part of device's version. [deviceType={0}]", deviceTypeWithVersion);
+                    this.logger.Instance().Warning("Can't parse major part of the device's version", "DeviceType".AsKeyFor(deviceTypeWithVersion));
                 }
 
                 if (majorMinorSplit.Length > 1 && int.TryParse(majorMinorSplit[1], out value))
@@ -323,7 +323,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
             else
             {
-                this.logger.Instance().Warning("The version is missing in device's type. [deviceType={0}]", deviceTypeWithVersion);
+				this.logger.Instance().Warning("The version is missing in device's type", "DeviceType".AsKeyFor(deviceTypeWithVersion));
             }
 
             return version;
@@ -382,21 +382,21 @@ namespace SV.UPnPLite.Protocols.UPnP
                     else
                     {
                         this.logger.Instance().Warning(
-                            "Can't add device as one of required elements is missing. [host={0}, deviceName={1}, deviceType={2}, deviceUDN={3}]",
-                            host,
-                            deviceName.ValueOrDefault(),
-                            deviceType.ValueOrDefault(),
-                            deviceUDN.ValueOrDefault());
-                    }
+                            "A device has been ignored as some mandatory fields are missing in its description",
+                            "DeviceHost".AsKeyFor(host),
+							"DeviceName".AsKeyFor(deviceName.ValueOrDefault()),
+							"DeviceType".AsKeyFor(deviceType.ValueOrDefault()),
+							"DeviceUDN".AsKeyFor(deviceUDN.ValueOrDefault()));
+					}
                 }
                 else
                 {
-                    this.logger.Instance().Warning("Can't add device as it's description is missing. [host={0}]", host);
+					this.logger.Instance().Warning("A device has been ignored as its description is missing", "DeviceHost".AsKeyFor(host));
                 }
             }
             else
             {
-                this.logger.Instance().Warning("Can't add device as it's description is empty. [host={0}]", host);
+				this.logger.Instance().Warning("A device has been ignored as its description is missing", "DeviceHost".AsKeyFor(host));
             }
 
             return device;
@@ -430,14 +430,14 @@ namespace SV.UPnPLite.Protocols.UPnP
                     }
                     else
                     {
-                        this.logger.Instance().Warning(
-                            "Can't use service as one of the reuqired elemetns is invalid. [serviceType={0}, controlUri={1}, eventsSubscriptionUri={2}, host={3}, deviceName={4}, deviceUDN={5}]",
-                            serviceType,
-                            controlUri.ValueOrDefault(),
-                            eventsSubscriptionUri.ValueOrDefault(),
-                            host,
-                            deviceName,
-                            deviceUDN);
+						this.logger.Instance().Warning(
+							"The device service has been ignored as some mandatory fields are missing in its description",
+							"DeviceHost".AsKeyFor(host),
+							"DeviceName".AsKeyFor(deviceName),
+							"DeviceUDN".AsKeyFor(deviceUDN),
+							"ServiceType".AsKeyFor(serviceType),
+							"ControlUri".AsKeyFor(controlUri.ValueOrDefault()),
+							"EventsSubscriptionUri".AsKeyFor(eventsSubscriptionUri.ValueOrDefault()));
                     }
                 }
             }

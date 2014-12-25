@@ -225,15 +225,11 @@ namespace SV.UPnPLite.Protocols.SSDP
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
                         searchClient.SendAsync(buffer, buffer.Length, multicastEndPoint);
 
-                        logger.Instance().Debug(
-                            "Sent M-Search request from local endpoint '{0}' to a multicast endpoint '{1}' with search target '{2}'.",
-                            localEndPoint,
-                            multicastEndPoint,
-                            searchTarget);
+                        logger.Instance().Debug("Sent M-Search request from local endpoint '{0}' to a multicast endpoint '{1}' with search target '{2}'.".F(localEndPoint, multicastEndPoint, searchTarget));
                     }
                     catch (SocketException ex)
                     {
-                        logger.Instance().Warning(ex, "Failed to send M-Search request from local endpoint '{0}' to a multicast endpoint '{1}'.", localEndPoint, multicastEndPoint);
+                        logger.Instance().Warning(ex, "Failed to send M-Search request from local endpoint '{0}' to a multicast endpoint '{1}'.".F(localEndPoint, multicastEndPoint));
                     }
                     catch (ObjectDisposedException)
                     {
@@ -295,7 +291,7 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         private static void HandleSearchResponseMessage(string message, IObserver<SearchResponseMessage> observer)
         {
-            logger.Instance().Trace("Received search response message :\n{0}", message);
+            logger.Instance().Trace("Received search response message", "Message".AsKeyFor(message));
 
             try
             {
@@ -310,7 +306,7 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         private static void HandleNotifyMessage(string message, IObserver<NotifyMessage> observer)
         {
-            logger.Instance().Trace("Received notification message :\n{0}", message);
+			logger.Instance().Trace("Received notification message", "Message".AsKeyFor(message));
 
             try
             {
@@ -338,11 +334,11 @@ namespace SV.UPnPLite.Protocols.SSDP
                 var incommingMessages = GetIncommingMessagesSequence(this.server);
                 incommingMessages.Subscribe(message => HandleNotifyMessage(message, this.notifyMessages));
 
-                logger.Instance().Info("Started listening for a notification messages at {0}", localEndPoint);
+                logger.Instance().Info("Started listening for notification messages at {0}".F(localEndPoint));
             }
             catch (SocketException ex)
             {
-                logger.Instance().Error(ex, "Can't bind to a {0} for listening for a notification messages", localEndPoint);
+                logger.Instance().Error(ex, "Can't bind to a {0} for listening for notification messages".F(localEndPoint));
             }
         }
 

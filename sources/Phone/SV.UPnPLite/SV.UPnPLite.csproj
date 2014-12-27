@@ -281,7 +281,6 @@
       <Link>Protocols\SSDP\SSDPServer.cs</Link>
     </Compile>
     <Compile Include="Extensions\WebClientExtensions.cs" />
-    <Compile Include="Extensions\WebRequestExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

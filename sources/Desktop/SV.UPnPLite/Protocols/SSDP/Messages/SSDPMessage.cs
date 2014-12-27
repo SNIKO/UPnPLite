@@ -24,6 +24,16 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
 
         public int ConfigId { get; set; }
 
+		public string UDN
+		{
+			get
+			{
+				var doubleColonIndex = USN.IndexOf("::");
+
+				return doubleColonIndex != -1 ? USN.Substring(0, doubleColonIndex) : USN;
+			}
+		}
+
         /// <summary>
         ///     Retrieves the MaxAge property from the CACHE-CONTROL header.
         /// </summary>

@@ -196,11 +196,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 						}
 						catch (FormatException ex)
 						{
-							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".AsKeyFor(objectXml));
+							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".As(objectXml));
 						}
 						catch (OverflowException ex)
 						{
-							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".AsKeyFor(objectXml));
+							this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(xmlReader.Value, xmlReader.LocalName), "Metadata".As(objectXml));
 						}
                     }
 

@@ -205,7 +205,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             {
 				logger.Trace("Request has been sent: {0}?{1}".F(this.controlUri, requestInfo.Action), requestInfo.Arguments.ToArray());
 
-                var request = this.CreateRequest(requestInfo.Action, requestInfo.Arguments);
+                var request = await this.CreateRequestAsync(requestInfo.Action, requestInfo.Arguments);
 
                 using (var response = await request.GetResponseAsync())
                 {
@@ -255,7 +255,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             }
         }
 
-        private WebRequest CreateRequest(string action, Dictionary<string, object> parameters)
+        private async Task<WebRequest> CreateRequestAsync(string action, Dictionary<string, object> parameters)
         {
             var requestXml = this.CreateActionRequest(action, parameters);
             var data = Encoding.UTF8.GetBytes(requestXml);
@@ -265,7 +265,7 @@ namespace SV.UPnPLite.Protocols.UPnP
             request.ContentType = "text/xml; charset=\"utf-8\"";
             request.Headers["SOAPACTION"] = "\"{0}#{1}\"".F(this.ServiceType, action);
 
-            using (var stream = request.GetRequestStreamAsync().GetAwaiter().GetResult())
+            using (var stream = await request.GetRequestStreamAsync())
             {
                 stream.Write(data, 0, data.Length);
             }

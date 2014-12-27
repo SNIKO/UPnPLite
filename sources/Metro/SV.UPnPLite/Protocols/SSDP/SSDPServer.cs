@@ -80,7 +80,7 @@ namespace SV.UPnPLite.Protocols.SSDP
             this.server.BindEndpointAsync(null, MulticastPort.ToString()).GetAwaiter().GetResult();
             this.server.JoinMulticastGroup(this.multicastHost);
 
-            logger.Instance().Info("Started listening for notification messages", "Port".AsKeyFor(MulticastPort), "MulticastGroup".AsKeyFor(this.multicastHost));
+            logger.Instance().Info("Started listening for notification messages", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
         }
 
         #endregion
@@ -154,57 +154,56 @@ namespace SV.UPnPLite.Protocols.SSDP
         /// </returns>
         public IObservable<SearchResponseMessage> Search(string searchTarget, int timeForResponse)
         {
-            return Observable.Create<SearchResponseMessage>(
-                observer =>
-                {
-                    var searchSocket = new DatagramSocket();
+			return Observable.Create<SearchResponseMessage>(async observer =>
+			{
+				var searchSocket = new DatagramSocket();
 
-                    // Handling responses from found devices
-                    searchSocket.MessageReceived += async (sender, args) =>
-                        {
-                            var dataReader = args.GetDataReader();
-                            dataReader.InputStreamOptions = InputStreamOptions.Partial;
+				// Handling responses from found devices
+				searchSocket.MessageReceived += async (sender, args) =>
+				{
+					var dataReader = args.GetDataReader();
+					dataReader.InputStreamOptions = InputStreamOptions.Partial;
 
-                            if (dataReader.UnconsumedBufferLength == 0)
-                            {
-                                await dataReader.LoadAsync(1024);
-                            }
+					if (dataReader.UnconsumedBufferLength == 0)
+					{
+						await dataReader.LoadAsync(1024);
+					}
 
-                            var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
+					var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
 
-                            try
-                            {
-                                var response = SearchResponseMessage.Create(message);
-                                observer.OnNext(response);
-                            }
-							catch (ArgumentException ex)
-							{
-								logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".AsKeyFor(message));
-							}
-                        };
+					try
+					{
+						var response = SearchResponseMessage.Create(message);
 
-                    searchSocket.BindEndpointAsync(null, "0").GetAwaiter().GetResult();
-                    searchSocket.JoinMulticastGroup(this.multicastHost);
+						observer.OnNext(response);
+					}
+					catch (ArgumentException ex)
+					{
+						logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".As(message));
+					}
+				};
 
-                    // Sending the search request to a multicast group
-                    var outputStream = searchSocket.GetOutputStreamAsync(this.multicastHost, MulticastPort.ToString()).GetAwaiter().GetResult();
-                    var request = MSearchRequestFormattedString.F(searchTarget, timeForResponse);
-                    var buffer = Encoding.UTF8.GetBytes(request).AsBuffer();
-                    outputStream.WriteAsync(buffer);
-                    outputStream.WriteAsync(buffer);
+				await searchSocket.BindEndpointAsync(null, "0");
+				searchSocket.JoinMulticastGroup(this.multicastHost);
+				
+				var request = MSearchRequestFormattedString.F(searchTarget, timeForResponse);
+				var buffer = Encoding.UTF8.GetBytes(request).AsBuffer();
 
-                    // Stop listening for a devices when timeout for responses is expired
-                    Observable.Timer(TimeSpan.FromSeconds(timeForResponse)).Subscribe(
-                        s =>
-                        {
-                            observer.OnCompleted();
-                            searchSocket.Dispose();
-                        });
+				// Sending the search request to a multicast group
+				var outputStream = await searchSocket.GetOutputStreamAsync(this.multicastHost, MulticastPort.ToString());
+				await outputStream.WriteAsync(buffer);
+				await outputStream.WriteAsync(buffer);
 
-                    logger.Instance().Debug("Sent M-Search request. [multicastHost={0}, searchTarget={1}]".F(multicastHost.DisplayName, searchTarget));
+				// Stop listening for a devices when timeout for responses is expired
+				Observable.Timer(TimeSpan.FromSeconds(timeForResponse)).Subscribe(s =>
+				{
+					observer.OnCompleted();
+					searchSocket.Dispose();
+				});
 
-                    return searchSocket.Dispose;
-                });
+				logger.Instance().Debug("M-Search request has been sent. [multicastHost={0}, searchTarget={1}]".F(multicastHost.DisplayName, searchTarget));
+				return searchSocket.Dispose;
+			});
         }
 
         private async void NotifyMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
@@ -227,7 +226,7 @@ namespace SV.UPnPLite.Protocols.SSDP
             }
 			catch (ArgumentException ex)
 			{
-				logger.Instance().Warning(ex, "The received notification message has been ignored.", "Message".AsKeyFor(message));
+				logger.Instance().Warning(ex, "The received notification message has been ignored.", "Message".As(message));
 			}
         }
         

@@ -291,7 +291,7 @@ namespace SV.UPnPLite.Protocols.SSDP
 
         private static void HandleSearchResponseMessage(string message, IObserver<SearchResponseMessage> observer)
         {
-            logger.Instance().Trace("Received search response message", "Message".AsKeyFor(message));
+            logger.Instance().Trace("Received search response message", "Message".As(message));
 
             try
             {
@@ -300,13 +300,13 @@ namespace SV.UPnPLite.Protocols.SSDP
             }
 			catch (ArgumentException ex)
 			{
-				logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".AsKeyFor(message));
+				logger.Instance().Warning(ex, "The received M-Search response has been ignored.", "Message".As(message));
 			}
         }
 
         private static void HandleNotifyMessage(string message, IObserver<NotifyMessage> observer)
         {
-			logger.Instance().Trace("Received notification message", "Message".AsKeyFor(message));
+			logger.Instance().Trace("Received notification message", "Message".As(message));
 
             try
             {
@@ -315,7 +315,7 @@ namespace SV.UPnPLite.Protocols.SSDP
             }
             catch (ArgumentException ex)
             {
-                logger.Instance().Warning(ex, "The received notification message has been discarded.", "Message".AsKeyFor(message));
+                logger.Instance().Warning(ex, "The received notification message has been discarded.", "Message".As(message));
             }
         }
 

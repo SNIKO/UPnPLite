@@ -332,7 +332,7 @@ namespace SV.UPnPLite.Protocols.DLNA
             {
                 result = MediaRendererState.Stopped;
 
-                this.logger.Instance().Warning("An enexpected transport state received", "Renderer".AsKeyFor(this.FriendlyName), "State".AsKeyFor(transportState));
+                this.logger.Instance().Warning("An enexpected transport state received", "Renderer".As(this.FriendlyName), "State".As(transportState));
             }
 
             return result;
@@ -357,15 +357,15 @@ namespace SV.UPnPLite.Protocols.DLNA
                         }
                         catch (WebException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".As(this.FriendlyName));
                         }
                         catch (FormatException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".As(this.FriendlyName));
                         }
                         catch (UPnPServiceException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting position info", "Renderer".As(this.FriendlyName));
                         }
                     });
 
@@ -390,15 +390,15 @@ namespace SV.UPnPLite.Protocols.DLNA
                         }
                         catch (WebException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".As(this.FriendlyName));
                         }
                         catch (FormatException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".As(this.FriendlyName));
                         }
                         catch (UPnPServiceException ex)
                         {
-							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".AsKeyFor(this.FriendlyName));
+							this.logger.Instance().Warning(ex, "An error occurred when requesting state info", "Renderer".As(this.FriendlyName));
                         }
                     });
 

@@ -137,11 +137,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 					}
 					catch(FormatException ex)
 					{
-						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".AsKeyFor(resourceXml));
+						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".As(resourceXml));
 					}
 					catch(OverflowException ex)
 					{
-						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".AsKeyFor(resourceXml));
+						this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for resource key '{1}'.".F(reader.Value, reader.LocalName), "ResourceXML".As(resourceXml));
 					}
                 }
 

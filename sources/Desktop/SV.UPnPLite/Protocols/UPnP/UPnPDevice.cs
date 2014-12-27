@@ -95,6 +95,18 @@ namespace SV.UPnPLite.Protocols.UPnP
         /// </summary>
         public IEnumerable<DeviceIcon> Icons { get; internal set; }
 
+		internal TimeSpan MaxAge
+		{
+			get;
+			set;
+		}
+
+		internal DateTime LastCheckTime
+		{
+			get;
+			set;
+		}
+
         #endregion
     }
 }

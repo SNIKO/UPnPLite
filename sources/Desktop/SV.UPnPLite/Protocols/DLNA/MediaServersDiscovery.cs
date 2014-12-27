@@ -75,9 +75,9 @@ namespace SV.UPnPLite.Protocols.DLNA
             {
                 this.logger.Instance().Warning(
                     "The media server has been ignored as it doesn't implement some mandatory services",
-                    "MissingServices".AsKeyFor(string.Join(",", missingServices)),
-                    "DeviceName".AsKeyFor(name),
-                    "DeviceUDN".AsKeyFor(udn));
+                    "MissingServices".As(string.Join(",", missingServices)),
+                    "DeviceName".As(name),
+                    "DeviceUDN".As(udn));
 
                 return null;
             }

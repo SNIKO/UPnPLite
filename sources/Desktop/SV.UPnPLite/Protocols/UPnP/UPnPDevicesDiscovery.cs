@@ -303,7 +303,7 @@ namespace SV.UPnPLite.Protocols.UPnP
 			{
 				if (scanProcess == null)
 				{
-					this.logger.Instance().Debug("Searching for new devices...");
+					this.logger.Instance().Info("Searching for new devices...");
 
 					scanProcess = this.ssdpServer.Search(this.targetDeviceType, SearchTimeout).Subscribe(
 						response =>
@@ -344,8 +344,6 @@ namespace SV.UPnPLite.Protocols.UPnP
 					{
 						expiredDevicesChecker.Dispose();
 					}
-
-					this.logger.Instance().Debug(nextCheckTime.ToString() + " " + (nextCheckTime - DateTime.UtcNow).ToString());
 
 					expiredDevicesChecker = Observable.Timer(nextCheckTime - DateTime.UtcNow).Subscribe(_ =>
 					{

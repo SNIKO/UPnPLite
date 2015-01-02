@@ -81,7 +81,10 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
             {
                 var keyValue = headerLine.Split(new[] { ":" }, 2, StringSplitOptions.None);
 
-                result[keyValue[0].ToUpper()] = keyValue[1].TrimStart(' ');
+				if (keyValue.Length == 2)
+				{
+					result[keyValue[0].ToUpper()] = keyValue[1].TrimStart(' ');
+				}
             }
 
             return result;

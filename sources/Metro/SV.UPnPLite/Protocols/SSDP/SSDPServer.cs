@@ -1,159 +1,125 @@
 ﻿
 namespace SV.UPnPLite.Protocols.SSDP
 {
-    using SV.UPnPLite.Extensions;
-    using SV.UPnPLite.Logging;
-    using SV.UPnPLite.Protocols.SSDP.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Reactive.Linq;
-    using System.Reactive.Subjects;
-    using System.Runtime.InteropServices.WindowsRuntime;
-    using System.Text;
-    using Windows.Networking;
-    using Windows.Networking.Sockets;
-    using Windows.Storage.Streams;
+	using System;
+	using System.Reactive.Linq;
+	using System.Reactive.Subjects;
+	using System.Runtime.InteropServices.WindowsRuntime;
+	using System.Text;
+	using System.Threading.Tasks;
+	using SV.UPnPLite.Extensions;
+	using SV.UPnPLite.Logging;
+	using SV.UPnPLite.Protocols.SSDP.Messages;
+	using Windows.Networking;
+	using Windows.Networking.Sockets;
+	using Windows.Storage.Streams;
 
-    /// <summary>
-    ///     A Win RT implementation of the SSDP protocol.
-    /// </summary>
-    internal class SSDPServer : ISSDPServer
-    {
-        #region Constants
-        
-        private const string MulticastAddress = "239.255.255.250";
+	/// <summary>
+	///     A Win RT implementation of the SSDP protocol.
+	/// </summary>
+	internal class SSDPServer : ISSDPServer
+	{
+		#region Constants
 
-        private const int MulticastPort = 1900;
+		private const string MulticastAddress = "239.255.255.250";
+
+		private const int MulticastPort = 1900;
 
         private const string MSearchRequestFormattedString =
-            "M-SEARCH * HTTP/1.1" + "\r\n" +
+            "M-SEARCH * HTTP/1.1" 		 + "\r\n" +
             "HOST: 239.255.255.250:1900" + "\r\n" +
-            "MAN: \"ssdp:discover\"" + "\r\n" +
-            "ST: {0}" + "\r\n" +
-            "MX: {1}" + "\r\n" +
-            "Content-Length: 0" + "\r\n\r\n";
+            "MAN: \"ssdp:discover\"" 	 + "\r\n" +
+            "ST: {0}" 					 + "\r\n" +
+            "MX: {1}" 					 + "\r\n" +
+            "Content-Length: 0" 		 + "\r\n\r\n";
 
-        #endregion
+		#endregion
 
-        #region Fields
+		#region Fields
 
-        private static readonly object instanceSyncObject = new object();
+		private static readonly object instanceSyncObject = new object();
 
-        private static ISSDPServer instance;
+		private static SSDPServer instance;
 
-        private static ILogger logger;
+		private ILogger logger;
 
-        private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
+		private readonly Subject<NotifyMessage> notifyMessages = new Subject<NotifyMessage>();
 
-        private readonly DatagramSocket server;
+		private DatagramSocket server;
 
-        private readonly HostName multicastHost;
+		private HostName multicastHost;
 
-        #endregion
+		#endregion
 
-        #region Constructors
+		#region Constructors
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
-        /// </summary>
-        /// <param name="logManager">
-        ///     The <see cref="ILogManager"/> to use for logging the debug information
-        /// </param>
-        private SSDPServer(ILogManager logManager)
-            : this()
-        {
-            if (logManager != null)
-            {
-                logger = logManager.GetLogger<SSDPServer>();
-            }
-        }
+		/// <summary>
+		///     Initializes a new instance of the <see cref="SSDPServer" /> class.
+		/// </summary>
+		/// <param name="logManager">
+		///     The <see cref="ILogManager"/> to use for logging the debug information.
+		/// </param>
+		private SSDPServer(ILogManager logManager = null)
+		{
+			if (logManager != null)
+			{
+				this.logger = logManager.GetLogger<SSDPServer>();
+			}
+		}
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="SSDPServer" /> class.
-        /// </summary>
-        private SSDPServer()
-        {
-            this.multicastHost = new HostName(MulticastAddress);
+		#endregion
 
-            this.server = new DatagramSocket();
-            this.server.MessageReceived += this.NotifyMessageReceived;
-            this.server.BindEndpointAsync(null, MulticastPort.ToString()).GetAwaiter().GetResult();
-            this.server.JoinMulticastGroup(this.multicastHost);
+		#region Properties
 
-            logger.Instance().Info("Started listening for notification messages", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
-        }
+		/// <summary>
+		///     An observable collection which contains notifications from devices.
+		/// </summary>
+		public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
 
-        #endregion
+		#endregion
 
-        #region Properties
+		#region Members
 
-        /// <summary>
-        ///     An observable collection which contains notifications from devices.
-        /// </summary>
-        public IObservable<NotifyMessage> NotifyMessages { get { return this.notifyMessages; } }
+		/// <summary>
+		///     Gets a singletone instance of the <see cref="SSDPServer"/>.
+		/// </summary>
+		/// <param name="logManager">
+		///     The <see cref="ILogManager"/> to use for logging the debug information.
+		/// </param>
+		/// <returns>
+		///     A singletone instance of the <see cref="SSDPServer"/>.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		///     <paramref name="logManager"/> is <c>null</c>.
+		/// </exception>
+		public static SSDPServer GetInstance(ILogManager logManager = null)
+		{
+			lock (instanceSyncObject)
+			{
+				if (instance == null)
+				{
+					instance = new SSDPServer(logManager);
+					instance.StartAync();
+				}
+			}
 
-        #endregion
+			return instance;
+		}
 
-        #region Members
-
-        /// <summary>
-        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
-        /// </summary>
-        /// <returns>
-        ///     A singletone instance of the <see cref="SSDPServer"/>.
-        /// </returns>
-        public static ISSDPServer GetInstance()
-        {
-            lock (instanceSyncObject)
-            {
-                if (instance == null)
-                {
-                    instance = new SSDPServer();
-                }
-            }
-
-            return instance;
-        }
-
-        /// <summary>
-        ///     Gets a singletone instance of the <see cref="SSDPServer"/>.
-        /// </summary>
-        /// <param name="logManager">
-        ///     The <see cref="ILogManager"/> to use for logging the debug information.
-        /// </param>
-        /// <returns>
-        ///     A singletone instance of the <see cref="SSDPServer"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="logManager"/> is <c>null</c>.
-        /// </exception>
-        public static ISSDPServer GetInstance(ILogManager logManager)
-        {
-            lock (instanceSyncObject)
-            {
-                if (instance == null)
-                {
-                    instance = new SSDPServer(logManager);
-                }
-            }
-
-            return instance;
-        }
-
-        /// <summary>
-        ///     Searches for an available devices of specified type.
-        /// </summary>
-        /// <param name="searchTarget">
-        ///     The type of the devices to search for.
-        /// </param>
-        /// <param name="timeForResponse">
-        ///     The time (in seconds) of a search.
-        /// </param>
-        /// <returns>
-        ///     An observable collection which contains search results.
-        /// </returns>
-        public IObservable<SearchResponseMessage> Search(string searchTarget, int timeForResponse)
-        {
+		/// <summary>
+		///     Searches for an available devices of specified type.
+		/// </summary>
+		/// <param name="searchTarget">
+		///     The type of the devices to search for.
+		/// </param>
+		/// <param name="timeForResponse">
+		///     The time (in seconds) of a search.
+		/// </param>
+		/// <returns>
+		///     An observable collection which contains search results.
+		/// </returns>
+		public IObservable<SearchResponseMessage> Search(string searchTarget, int timeForResponse)
+		{
 			return Observable.Create<SearchResponseMessage>(async observer =>
 			{
 				var searchSocket = new DatagramSocket();
@@ -183,9 +149,9 @@ namespace SV.UPnPLite.Protocols.SSDP
 					}
 				};
 
-				await searchSocket.BindEndpointAsync(null, "0");
+				await searchSocket.BindServiceNameAsync("0");
 				searchSocket.JoinMulticastGroup(this.multicastHost);
-				
+
 				var request = MSearchRequestFormattedString.F(searchTarget, timeForResponse);
 				var buffer = Encoding.UTF8.GetBytes(request).AsBuffer();
 
@@ -204,32 +170,44 @@ namespace SV.UPnPLite.Protocols.SSDP
 				logger.Instance().Debug("M-Search request has been sent. [multicastHost={0}, searchTarget={1}]".F(multicastHost.DisplayName, searchTarget));
 				return searchSocket.Dispose;
 			});
-        }
+		}
 
-        private async void NotifyMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
-        {
-            var dataReader = args.GetDataReader();
-            dataReader.InputStreamOptions = InputStreamOptions.Partial;
+		private async Task StartAync()
+		{
+			this.multicastHost = new HostName(MulticastAddress);
 
-            if (dataReader.UnconsumedBufferLength == 0)
-            {
-                await dataReader.LoadAsync(1024);
-            }
+			this.server = new DatagramSocket();
+			this.server.MessageReceived += this.NotifyMessageReceived;
+			await this.server.BindServiceNameAsync(MulticastPort.ToString());
+			this.server.JoinMulticastGroup(this.multicastHost);
 
-            var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
+			this.logger.Instance().Info("Started listening for notification messages", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
+		}
 
-            try
-            {
-                var notifyMessage = NotifyMessage.Create(message);
+		private async void NotifyMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+		{
+			var dataReader = args.GetDataReader();
+			dataReader.InputStreamOptions = InputStreamOptions.Partial;
 
-                this.notifyMessages.OnNext(notifyMessage);
-            }
+			if (dataReader.UnconsumedBufferLength == 0)
+			{
+				await dataReader.LoadAsync(1024);
+			}
+
+			var message = dataReader.ReadString(dataReader.UnconsumedBufferLength);
+
+			try
+			{
+				var notifyMessage = NotifyMessage.Create(message);
+
+				this.notifyMessages.OnNext(notifyMessage);
+			}
 			catch (ArgumentException ex)
 			{
 				logger.Instance().Warning(ex, "The received notification message has been ignored.", "Message".As(message));
 			}
-        }
-        
-        #endregion
-    }
+		}
+
+		#endregion
+	}
 }

@@ -223,20 +223,20 @@ namespace SV.UPnPLite.Protocols.UPnP
             {
                 if (ex.Response != null)
                 {
-                    using (var responseStream = ex.Response.GetResponseStream())
-                    {
-                        if (responseStream.Length > 0)
-                        {
-                            var error = this.ParseActionError(requestInfo.Action, responseStream, ex);
-                            if (error != null)
-                            {
-                                error.Action = requestInfo.Action;
-                                error.Arguments = requestInfo.Arguments;
+					if (ex.Response.ContentLength > 0)
+					{
+						using (var responseStream = ex.Response.GetResponseStream())
+						{
+							var error = this.ParseActionError(requestInfo.Action, responseStream, ex);
+							if (error != null)
+							{
+								error.Action = requestInfo.Action;
+								error.Arguments = requestInfo.Arguments;
 
-                                requestInfo.CompletionSource.TrySetException(error);
-                            }
-                        }
-                    }
+								requestInfo.CompletionSource.TrySetException(error);
+							}
+						}
+					}
                 }
 
                 requestInfo.CompletionSource.TrySetException(ex);

@@ -37,6 +37,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </summary>
         public string AlbumArtUri { get; internal set; }
 
+		/// <summary>
+		///		Gets the original track number on an audio CD or other medium.
+		/// </summary>		
+		public int TrackNumber { get; internal set; }
+
         #endregion
 
 		#region Constructors
@@ -51,7 +56,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         #region Methods
 
         /// <summary>
-        ///     Sets a value read from an object's metadata XML.
+		///     Sets a value read from an object's metadata XML.
         /// </summary>
         /// <param name="key">
         ///     The key of the property read from XML.
@@ -81,6 +86,10 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
             {
                 this.Date = ParsingHelper.ParseDate(value);
             }
+			else if(key.Is("originalTrackNumber"))
+			{
+				this.TrackNumber = int.Parse(value);
+			}
             else
             {
 				base.SetValue(key, value);

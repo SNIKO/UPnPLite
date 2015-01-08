@@ -315,28 +315,29 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
         /// </summary>
         public static class Properties
         {
-            public static string Title = "dc:title";
-            public static string Creator = "dc:creator";
-            public static string ParentId = "@parentID";
-            public static string RefId = "item@refID";
-            public static string Restricted = "object@restricted";
-            public static string Artist = "upnp:artist";
-            public static string Actor = "upnp:actor";
-            public static string Producer = "upnp:producer";
-            public static string Director = "upnp:director";
-            public static string Contributor = "dc:contributor";
-            public static string Publisher = "dc:publisher";
-            public static string Album = "upnp:album";
-            public static string Genre = "upnp:genre";
-            public static string AlbumArtUri = "upnp:albumArtURI";
-            public static string Relation = "dc:relation";
-            public static string StorageMedium = "upnp:storageMedium";
-            public static string Description = "dc:description";
+            public static string Title 			 = "dc:title";
+            public static string Creator 		 = "dc:creator";
+            public static string ParentId 		 = "@parentID";
+            public static string RefId 			 = "item@refID";
+            public static string Restricted 	 = "object@restricted";
+            public static string Artist 		 = "upnp:artist";
+            public static string Actor 			 = "upnp:actor";
+			public static string TrackNumber 	 = "upnp:originalTrackNumber";
+            public static string Producer 		 = "upnp:producer";
+            public static string Director 		 = "upnp:director";
+            public static string Contributor 	 = "dc:contributor";
+            public static string Publisher 		 = "dc:publisher";
+            public static string Album 			 = "upnp:album";
+            public static string Genre 			 = "upnp:genre";
+            public static string AlbumArtUri 	 = "upnp:albumArtURI";
+            public static string Relation 		 = "dc:relation";
+            public static string StorageMedium 	 = "upnp:storageMedium";
+            public static string Description 	 = "dc:description";
             public static string LongDescription = "upnp:longDescription";
-            public static string Rating = "upnp:rating";
-            public static string Rights = "dc:rights";
-            public static string Language = "dc:language";
-            public static string Date = "dc:date";
+            public static string Rating 		 = "upnp:rating";
+            public static string Rights 		 = "dc:rights";
+            public static string Language 		 = "dc:language";
+            public static string Date 			 = "dc:date";
 
             internal static string Id = "@id";
             internal static string ContainerChildCount = "container@childCount";
@@ -345,18 +346,18 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
             public static class Resource
             {
-                public static string Uri = "res";
-                public static string Size = "res@size";
-                public static string Duration = "res@duration";
-                public static string Bitrate = "res@bitrate";
-                public static string SampleFrequency = "res@sampleFrequency";
-                public static string BitsPerSample = "res@bitsPerSample";
+                public static string Uri 				   = "res";
+                public static string Size 				   = "res@size";
+                public static string Duration 			   = "res@duration";
+                public static string Bitrate 			   = "res@bitrate";
+                public static string SampleFrequency 	   = "res@sampleFrequency";
+                public static string BitsPerSample 		   = "res@bitsPerSample";
                 public static string NumberOfAudioChannels = "res@nrAudioChannels";
-                public static string Resolution = "res@resolution";
-                public static string ColorDepth = "res@colorDepth";
-                public static string ProtocolInfo = "res@protocolInfo";
-                public static string Protection = "res@protection";
-                public static string ImportUri = "res@importUri";
+                public static string Resolution 		   = "res@resolution";
+                public static string ColorDepth 		   = "res@colorDepth";
+                public static string ProtocolInfo 		   = "res@protocolInfo";
+                public static string Protection 		   = "res@protection";
+                public static string ImportUri 			   = "res@importUri";
             }
         }
 

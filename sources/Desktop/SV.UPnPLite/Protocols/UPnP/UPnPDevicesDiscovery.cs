@@ -121,7 +121,7 @@ namespace SV.UPnPLite.Protocols.UPnP
 			ssdpServer.EnsureNotNull("ssdpServer");
 
 			this.targetDeviceType = targetDeviceType;
-			this.ssdpServer = ssdpServer;			
+			this.ssdpServer = ssdpServer;
 			this.logManager = logManager;
 
 			if (this.logManager != null)

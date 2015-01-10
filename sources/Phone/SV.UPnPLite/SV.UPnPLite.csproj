@@ -280,7 +280,6 @@
     <Compile Include="..\..\Metro\SV.UPnPLite\Protocols\SSDP\SSDPServer.cs">
       <Link>Protocols\SSDP\SSDPServer.cs</Link>
     </Compile>
-    <Compile Include="Extensions\WebClientExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

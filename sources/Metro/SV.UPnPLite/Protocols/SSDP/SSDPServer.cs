@@ -25,13 +25,13 @@ namespace SV.UPnPLite.Protocols.SSDP
 
 		private const int MulticastPort = 1900;
 
-        private const string MSearchRequestFormattedString =
-            "M-SEARCH * HTTP/1.1" 		 + "\r\n" +
-            "HOST: 239.255.255.250:1900" + "\r\n" +
-            "MAN: \"ssdp:discover\"" 	 + "\r\n" +
-            "ST: {0}" 					 + "\r\n" +
-            "MX: {1}" 					 + "\r\n" +
-            "Content-Length: 0" 		 + "\r\n\r\n";
+		private const string MSearchRequestFormattedString =
+			"M-SEARCH * HTTP/1.1" + "\r\n" +
+			"HOST: 239.255.255.250:1900" + "\r\n" +
+			"MAN: \"ssdp:discover\"" + "\r\n" +
+			"ST: {0}" + "\r\n" +
+			"MX: {1}" + "\r\n" +
+			"Content-Length: 0" + "\r\n\r\n";
 
 		#endregion
 

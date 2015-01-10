@@ -2,57 +2,57 @@
 
 namespace SV.UPnPLite.Protocols.SSDP.Messages
 {
-    using SV.UPnPLite.Extensions;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using SV.UPnPLite.Extensions;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
-    /// <summary>
-    ///     Defines the NOTIFY ssdp message.
-    /// </summary>
-    internal class NotifyMessage : SSDPMessage
-    {
-        public string Host { get; set; }
+	/// <summary>
+	///     Defines the NOTIFY ssdp message.
+	/// </summary>
+	internal class NotifyMessage : SSDPMessage
+	{
+		public string Host { get; set; }
 
-        /// <summary>
-        ///     Gets the type of source which sent a message.
-        /// </summary>
-        public string NotificationType { get; private set; }
+		/// <summary>
+		///     Gets the type of source which sent a message.
+		/// </summary>
+		public string NotificationType { get; private set; }
 
-        /// <summary>
-        ///     Gets the type of the notification.
-        /// </summary>
-        public NotifyMessageType NotificationSubtype { get; private set; }
+		/// <summary>
+		///     Gets the type of the notification.
+		/// </summary>
+		public NotifyMessageType NotificationSubtype { get; private set; }
 
-        /// <summary>
-        ///     Gets value that the device intends to use in the subsequent device and service announcement messages.
-        /// </summary>
-        public int NextBootId { get; private set; }
+		/// <summary>
+		///     Gets value that the device intends to use in the subsequent device and service announcement messages.
+		/// </summary>
+		public int NextBootId { get; private set; }
 
-        /// <summary>
-        ///     Creates a new instance of <see cref="NotifyMessage"/> from notify message.
-        /// </summary>
-        /// <param name="message">
-        ///     The notify message received from a device.
-        /// </param>
-        /// <returns>
-        ///     A new instance of <see cref="NotifyMessage"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="message"/> is not valid notify message.
-        /// </exception>
-        internal static NotifyMessage Create(string message)
-        {
-            var notifyMessage = new NotifyMessage();
+		/// <summary>
+		///     Creates a new instance of <see cref="NotifyMessage"/> from notify message.
+		/// </summary>
+		/// <param name="message">
+		///     The notify message received from a device.
+		/// </param>
+		/// <returns>
+		///     A new instance of <see cref="NotifyMessage"/>.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		///     <paramref name="message"/> is not valid notify message.
+		/// </exception>
+		internal static NotifyMessage Create(string message)
+		{
+			var notifyMessage = new NotifyMessage();
 
-            var lines = message.SplitIntoLines();
-            if (lines.Count() > 1)
-            {
-                var statusString = lines[0];
-                var headers = ParseHeaders(lines.Skip(1));
+			var lines = message.SplitIntoLines();
+			if (lines.Count() > 1)
+			{
+				var statusString = lines[0];
+				var headers = ParseHeaders(lines.Skip(1));
 
-                if (statusString.StartsWith("notify", StringComparison.OrdinalIgnoreCase))
-                {
+				if (statusString.StartsWith("notify", StringComparison.OrdinalIgnoreCase))
+				{
 					try
 					{
 						notifyMessage.Host 				  = headers.GetValue<string>("HOST");
@@ -76,32 +76,32 @@ namespace SV.UPnPLite.Protocols.SSDP.Messages
 					{
 						throw new ArgumentException("The given message is not valid notify message", "message", ex);
 					}
-                }
-            }
+				}
+			}
 
-            return notifyMessage;
-        }
+			return notifyMessage;
+		}
 
-        private static NotifyMessageType ParseNotifyType(string notifyType)
-        {
-            NotifyMessageType result;
+		private static NotifyMessageType ParseNotifyType(string notifyType)
+		{
+			NotifyMessageType result;
 
-            switch (notifyType.ToUpper())
-            {
-                case "SSDP:ALIVE":
-                    result = NotifyMessageType.Alive;
-                    break;
-                case "SSDP:BYEBYE":
-                    result = NotifyMessageType.ByeBye;
-                    break;
-                case "SSDP:UPDATE":
-                    result = NotifyMessageType.Update;
-                    break;
-                default:
-                    throw new FormatException("Unknown notification type: '{0}'".F(notifyType));
-            }
+			switch (notifyType.ToUpper())
+			{
+				case "SSDP:ALIVE":
+					result = NotifyMessageType.Alive;
+					break;
+				case "SSDP:BYEBYE":
+					result = NotifyMessageType.ByeBye;
+					break;
+				case "SSDP:UPDATE":
+					result = NotifyMessageType.Update;
+					break;
+				default:
+					throw new FormatException("Unknown notification type: '{0}'".F(notifyType));
+			}
 
-            return result;
-        }
-    }
+			return result;
+		}
+	}
 }

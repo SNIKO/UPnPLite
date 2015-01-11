@@ -57,7 +57,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
 			if (logManager != null)
 			{
-				this.logger = logManager.GetLogger<MediaResource>();
+				this.logger = logManager.GetLogger(this.GetType());
 			}
 		}
 
@@ -75,6 +75,11 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		///     parentID attribute of any other Content Directory object may take this value. 
 		/// </summary>
 		public string ParentId { get; internal set; }
+
+		/// <summary>
+		///		Gets the unique number of the media server the media object belongs to.
+		/// </summary>		
+		public string ServerUDN { get; internal set; }
 
 		/// <summary>
 		///     Gets a name of the object.
@@ -218,7 +223,17 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 							}
 							else
 							{
-								this.SetValue(xmlReader.LocalName, xmlReader.ReadElementContentAsString());
+								var name = xmlReader.LocalName;
+								var val = xmlReader.ReadElementContentAsString();
+
+								try
+								{
+									this.SetValue(name, val);
+								}
+								catch (FormatException ex)
+								{
+									this.logger.Instance().Warning(ex, "Unable to parse value '{0}' for key '{1}'.".F(val, name), "Metadata".As(objectXml));
+								}
 							}
 						}
 						else

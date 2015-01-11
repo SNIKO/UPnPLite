@@ -189,6 +189,9 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\TransportStatus.cs">
       <Link>Protocols\DLNA\Services\AvTransport\TransportStatus.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\AlbumContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\AlbumContainer.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\AudioItem.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\AudioItem.cs</Link>
     </Compile>
@@ -203,6 +206,9 @@
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\Extensions\StringExtensions.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\Extensions\StringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\GenreContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\GenreContainer.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\IContentDirectoryService.cs</Link>
@@ -222,8 +228,23 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MediaResource.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\MediaResource.cs</Link>
     </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MusicAlbumContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MusicAlbumContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MusicArtistContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\MusicArtistContainer.cs</Link>
+    </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\MusicTrack.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\MusicTrack.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\PersonContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\PersonContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\PhotoAlbumContainer.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\PhotoAlbumContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\PhotoItem.cs">
+      <Link>Protocols\DLNA\Services\ContentDirectory\PhotoItem.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\ContentDirectory\VideoItem.cs">
       <Link>Protocols\DLNA\Services\ContentDirectory\VideoItem.cs</Link>

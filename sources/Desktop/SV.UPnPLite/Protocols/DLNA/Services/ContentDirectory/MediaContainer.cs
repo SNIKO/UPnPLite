@@ -23,9 +23,20 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		public bool Searchable { get; internal set; }
 
 		/// <summary>
-		///     Gets a revision of the currrent container.
+		///     Gets a revision of the current container.
 		/// </summary>
 		public uint Revision { get; internal set; }
+
+		/// <summary>
+		///		Gets a value indicating whether this instance is the root container.
+		/// </summary>
+		public bool IsRootContainer
+		{
+			get
+			{
+				return this.Id == "0";
+			}
+		}
 
 		#endregion
 

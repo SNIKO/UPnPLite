@@ -50,6 +50,14 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		/// </summary>
 		public DateTime Date { get; internal set; }
 
+		/// <summary>
+		///		Gets the reference to album art. 
+		/// </summary>
+		/// <remarks>
+		///		Even though this property is not supported by DLNA protocol, some servers (Windows Media Server) put there a thumbnail of the image.
+		/// </remarks>
+		public string AlbumArtURI { get; private set; }
+
 		#endregion
 
 		#region Constructors
@@ -113,7 +121,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 			}
 			else if (key.Is("albumArtURI"))
 			{
-				this.ThumbnailUri = value;
+				this.AlbumArtURI = value;
 			}
 			else
 			{

@@ -103,11 +103,6 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		public IEnumerable<MediaResource> Resources { get { return this.resources; } }
 
 		/// <summary>
-		///     Gets a thumbnail of the media item.
-		/// </summary>
-		public virtual string ThumbnailUri { get; protected set; }
-
-		/// <summary>
 		///     Gets a UPnP class of the media object.
 		/// </summary>
 		public string Class
@@ -286,12 +281,19 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		{
 			knownMediaObjectTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
-			knownMediaObjectTypes["object.item"] = typeof(MediaItem);
-			knownMediaObjectTypes["object.item.audioItem"] = typeof(AudioItem);
-			knownMediaObjectTypes["object.item.audioItem.musicTrack"] = typeof(MusicTrack);
-			knownMediaObjectTypes["object.item.videoItem"] = typeof(VideoItem);
-			knownMediaObjectTypes["object.item.imageItem"] = typeof(ImageItem);
-			knownMediaObjectTypes["object.container"] = typeof(MediaContainer);
+			knownMediaObjectTypes["object.item"] 						 = typeof(MediaItem);
+			knownMediaObjectTypes["object.item.audioItem"] 				 = typeof(AudioItem);
+			knownMediaObjectTypes["object.item.audioItem.musicTrack"] 	 = typeof(MusicTrack);
+			knownMediaObjectTypes["object.item.videoItem"] 				 = typeof(VideoItem);
+			knownMediaObjectTypes["object.item.imageItem"] 				 = typeof(ImageItem);
+			knownMediaObjectTypes["object.item.imageItem.photo"]		 = typeof(PhotoItem);
+			knownMediaObjectTypes["object.container"] 					 = typeof(MediaContainer);
+			knownMediaObjectTypes["object.container.album"] 			 = typeof(AlbumContainer);
+			knownMediaObjectTypes["object.container.album.musicAlbum"] 	 = typeof(MusicAlbumContainer);
+			knownMediaObjectTypes["object.container.album.photoAlbum"] 	 = typeof(PhotoAlbumContainer);
+			knownMediaObjectTypes["object.container.genre"] 			 = typeof(GenreContainer);
+			knownMediaObjectTypes["object.container.person"] 			 = typeof(PersonContainer);
+			knownMediaObjectTypes["object.container.person.musicArtist"] = typeof(MusicArtistContainer);
 		}
 
 		private static MediaObject CreateMediaObject(string contentClass, ILogManager logManager)
@@ -301,16 +303,21 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 
 			if (knownMediaObjectTypes.TryGetValue(contentClass, out mediaObjectType) == false)
 			{
-				// Type for object with such class not found. Lets fine the closest type. 
+				// The type for object with such class not found. Lets find the closest type.
 				var maxCoincidence = 0;
+				string fallbackClass = null;
+
 				foreach (var knownMediaObjectType in knownMediaObjectTypes)
 				{
 					if (contentClass.StartsWith(knownMediaObjectType.Key, StringComparison.OrdinalIgnoreCase) && knownMediaObjectType.Key.Length > maxCoincidence)
 					{
 						maxCoincidence = knownMediaObjectType.Key.Length;
 						mediaObjectType = knownMediaObjectType.Value;
+						fallbackClass = knownMediaObjectType.Key;
 					}
 				}
+
+				logManager.GetLogger<MediaObject>().Debug("It looks like the type for object of class '{0}' is not implemented. The type for '{1}' will be used instead.".F(contentClass, fallbackClass));
 			}
 
 			if (mediaObjectType != null)
@@ -330,29 +337,30 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 		/// </summary>
 		public static class Properties
 		{
-			public static string Title 			 = "dc:title";
-			public static string Creator 		 = "dc:creator";
-			public static string ParentId 		 = "@parentID";
-			public static string RefId 			 = "item@refID";
-			public static string Restricted 	 = "object@restricted";
-			public static string Artist 		 = "upnp:artist";
-			public static string Actor 			 = "upnp:actor";
-			public static string TrackNumber 	 = "upnp:originalTrackNumber";
-			public static string Producer 		 = "upnp:producer";
-			public static string Director 		 = "upnp:director";
-			public static string Contributor 	 = "dc:contributor";
-			public static string Publisher 		 = "dc:publisher";
-			public static string Album 			 = "upnp:album";
-			public static string Genre 			 = "upnp:genre";
-			public static string AlbumArtUri 	 = "upnp:albumArtURI";
-			public static string Relation 		 = "dc:relation";
-			public static string StorageMedium 	 = "upnp:storageMedium";
-			public static string Description 	 = "dc:description";
-			public static string LongDescription = "upnp:longDescription";
-			public static string Rating 		 = "upnp:rating";
-			public static string Rights 		 = "dc:rights";
-			public static string Language 		 = "dc:language";
-			public static string Date 			 = "dc:date";
+			public static string Title 			 		 = "dc:title";
+			public static string Creator 		 		 = "dc:creator";
+			public static string ParentId 		 		 = "@parentID";
+			public static string RefId 			 		 = "item@refID";
+			public static string Restricted 	 		 = "object@restricted";
+			public static string Artist 		 		 = "upnp:artist";
+			public static string Actor 			 		 = "upnp:actor";
+			public static string TrackNumber 	 		 = "upnp:originalTrackNumber";
+			public static string Producer 		 		 = "upnp:producer";
+			public static string Director 		 		 = "upnp:director";
+			public static string Contributor 	 		 = "dc:contributor";
+			public static string Publisher 		 		 = "dc:publisher";
+			public static string Album 			 		 = "upnp:album";
+			public static string Genre 			 		 = "upnp:genre";
+			public static string AlbumArtUri 	 		 = "upnp:albumArtURI";
+			public static string ArtistDiscographyURI 	 = "upnp:artistDiscographyURI";
+			public static string Relation 		 		 = "dc:relation";
+			public static string StorageMedium 	 		 = "upnp:storageMedium";
+			public static string Description 	 		 = "dc:description";
+			public static string LongDescription 		 = "upnp:longDescription";
+			public static string Rating 		 		 = "upnp:rating";
+			public static string Rights 		 		 = "dc:rights";
+			public static string Language 		 		 = "dc:language";
+			public static string Date 			 		 = "dc:date";
 
 			internal static string Id = "@id";
 			internal static string ContainerChildCount = "container@childCount";

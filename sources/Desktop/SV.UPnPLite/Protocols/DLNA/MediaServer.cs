@@ -20,11 +20,11 @@ namespace SV.UPnPLite.Protocols.DLNA
 
 		private readonly IContentDirectoryService contentDirectoryService;
 
-		private readonly List<string> requiredPropertiesFilter = new List<string>
-            {
-                MediaObject.Properties.Id, 
-                MediaObject.Properties.ContainerChildCount
-            };
+		private readonly string[] mandatoryProperties = new []
+        {
+			MediaObject.Properties.Id, 
+            MediaObject.Properties.ContainerChildCount
+        };
 
 		private IEnumerable<string> searchCapabilities;
 
@@ -82,39 +82,14 @@ namespace SV.UPnPLite.Protocols.DLNA
 
 		#region Methods
 
-		/// <summary>
-		///     Loads root media objects.
-		/// </summary>
-		/// <returns>
-		///     A list of root media objects.
-		/// </returns>
-		/// <exception cref="MediaServerException">
-		///     An error occurred when receiving result from media server.
-		/// </exception>
-		public async Task<IEnumerable<MediaObject>> BrowseAsync()
-		{
-			try
-			{
-				var browseResult = await this.contentDirectoryService.BrowseAsync("0", BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
-
-				return browseResult.Result;
-			}
-			catch (FormatException ex)
-			{
-				throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
-			}
-			catch (UPnPServiceException ex)
-			{
-				throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root objects", ex);
-			}
-		}
+		#region BrowseAsync
 
 		/// <summary>
-		///     Loads the root media object.
+		///     Loads the root media objects.
 		/// </summary>
 		/// <param name="properties">
-		///     The properties of the media objects to load. Use this property to load only needed properties instead of loading all of them. It will reduce the server and network load.
-		///     All properties are listed here: <see cref="MediaObject.Properties"/>.
+		///     The properties of media objects to load. Use this property to load only needed properties instead of loading all of them. It will reduce the server and network load.
+		///     All supported properties are listed here: <see cref="MediaObject.Properties"/>.
 		/// </param>
 		/// <returns>
 		///     A list of root media objects.
@@ -122,67 +97,9 @@ namespace SV.UPnPLite.Protocols.DLNA
 		/// <exception cref="MediaServerException">
 		///     An error occurred when receiving result from media server.
 		/// </exception>
-		public async Task<IEnumerable<MediaObject>> BrowseAsync(IEnumerable<string> properties)
+		public async Task<IEnumerable<MediaObject>> BrowseAsync(params string[] properties)
 		{
-			try
-			{
-				var propertiesFilter = new List<string>();
-				propertiesFilter.AddRange(this.requiredPropertiesFilter);
-
-				if (properties != null)
-				{
-					propertiesFilter.AddRange(properties);
-				}
-
-				var filter = string.Join(",", propertiesFilter);
-				var browseResult = await this.contentDirectoryService.BrowseAsync("0", BrowseFlag.BrowseDirectChildren, filter, 0, 0, string.Empty);
-
-				return browseResult.Result;
-			}
-			catch (FormatException ex)
-			{
-				throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
-			}
-			catch (UPnPServiceException ex)
-			{
-				throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root folders", ex);
-			}
-		}
-
-		/// <summary>
-		///     Loads the media objects from <paramref name="container"/>.
-		/// </summary>
-		/// <param name="container">
-		///     The container from which to load media objects.        
-		/// </param>
-		/// <returns>
-		///     A list of media objects loaded from the <paramref name="container"/>.
-		/// </returns>
-		/// <exception cref="ArgumentNullException">
-		///     <paramref name="container"/> is <c>null</c>.
-		/// </exception>
-		/// <exception cref="MediaServerException">
-		///     An error occurred when receiving result from media server.
-		/// </exception>
-		public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container)
-		{
-			container.EnsureNotNull("container");
-
-			try
-			{
-				var browseResult = await this.contentDirectoryService.BrowseAsync(container.Id, BrowseFlag.BrowseDirectChildren, "*", 0, 0, string.Empty);
-				container.Revision = browseResult.UpdateId;
-
-				return browseResult.Result;
-			}
-			catch (FormatException ex)
-			{
-				throw new MediaServerException(this, MediaServerError.UnexpectedError, "Received result is in a bad format", ex);
-			}
-			catch (UPnPServiceException ex)
-			{
-				throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}'".F(container.Title), ex);
-			}
+			return await this.BrowseAsync("0", properties);
 		}
 
 		/// <summary>
@@ -204,22 +121,25 @@ namespace SV.UPnPLite.Protocols.DLNA
 		/// <exception cref="MediaServerException">
 		///     An error occurred when receiving result from media server.
 		/// </exception>
-		public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container, IEnumerable<string> properties)
+		public async Task<IEnumerable<MediaObject>> BrowseAsync(MediaContainer container, params string[] properties)
 		{
 			container.EnsureNotNull("container");
 
+			return await this.BrowseAsync(container.Id, properties);
+		}
+
+		private async Task<IEnumerable<MediaObject>> BrowseAsync(string containerId, params string[] properties)
+		{
 			try
 			{
-				var propertiesFilter = new List<string>();
-				propertiesFilter.AddRange(this.requiredPropertiesFilter);
+				var filter = properties.Any() ? string.Join(",", mandatoryProperties.Concat(properties)) : "*";
 
-				if (properties != null)
+				var browseResult = await this.contentDirectoryService.BrowseAsync(containerId, BrowseFlag.BrowseDirectChildren, filter, 0, 0, string.Empty);
+
+				foreach (var mediaObject in browseResult.Result)
 				{
-					propertiesFilter.AddRange(properties);
+					mediaObject.ServerUDN = this.UDN;
 				}
-
-				var filter = string.Join(",", propertiesFilter);
-				var browseResult = await this.contentDirectoryService.BrowseAsync(container.Id, BrowseFlag.BrowseDirectChildren, filter, 0, 0, string.Empty);
 
 				return browseResult.Result;
 			}
@@ -229,9 +149,11 @@ namespace SV.UPnPLite.Protocols.DLNA
 			}
 			catch (UPnPServiceException ex)
 			{
-				throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing container '{0}'".F(container.Title), ex);
+				throw new MediaServerException(this, ex.ErrorCode.ToMediaServerError(), "An error occurred when browsing root folders", ex);
 			}
 		}
+		
+		#endregion
 
 		/// <summary>
 		///     Gets metadata of the container referenced by <paramref name="containerId"/>.
@@ -305,7 +227,7 @@ namespace SV.UPnPLite.Protocols.DLNA
 			if (properties.Any())
 			{
 				var propertiesFilter = new List<string>();
-				propertiesFilter.AddRange(this.requiredPropertiesFilter);
+				propertiesFilter.AddRange(this.mandatoryProperties);
 				propertiesFilter.AddRange(properties);
 
 				filter = string.Join(",", propertiesFilter);

@@ -176,12 +176,19 @@ namespace SV.UPnPLite.Protocols.SSDP
 		{
 			this.multicastHost = new HostName(MulticastAddress);
 
-			this.server = new DatagramSocket();
-			this.server.MessageReceived += this.NotifyMessageReceived;
-			await this.server.BindServiceNameAsync(MulticastPort.ToString());
-			this.server.JoinMulticastGroup(this.multicastHost);
+			try
+			{
+				this.server = new DatagramSocket();
+				this.server.MessageReceived += this.NotifyMessageReceived;
+				await this.server.BindServiceNameAsync(MulticastPort.ToString());
+				this.server.JoinMulticastGroup(this.multicastHost);
 
-			this.logger.Instance().Info("Started listening for notification messages", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
+				this.logger.Instance().Info("Started listening for notification messages", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
+			}
+			catch (Exception ex)
+			{
+				this.logger.Instance().Error(ex, "Unable to bind to a multicast port for receiving notifications from UPnP devices", "Port".As(MulticastPort), "MulticastGroup".As(this.multicastHost));
+			}
 		}
 
 		private async void NotifyMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)

@@ -3,6 +3,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 {
 	using SV.UPnPLite.Logging;
 	using SV.UPnPLite.Protocols.UPnP;
+	using SV.UPnPLite.Extensions;
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
@@ -259,6 +260,10 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.ContentDirectory
 							if (mediaObject != null)
 							{
 								result.Add(mediaObject);
+							}
+							else
+							{
+								this.logger.Instance().Warning("MediaObject class '{0}' is unknown. The MediaObject has been ignored.".F(element), "Metadata".As(mediaObjectsXml));
 							}
 						}
 					}

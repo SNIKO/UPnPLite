@@ -181,12 +181,13 @@ namespace SV.UPnPLite.Protocols.DLNA
 				if (newContainer != null)
 				{
 					newContainer.Revision = browseResult.UpdateId;
+					newContainer.ServerUDN = this.UDN;
 
 					return newContainer;
 				}
 				else
 				{
-					throw new FormatException("Container tag is missing in response");
+					throw new FormatException("Container info is missing in the server response");
 				}
 			}
 			catch (FormatException ex)
@@ -243,11 +244,13 @@ namespace SV.UPnPLite.Protocols.DLNA
 				var mediaItem = browseResult.Result.FirstOrDefault() as MediaItem;
 				if (mediaItem != null)
 				{
+					mediaItem.ServerUDN = this.UDN;
+
 					return mediaItem;
 				}
 				else
 				{
-					throw new FormatException("Container tag is missing in response");
+					throw new FormatException("Item info is missing in the server response");
 				}
 			}
 			catch (FormatException ex)

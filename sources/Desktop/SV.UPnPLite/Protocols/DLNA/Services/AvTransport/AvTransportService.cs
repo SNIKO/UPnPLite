@@ -154,7 +154,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 		///      Identifies the virtual instanceId of the AVTransport service to which the action applies.
 		/// </param>
 		/// <returns>
-		///     An instance of <see cref="MediaInfo"/> which defines information about currently current media.
+		///     An instance of <see cref="RendererMediaInfo"/> which defines information about currently current media.
 		/// </returns>
 		/// <exception cref="WebException">
 		///     An error occurred when sending request to service.
@@ -165,13 +165,13 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 		/// <exception cref="UPnPServiceException">
 		///     An internal service error occurred when executing request.
 		/// </exception>
-		public async Task<MediaInfo> GetMediaInfoAsync(uint instanceId)
+		public async Task<RendererMediaInfo> GetMediaInfoAsync(uint instanceId)
 		{
 			var arguments = new Dictionary<string, object> { { "InstanceID", instanceId } };
 
 			var response = await this.InvokeActionAsync("GetMediaInfo", arguments);
 
-			var mediaInfo = new MediaInfo
+			var mediaInfo = new RendererMediaInfo
 								{
 									NumberOfTracks = response.GetValueOrDefault<int>("NrTracks"),
 									MediaDuration = ParsingHelper.ParseTimeSpan(response.GetValueOrDefault<string>("MediaDuration")),

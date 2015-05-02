@@ -55,7 +55,7 @@
     <Compile Include="Protocols\DLNA\MediaServersDiscovery.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\AvTransportService.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\IAvTransportService.cs" />
-    <Compile Include="Protocols\DLNA\Services\AvTransport\MediaInfo.cs" />
+    <Compile Include="Protocols\DLNA\Services\AvTransport\RendererMediaInfo.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\PositionInfo.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\TransportInfo.cs" />
     <Compile Include="Protocols\DLNA\Services\AvTransport\TransportState.cs" />

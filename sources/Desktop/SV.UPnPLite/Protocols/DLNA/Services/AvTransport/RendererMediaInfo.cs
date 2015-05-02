@@ -6,7 +6,7 @@ namespace SV.UPnPLite.Protocols.DLNA.Services.AvTransport
 	/// <summary>
 	///     Defines an information about media currently controlled by the AVTransport instance.
 	/// </summary>
-	public class MediaInfo
+	public class RendererMediaInfo
 	{
 		#region Properties
 

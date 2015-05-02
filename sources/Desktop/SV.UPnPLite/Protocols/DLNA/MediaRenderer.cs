@@ -163,6 +163,42 @@ namespace SV.UPnPLite.Protocols.DLNA
 		}
 
 		/// <summary>
+		///     Prepares the <paramref name="resource"/> for playback on the renderer.
+		/// </summary>
+		/// <param name="resource">
+		///     A resource to play on the renderer.
+		/// </param>
+		/// <returns>
+		///     An <see cref="Task"/> instance which notifies about completion the async operation.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		///     <paramref name="item"/> is <c>null</c>.
+		/// </exception>
+		/// <exception cref="WebException">
+		///     An error occurred when sending request to service.
+		/// </exception>
+		/// <exception cref="MediaRendererException">
+		///     An unexpected error occurred when executing request on device.
+		/// </exception>
+		public async Task OpenAsync(MediaResource resource)
+		{
+			resource.EnsureNotNull("resource");
+			
+			try
+			{
+				await this.avTransportService.SetAvTransportURIAsync(0, resource.Uri, resource.Metadata);
+			}
+			catch (FormatException ex)
+			{
+				throw new MediaRendererException(this, MediaRendererError.UnexpectedError, "Received result is in a bad format", ex);
+			}
+			catch (UPnPServiceException ex)
+			{
+				throw new MediaRendererException(this, ex.ErrorCode.ToMediaRendererError(), "An error occurred when opening '{0}'".F(resource.Uri), ex);
+			}
+		}
+
+		/// <summary>
 		///     Requests the renderer to start playback.
 		/// </summary>
 		/// <returns>
@@ -295,10 +331,10 @@ namespace SV.UPnPLite.Protocols.DLNA
 		}
 
 		/// <summary>
-		///     Requests current uri.
+		///     Requests an information about current media info.
 		/// </summary>
 		/// <returns>
-		///     The conceptually top-level state of the MediaRenderer.
+		///     An information about the media being played.
 		/// </returns>
 		/// <exception cref="WebException">
 		///     An error occurred when sending request to service.
@@ -306,13 +342,13 @@ namespace SV.UPnPLite.Protocols.DLNA
 		/// <exception cref="MediaRendererException">
 		///     An unexpected error occurred when executing request on device.
 		/// </exception>
-		public async Task<Uri> GetCurrentUriAsync()
+		public async Task<RendererMediaInfo> GetMediaInfoAsync()
 		{
 			try
 			{
 				var mediaInfo = await this.avTransportService.GetMediaInfoAsync(0);
 
-				return mediaInfo.CurrentUri;
+				return mediaInfo;
 			}
 			catch (FormatException ex)
 			{
@@ -332,7 +368,7 @@ namespace SV.UPnPLite.Protocols.DLNA
 			{
 				result = MediaRendererState.Stopped;
 
-				this.logger.Instance().Warning("An enexpected transport state received", "Renderer".As(this.FriendlyName), "State".As(transportState));
+				this.logger.Instance().Warning("An unexpected transport state received", "Renderer".As(this.FriendlyName), "State".As(transportState));
 			}
 
 			return result;

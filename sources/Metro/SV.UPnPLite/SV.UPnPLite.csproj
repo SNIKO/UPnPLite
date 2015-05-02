@@ -174,8 +174,8 @@
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\IAvTransportService.cs">
       <Link>Protocols\DLNA\Services\AvTransport\IAvTransportService.cs</Link>
     </Compile>
-    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\MediaInfo.cs">
-      <Link>Protocols\DLNA\Services\AvTransport\MediaInfo.cs</Link>
+    <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\RendererMediaInfo.cs">
+      <Link>Protocols\DLNA\Services\AvTransport\RendererMediaInfo.cs</Link>
     </Compile>
     <Compile Include="..\..\Desktop\SV.UPnPLite\Protocols\DLNA\Services\AvTransport\PositionInfo.cs">
       <Link>Protocols\DLNA\Services\AvTransport\PositionInfo.cs</Link>

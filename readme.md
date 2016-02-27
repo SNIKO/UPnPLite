@@ -174,4 +174,4 @@ renderer.StateChanges.Subscribe(state =>
 
 ## Copyright
 
-Copyright (c) 2013 Sergii Vashchyshchuk
+Copyright (c) 2016 Sergii Vashchyshchuk
